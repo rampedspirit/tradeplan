@@ -25,7 +25,7 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: gt-ecr-repo
-        IMAGE_TAG: latest
+        IMAGE_TAG: gt-app-db-image
       run: |
         docker build database/app/ -f database/app/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg user=${{ secrets.DB_USER_NAME }} --build-arg password=${{ secrets.DB_PASSWORD }}
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
