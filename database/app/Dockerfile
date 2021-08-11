@@ -1,6 +1,6 @@
 FROM postgres:13.3
 
-ARG name
+ARG user
 ARG password
 
 ENV POSTGRES_USER=${user}
