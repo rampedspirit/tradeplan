@@ -27,5 +27,5 @@ jobs:
         ECR_REPOSITORY: gt-ecr-repo
         IMAGE_TAG: latest
       run: |
-        docker build -f database/app/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg user=${{ secrets.DB_USER_NAME }} --build-arg password=${{ secrets.DB_PASSWORD }} database/app
+        docker build -f database/app/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg user=${{ secrets.DB_USER_NAME }} --build-arg password=${{ secrets.DB_PASSWORD }} database/app/
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
