@@ -15,13 +15,13 @@ ENV DB_NAME=${DB_NAME}
 ENV DB_USER_NAME=${USER_NAME}
 ENV DB_PASSWORD=${PASSWORD}
 
-# Install OpenJDK-8
+# Install OpenJDK-11
 RUN apt-get update && \
-    openjdk-11-jre && \
+    apt-get install -y openjdk-11-jre && \
     apt-get clean;
 
 # Setup JAVA_HOME -- useful for docker commandline
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 RUN export JAVA_HOME
 
 # Run health monitoring app
