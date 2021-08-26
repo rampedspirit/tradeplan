@@ -16,6 +16,8 @@ ENV DB_USER_NAME=${USER_NAME}
 ENV DB_PASSWORD=${PASSWORD}
 
 # Install OpenJDK-8
+RUN add-apt-repository ppa:openjdk-r/ppa
+
 RUN apt-get update && \
     apt-get install -y openjdk-8-jdk && \
     apt-get clean;
