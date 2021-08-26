@@ -1,0 +1,1 @@
+docker build . -t gtk-db-app-master:1.0.0 --build-arg USER_NAME=postgres --build-arg PASSWORD=password
