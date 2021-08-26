@@ -1,0 +1,15 @@
+name: Build and Push Database Docker Images
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build APP DB image
+      run: |
+        docker build database/com.bhs.gtk.db.app.master/ -f database/com.bhs.gtk.db.app.master/Dockerfile -t gtk-db-app-master --build-arg USER_NAME=${{ secrets.DB_USER_NAME }} --build-arg PASSWORD=${{ secrets.DB_PASSWORD }}
