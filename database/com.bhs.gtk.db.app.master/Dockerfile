@@ -19,7 +19,7 @@ ENV DB_PASSWORD=${PASSWORD}
 RUN apt-get update && \
     apt-get install -y software-properties-common && \
     add-apt-repository ppa:openjdk-r/ppa && \
-    apt-get install -y openjdk-8-jdk && \
+#    apt-get install -y openjdk-8-jdk && \
     apt-get clean;
 
 # Setup JAVA_HOME -- useful for docker commandline
