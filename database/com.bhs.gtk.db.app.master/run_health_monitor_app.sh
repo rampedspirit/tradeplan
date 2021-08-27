@@ -1,1 +1,1 @@
-java -jar ./app.jar
+sudo java -jar ./app.jar
