@@ -34,7 +34,7 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: gtk-common-repo
-        IMAGE_TAG: gtk.db.app.master
+        IMAGE_TAG: gtk-db-app-master
       run: |
-        docker build database/com.bhs.gtk.db.app.master/ -f database/com.bhs.gtk.db.app.master/Dockerfile -t gtk-db-app-master --build-arg USER_NAME=${{ secrets.DB_USER_NAME }} --build-arg PASSWORD=${{ secrets.DB_PASSWORD }}
+        docker build database/com.bhs.gtk.db.app.master/ -f database/com.bhs.gtk.db.app.master/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg USER_NAME=${{ secrets.DB_USER_NAME }} --build-arg PASSWORD=${{ secrets.DB_PASSWORD }}
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
