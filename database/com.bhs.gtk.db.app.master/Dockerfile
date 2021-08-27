@@ -24,6 +24,6 @@ RUN apt-get update && \
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 RUN export JAVA_HOME
 
-# Run health monitoring app
+# Copy health monitoring app
 COPY target/*.jar app.jar
-CMD "java -jar app.jar"
+COPY run_health_monitor_app.sh /docker-entrypoint-initdb.d/run_health_monitor_app.sh
