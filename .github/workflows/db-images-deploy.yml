@@ -3,6 +3,9 @@ name: Build and Push Database Docker Images
 on:
   workflow_dispatch:
     inputs:
+     RepoName:
+      required: true
+      description: Name of the ECR Repository
      AppDBImageName:
       required: true
       description: Name Application Database Image
@@ -33,7 +36,7 @@ jobs:
     - name: Build, tag, and push image to Amazon ECR
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: gtk-common-repo
+        ECR_REPOSITORY: ${{ github.event.inputs.RepoName }}
         IMAGE_TAG: ${{ github.event.inputs.AppDBImageName }}-${{ github.event.inputs.AppDBImageVersion }}
       run: |
         docker build database/app/ -f database/app/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg USER_NAME=${{ secrets.DB_USER_NAME }} --build-arg PASSWORD=${{ secrets.DB_PASSWORD }}
