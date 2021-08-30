@@ -17,7 +17,7 @@ on:
         
 jobs:
   build:
-    runs-on: ubuntu-late st
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
