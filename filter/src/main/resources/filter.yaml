@@ -60,9 +60,9 @@ paths:
     get:
       tags:
         - filter
-      summary: get filter of given id/s
+      summary: get filter of given id
       description: get filter
-      operationId: getFilters
+      operationId: getFilter
       parameters:
         - in: path
           name: id
@@ -77,8 +77,6 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
                   $ref: '#/components/schemas/Filter'
         '400':
           description: Request is not understood.

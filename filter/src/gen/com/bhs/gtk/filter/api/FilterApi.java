@@ -25,7 +25,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.List;
 import java.util.Map;
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-08-21T16:08:53.452673600+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-09-02T18:16:07.244312900+05:30[Asia/Calcutta]")
 
 @Api(value = "Filter", description = "the Filter API")
 public interface FilterApi {
@@ -61,15 +61,15 @@ public interface FilterApi {
     ResponseEntity<List<Filter>> getAllFilters();
 
 
-    @ApiOperation(value = "get filter of given id/s", nickname = "getFilters", notes = "get filter", response = Filter.class, responseContainer = "List", tags={ "filter", })
+    @ApiOperation(value = "get filter of given id", nickname = "getFilter", notes = "get filter", response = Filter.class, tags={ "filter", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 206, message = "Request sucessfully processed.", response = Filter.class, responseContainer = "List"),
+        @ApiResponse(code = 206, message = "Request sucessfully processed.", response = Filter.class),
         @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class),
         @ApiResponse(code = 404, message = "Requested filter not found.", response = Error.class) })
     @RequestMapping(value = "/v1/filter/{id}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    ResponseEntity<List<Filter>> getFilters(@ApiParam(value = "",required=true) @PathVariable("id") UUID id);
+    ResponseEntity<Filter> getFilter(@ApiParam(value = "",required=true) @PathVariable("id") UUID id);
 
 
     @ApiOperation(value = "update filter", nickname = "updateFilter", notes = "update filter of given id", response = Filter.class, tags={ "filter", })
