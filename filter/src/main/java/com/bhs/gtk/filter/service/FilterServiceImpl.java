@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.validation.Valid;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.bhs.gtk.filter.model.Filter;
 import com.bhs.gtk.filter.model.PatchData;
 import com.bhs.gtk.filter.model.PatchData.OperationEnum;
-import com.bhs.gtk.filter.model.PatchData.PropertyEnum;
 import com.bhs.gtk.filter.model.PatchModel;
 import com.bhs.gtk.filter.persistence.FilterEntity;
 import com.bhs.gtk.filter.persistence.FilterRepository;

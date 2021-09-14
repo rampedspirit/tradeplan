@@ -1,6 +1,5 @@
 package com.bhs.gtk.filter.controllers;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 

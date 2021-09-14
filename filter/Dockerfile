@@ -1,0 +1,15 @@
+FROM openjdk:8-jdk-alpine
+
+ARG DB_USER_NAME
+ARG DB_PASSWORD
+
+ENV DB_HOST=localhost
+ENV DB_PORT=5432
+ENV DB_NAME=appdb
+ENV DB_USER_NAME=${DB_USER_NAME}
+ENV DB_PASSWORD=${DB_PASSWORD}
+
+ARG JAR_FILE=target/*.jar
+COPY ${JAR_FILE} app.jar
+
+ENTRYPOINT ["java","-jar","/app.jar"]
