@@ -1,4 +1,4 @@
-name: Build and Push Database Docker Images
+name: Build and Push Service Docker Images
 
 on:
   workflow_dispatch:
@@ -28,12 +28,12 @@ jobs:
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
-
-    - name: Build, tag, and push image to Amazon ECR
+      
+    - name: Build and Push filter-service Image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: ${{ github.event.inputs.RepoName }}
-        IMAGE_TAG: gtk-appdb-${{ github.event.inputs.ImageVersion }}
+        IMAGE_TAG: gtk-filter-service-${{ github.event.inputs.ImageVersion }}
       run: |
-        docker build database/app/ -f database/app/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg USER_NAME=${{ secrets.DB_USER_NAME }} --build-arg PASSWORD=${{ secrets.DB_PASSWORD }}
+        docker build filter/ -f filter/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg DB_USER_NAME=${{ secrets.DB_USER_NAME }} --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }}
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG

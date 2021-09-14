@@ -1,0 +1,39 @@
+name: Build and Push Database Docker Images
+
+on:
+  workflow_dispatch:
+    inputs:
+     RepoName:
+      required: true
+      description: Name of the ECR Repository
+     ImageVersion:
+        required: true
+        description: Version of Image
+        default: latest
+        
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.REPO_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.REPO_AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-south-1
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build and Push appdb Image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: ${{ github.event.inputs.RepoName }}
+        IMAGE_TAG: gtk-appdb-${{ github.event.inputs.ImageVersion }}
+      run: |
+        docker build database/app/ -f database/app/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg USER_NAME=${{ secrets.DB_USER_NAME }} --build-arg PASSWORD=${{ secrets.DB_PASSWORD }}
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
