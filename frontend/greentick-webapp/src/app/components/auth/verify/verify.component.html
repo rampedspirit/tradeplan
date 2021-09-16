@@ -1,0 +1,21 @@
+<div fxLayout="column" fxLayoutGap="10px">
+    <h2>CONFIRM EMAIL</h2>
+    <form fxLayout="column" fxLayoutGap="10px" [formGroup]="verifyForm">
+        <span style="color: rgb(7, 139, 7);" [innerHTML]="message"></span>
+        <mat-form-field>
+            <mat-label>Verification Code</mat-label>
+            <input matInput [formControl]="codeControl">
+            <mat-error *ngIf="codeControl && codeControl.invalid">Please enter valid verification code.</mat-error>
+        </mat-form-field>
+        <mat-error *ngIf="submissionError">{{submissionError}}</mat-error>
+        <button mat-flat-button color="primary" (click)="verify()">VERIFY</button>
+    </form>
+    <div fxLayout="row" fxLayoutAlign="center center">
+        <div>
+            <button mat-stroked-button color="primary" (click)="generateVerificationCode()">Resend Verification
+                Email</button>
+        </div>
+    </div>
+</div>
+
+<ngx-spinner type="ball-spin-clockwise"></ngx-spinner>

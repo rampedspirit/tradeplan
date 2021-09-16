@@ -1,0 +1,23 @@
+<form fxLayout="column" fxLayoutGap="10px" [formGroup]="editFilterForm" fxFlexFill>
+    <div fxLayout="row" fxLayoutAlign="space-between">
+        <mat-form-field>
+            <mat-label>Name</mat-label>
+            <input matInput [formControl]="nameControl">
+            <mat-error *ngIf="nameControl && nameControl.invalid">Please enter valid name.</mat-error>
+        </mat-form-field>
+        <div style="margin-right: 20px;">
+            <button mat-flat-button color="accent" (click)="save()">SAVE</button>
+        </div>
+    </div>
+    <mat-form-field>
+        <mat-label>Description</mat-label>
+        <textarea matInput [formControl]="descriptionControl"></textarea>
+        <mat-error *ngIf="descriptionControl && descriptionControl.invalid">Please enter a valid description.
+        </mat-error>
+    </mat-form-field>
+    <div style="border: 1px solid rgb(124, 119, 119);padding-top: 10px;height: 400px;">
+        <ngx-monaco-editor matInput [formControl]="codeControl" [options]="editorOptions"
+            (onInit)="onEditorInit($event)" style="height: 100%;">
+        </ngx-monaco-editor>
+    </div>
+</form>
