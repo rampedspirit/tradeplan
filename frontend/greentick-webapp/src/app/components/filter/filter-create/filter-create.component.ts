@@ -3,7 +3,9 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { NgxSpinnerService } from 'ngx-spinner';
+import { TabAreaService } from 'src/app/services/tab-area.service';
 import { Filter, FilterService } from 'src/app/_gen';
+import { FilterNotificationService } from '../filter-notification.service';
 
 @Component({
   selector: 'app-filter-create',
@@ -13,6 +15,7 @@ import { Filter, FilterService } from 'src/app/_gen';
 export class FilterCreateComponent implements OnInit {
 
   createFilterForm: FormGroup;
+  createError: boolean;
 
   get nameControl(): FormControl {
     return this.createFilterForm.get('name') as FormControl;
@@ -23,7 +26,7 @@ export class FilterCreateComponent implements OnInit {
   }
 
   constructor(public dialogRef: MatDialogRef<FilterCreateComponent>, private filterService: FilterService,
-    private snackBar: MatSnackBar, private spinner: NgxSpinnerService) { }
+    private filterNotificationService: FilterNotificationService, private spinner: NgxSpinnerService) { }
 
   ngOnInit(): void {
     this.createFilterForm = new FormGroup({
@@ -47,24 +50,18 @@ export class FilterCreateComponent implements OnInit {
     });
   }
 
-  cancel(): void {
-    this.dialogRef.close();
-  }
-
   private createFilter(name: string, description: string) {
     this.spinner.show();
+    this.createError = false;
     this.filterService.createFilter({
       name: name,
       description: description
     }).subscribe(filter => {
-      this.dialogRef.close(filter);
+      this.dialogRef.close();
+      this.filterNotificationService.triggerCreateNotification(filter);
       this.spinner.hide();
     }, error => {
-      this.snackBar.open("Failed to create new filter '" + name + "', Please Retry.", "OK", {
-        verticalPosition: "bottom",
-        horizontalPosition: "center"
-      });
-      this.dialogRef.close();
+      this.createError = true;
       this.spinner.hide();
     });
   }

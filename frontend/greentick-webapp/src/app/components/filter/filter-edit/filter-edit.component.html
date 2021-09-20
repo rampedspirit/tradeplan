@@ -1,12 +1,19 @@
-<form fxLayout="column" fxLayoutGap="10px" [formGroup]="editFilterForm" fxFlexFill>
-    <div fxLayout="row" fxLayoutAlign="space-between">
+<div *ngIf="fetchError" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px" style="color: red;">
+    <mat-icon>error</mat-icon>
+    <span>Failed To Get Filter.</span>
+    <button mat-stroked-button color="primary" (click)="refresh()">Please Retry</button>
+</div>
+
+<form *ngIf="editFilterForm" fxLayout="column" fxLayoutGap="10px" [formGroup]="editFilterForm" fxFlexFill>
+    <div fxLayout="row" fxLayoutAlign="space-between center">
         <mat-form-field>
             <mat-label>Name</mat-label>
             <input matInput [formControl]="nameControl">
             <mat-error *ngIf="nameControl && nameControl.invalid">Please enter valid name.</mat-error>
         </mat-form-field>
-        <div style="margin-right: 20px;">
-            <button mat-flat-button color="accent" (click)="save()">SAVE</button>
+        <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+            <button mat-flat-button color="primary" (click)="save()">SAVE</button>
+            <button mat-flat-button color="warn" (click)="delete()">DELETE</button>
         </div>
     </div>
     <mat-form-field>

@@ -38,6 +38,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { FilterNameSearchPipe } from './components/filter/filter-name-search.pipe';
 import { MonacoWrapper } from './services/editor.service';
 import { MonacoEditorModule } from 'ngx-monaco-editor';
+import { ConfirmationComponent } from './components/common/confirmation/confirmation.component';
 
 Amplify.configure({
   Auth: {
@@ -61,7 +62,8 @@ Amplify.configure({
     FilterListComponent,
     FilterCreateComponent,
     FilterEditComponent,
-    FilterNameSearchPipe
+    FilterNameSearchPipe,
+    ConfirmationComponent
   ],
   imports: [
     BrowserModule,

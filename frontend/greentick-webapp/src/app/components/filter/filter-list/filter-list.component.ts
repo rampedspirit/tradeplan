@@ -1,11 +1,13 @@
-import { ThisReceiver } from '@angular/compiler';
-import { Component, OnInit } from '@angular/core';
+import { ThisReceiver, ThrowStmt } from '@angular/compiler';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+import { Component, OnInit, ViewChild, ViewChildren } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSelectionListChange } from '@angular/material/list';
+import { MatSelectionList, MatSelectionListChange } from '@angular/material/list';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { Tab, TabAreaService } from 'src/app/services/tab-area.service';
 import { Filter, FilterService } from 'src/app/_gen';
 import { FilterCreateComponent } from '../filter-create/filter-create.component';
+import { FilterNotificationService } from '../filter-notification.service';
 
 @Component({
   selector: 'app-filter-list',
@@ -14,14 +16,32 @@ import { FilterCreateComponent } from '../filter-create/filter-create.component'
 })
 export class FilterListComponent implements OnInit {
 
+  @ViewChild(MatSelectionList)
+  filterList!: MatSelectionList;
+
   public filters: Filter[];
   public fetchError = false;
 
-  constructor(private filterService: FilterService, private tabAreaService: TabAreaService,
-    private dialog: MatDialog, private spinner: NgxSpinnerService) { }
+  constructor(private filterService: FilterService, private filterNotificationService: FilterNotificationService,
+    private tabAreaService: TabAreaService, private dialog: MatDialog, private spinner: NgxSpinnerService) { }
 
   ngOnInit(): void {
     this.refresh();
+
+    this.filterNotificationService.createSubject.subscribe(filter => {
+      this.refresh();
+      this.openTab(filter);
+    });
+
+    this.filterNotificationService.updateSubject.subscribe(filter => {
+      this.refresh();
+    });
+
+    this.filterNotificationService.deleteSubject.subscribe(id => {
+      this.refresh();
+      this.tabAreaService.closeTab(id);
+    })
+
   }
 
   refresh() {
@@ -39,26 +59,23 @@ export class FilterListComponent implements OnInit {
 
   openCreateFilterDialog() {
     const dialogRef = this.dialog.open(FilterCreateComponent, {
-      width: "30%",
-      disableClose: true
-    });
-
-    dialogRef.afterClosed().subscribe(filter => {
-      if (filter) {
-        this.refresh();
-        console.log(filter);
-      }
+      width: "30%"
     });
   }
 
   onSelectionChange(event: MatSelectionListChange) {
+    this.filterList.deselectAll();
     let selectedFilter: Filter = event.options[0].value;
+    this.openTab(selectedFilter);
+  }
+
+  private openTab(filter: Filter) {
     let tab: Tab = {
-      id: selectedFilter.id,
+      id: filter.id,
       type: 'filter',
-      title: selectedFilter.name,
-      data: selectedFilter
+      title: filter.name,
+      dirtyFlag: false
     }
-    this.tabAreaService.addTab(tab);
+    this.tabAreaService.openTab(tab);
   }
 }

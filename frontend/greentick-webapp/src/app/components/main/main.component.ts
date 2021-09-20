@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { Tab, TabAreaService } from 'src/app/services/tab-area.service';
 import { Filter } from 'src/app/_gen';
+import { ConfirmationComponent } from '../common/confirmation/confirmation.component';
 
 @Component({
   selector: 'app-main',
@@ -9,12 +11,29 @@ import { Filter } from 'src/app/_gen';
 })
 export class MainComponent implements OnInit {
 
-  constructor(public tabAreaService: TabAreaService) { }
+  constructor(public tabAreaService: TabAreaService, private dialog: MatDialog) { }
 
   ngOnInit(): void {
   }
 
   closeTab(tab: Tab) {
-    this.tabAreaService.removeTab(tab);
+    if (tab.dirtyFlag) {
+      const dialogRef = this.dialog.open(ConfirmationComponent, {
+        data: {
+          title: "Close Tab [ " + tab.title + " ]",
+          icon: "warning",
+          message: "This tab contains unsaved changes. You will lose the changes if you continue."
+        }
+      });
+
+      dialogRef.afterClosed().subscribe(okToClose => {
+        if (okToClose) {
+          this.tabAreaService.closeTab(tab.id);
+        }
+      });
+    }
+    else {
+      this.tabAreaService.closeTab(tab.id);
+    }
   }
 }

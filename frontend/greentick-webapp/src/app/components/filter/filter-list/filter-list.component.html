@@ -1,9 +1,12 @@
-<div fxLayout="row" fxLayoutAlign="space-between center ">
-    <h3><b>FILTERS</b></h3>
-    <button mat-flat-button color="primary" (click)="openCreateFilterDialog()">NEW FILTER</button>
+<div fxLayout="row" fxLayoutAlign="space-between center" fxLayout.sm="column" fxLayoutAlign.sm="center start"
+    fxLayout.xs="column" fxLayoutAlign.xs="center start">
+    <div>
+        <h3><b>FILTERS</b></h3>
+    </div>
+    <div>
+        <button mat-flat-button color="primary" (click)="openCreateFilterDialog()">NEW FILTER</button>
+    </div>
 </div>
-
-<mat-divider style="margin-bottom: 10px;"></mat-divider>
 
 <div fxLayout="column">
     <mat-form-field>

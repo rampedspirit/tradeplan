@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FilterLanguageEditorOptions } from 'src/app/lang/filter/filter-language.editor.options';
 import { FilterLanguageParser, LibraryError, SytntaxError } from 'src/app/lang/filter/filter-language.parser';
@@ -8,6 +8,10 @@ import { Filter, FilterService } from 'src/app/_gen';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationComponent, ConfirmationInfo } from '../../common/confirmation/confirmation.component';
+import { Tab, TabAreaService } from 'src/app/services/tab-area.service';
+import { FilterNotificationService } from '../filter-notification.service';
 
 @Component({
   selector: 'app-filter-edit',
@@ -15,14 +19,18 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   styleUrls: ['./filter-edit.component.scss']
 })
 export class FilterEditComponent implements OnInit {
+
+  private filterTab: Tab;
   private filterLanguageParser: FilterLanguageParser;
 
+  fetchError: boolean;
   editFilterForm: FormGroup;
   editorOptions = new FilterLanguageEditorOptions();
 
   @Input()
-  filter: Filter;
-
+  set tab(value: Tab) {
+    this.filterTab = value;
+  }
 
   get nameControl(): FormControl {
     return this.editFilterForm.get('name') as FormControl;
@@ -37,18 +45,116 @@ export class FilterEditComponent implements OnInit {
   }
 
   constructor(private editorService: EditorService, private filterService: FilterService,
+    private filterNotificationService: FilterNotificationService, private dialog: MatDialog,
     private snackBar: MatSnackBar, private spinner: NgxSpinnerService) {
     this.filterLanguageParser = new FilterLanguageParser();
   }
 
   ngOnInit(): void {
-    this.editFilterForm = new FormGroup({
-      name: new FormControl(this.filter.name, [Validators.required]),
-      description: new FormControl(this.filter.description, [Validators.required]),
-      code: new FormControl(this.filter.code, [Validators.required])
+    this.refresh();
+  }
+
+  refresh() {
+    this.fetchError = false;
+    this.spinner.show();
+    this.filterService.getFilter(this.filterTab.id).subscribe(filter => {
+      this.editFilterForm = new FormGroup({
+        name: new FormControl(filter.name, [Validators.required]),
+        description: new FormControl(filter.description, [Validators.required]),
+        code: new FormControl(filter.code, [Validators.required])
+      });
+
+      this.editFilterForm.valueChanges.subscribe(change => {
+        let changedFilter: Filter = change;
+        this.filterTab.dirtyFlag = changedFilter.name != filter.name ||
+          changedFilter.description != filter.description ||
+          !this.isSame(changedFilter.code, filter.code);
+      });
+      this.spinner.hide();
+    }, error => {
+      this.fetchError = true;
+      this.spinner.hide();
     });
   }
 
+  private isSame(str1: string, str2: string): boolean {
+    let s1 = str1 == null ? "" : str1;
+    let s2 = str2 == null ? "" : str2;
+    return s1 == s2;
+  }
+
+  save(): void {
+    //Validate fields
+    Object.values(this.editFilterForm.controls).forEach(control => {
+      control.markAllAsTouched();
+    });
+
+    if (this.editFilterForm.valid) {
+      let name = this.editFilterForm.get('name')?.value;
+      let description = this.editFilterForm.get('description')?.value;
+      let code = this.editFilterForm.get('code')?.value;
+
+      this.spinner.show();
+      this.filterService.updateFilter({
+        patchData: [{
+          operation: 'REPLACE',
+          property: 'NAME',
+          value: name
+        },
+        {
+          operation: 'REPLACE',
+          property: 'DESCRIPTION',
+          value: description
+        },
+        {
+          operation: 'REPLACE',
+          property: 'CODE',
+          value: code
+        }]
+      }, this.filterTab.id).subscribe(filter => {
+        this.filterTab.title = filter.name;
+        this.filterTab.dirtyFlag = false;
+        this.filterNotificationService.triggerUpdateNotification(filter);
+        this.spinner.hide();
+      }, error => {
+        this.snackBar.open("Failed to save filter ' " + name + " ', Please Retry.", "OK", {
+          verticalPosition: "bottom",
+          horizontalPosition: "center"
+        });
+        this.spinner.hide();
+      })
+    }
+  }
+
+  delete() {
+    const dialogRef = this.dialog.open(ConfirmationComponent, {
+      data: {
+        title: "Delete Filter",
+        icon: "warning",
+        message: "Are you sure to delete ?"
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(okToDelete => {
+      if (okToDelete) {
+        this.spinner.show();
+        this.filterService.deleteFilter(this.filterTab.id).subscribe(filter => {
+          this.spinner.hide();
+          this.filterNotificationService.triggerDeleteNotification(filter.id);
+        }, error => {
+          this.snackBar.open("Failed to delete filter., Please Retry.", "OK", {
+            verticalPosition: "bottom",
+            horizontalPosition: "center"
+          });
+          this.spinner.hide();
+        });
+      }
+    });
+  }
+
+  /**
+   * EDITOR Configurations
+   */
   onEditorInit(editor: monaco.editor.IStandaloneCodeEditor) {
     editor.onDidChangeModelContent((event) => {
       let model = editor.getModel();
@@ -93,52 +199,5 @@ export class FilterEditComponent implements OnInit {
     } else {
       this.editorService.setModelMarkers(model, "Library Error", []);
     }
-  }
-
-  save(): void {
-    this.validateAllFields();
-    if (this.editFilterForm.valid) {
-      let name = this.editFilterForm.get('name')?.value;
-      let description = this.editFilterForm.get('description')?.value;
-      let code = this.editFilterForm.get('code')?.value;
-      this.update(name, description, code);
-    }
-  }
-
-  private validateAllFields() {
-    Object.values(this.editFilterForm.controls).forEach(control => {
-      control.markAllAsTouched();
-    });
-  }
-
-  private update(name: string, description: string, code: string) {
-    this.spinner.show();
-
-    this.filterService.updateFilter({
-      patchData: [{
-        operation: 'REPLACE',
-        property: 'NAME',
-        value: name
-      },
-      {
-        operation: 'REPLACE',
-        property: 'DESCRIPTION',
-        value: description
-      },
-      {
-        operation: 'REPLACE',
-        property: 'CODE',
-        value: code
-      }]
-    }, this.filter.id).subscribe(filter => {
-      this.spinner.hide();
-    }, error => {
-      this.snackBar.open("Failed to save filter '" + name + "', Please Retry.", "OK", {
-        verticalPosition: "bottom",
-        horizontalPosition: "center"
-      });
-
-      this.spinner.hide();
-    })
   }
 }

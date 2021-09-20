@@ -5,7 +5,7 @@ export interface Tab {
   id: string;
   type: string;
   title: string;
-  data: any;
+  dirtyFlag: boolean;
 }
 
 @Injectable({
@@ -16,25 +16,25 @@ export class TabAreaService {
   private tabs: Tab[];
 
   public selectedTabIndex: number;
-  public currentTabs: BehaviorSubject<Tab[]>;
+  public openedTabs: BehaviorSubject<Tab[]>;
 
   constructor() {
     this.tabs = [];
-    this.currentTabs = new BehaviorSubject<Tab[]>(this.tabs);
+    this.openedTabs = new BehaviorSubject<Tab[]>(this.tabs);
   }
 
-  public addTab(tab: Tab) {
+  public openTab(tab: Tab) {
     let matchingTab = this.tabs.find(t => t.id == tab.id);
     if (!matchingTab) {
       matchingTab = tab;
       this.tabs.push(tab);
-      this.currentTabs.next(this.tabs);
+      this.openedTabs.next(this.tabs);
     }
     this.selectedTabIndex = this.tabs.indexOf(matchingTab);
   }
 
-  public removeTab(tab: Tab) {
-    this.tabs = this.tabs.filter(t => t !== tab);
-    this.currentTabs.next(this.tabs);
+  public closeTab(id: string) {
+    this.tabs = this.tabs.filter(t => t.id !== id);
+    this.openedTabs.next(this.tabs);
   }
 }
