@@ -4,8 +4,8 @@ info:
   version: 1.0.0
   title: Condition
 servers:
-  - url: 'http://localhost:5000/'
-  - url: 'https://localhost:5000/'
+  - url: 'http://localhost:5001/'
+  - url: 'https://localhost:5001/'
 paths:
   /v1/condition:
     post:

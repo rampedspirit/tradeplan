@@ -17,7 +17,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "All patch operations follow the json patch api standard. The patch object is provided by the user in the patch operation for the particular resource.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-09-13T22:14:17.965791400+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-09-22T11:39:28.124829500+05:30[Asia/Calcutta]")
 
 public class PatchModel   {
   @JsonProperty("patchData")
