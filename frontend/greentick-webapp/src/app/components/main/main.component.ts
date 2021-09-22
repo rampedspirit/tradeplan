@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Tab, TabAreaService } from 'src/app/services/tab-area.service';
-import { Filter } from 'src/app/_gen';
 import { ConfirmationComponent } from '../common/confirmation/confirmation.component';
 
 @Component({

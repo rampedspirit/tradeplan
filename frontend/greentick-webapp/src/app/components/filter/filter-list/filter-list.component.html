@@ -17,16 +17,13 @@
     </mat-form-field>
 </div>
 
-<div *ngIf="!fetchError && (filters==null || filters.length==0)" fxLayout="row" fxLayoutAlign="start center"
-    fxLayoutGap="10px" style="color: darkgrey;">
-    <mat-icon>info</mat-icon><span>No Filters Available. Please Create New Filter.</span>
-</div>
+<app-message *ngIf="filters!=null && filters.length==0" type="warn" message="No Filters Available."
+    [callback]="openCreateFilterDialog" callbackText="Create Filter">
+</app-message>
 
-<div *ngIf="fetchError" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px" style="color: red;">
-    <mat-icon>error</mat-icon>
-    <span>Failed To Get Filters.</span>
-    <button mat-stroked-button color="primary" (click)="refresh()">Please Retry</button>
-</div>
+<app-message *ngIf="fetchError" type="error" message="Failed to connect to our servers." [callback]="refresh"
+    callbackText="Refresh">
+</app-message>
 
 <mat-selection-list #filterList [multiple]="false" (selectionChange)="onSelectionChange($event)">
     <mat-list-option *ngFor="let filter of ( filters | filterNameSearch:filterSearch.value)" [value]="filter">

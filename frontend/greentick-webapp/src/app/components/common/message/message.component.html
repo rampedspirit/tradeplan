@@ -1,0 +1,15 @@
+<mat-card [style.background-color]="backgroundColor">
+    <mat-card-content fxLayout="row" fxLayoutAlign="start center">
+        <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+            <div style="color: darkslategray;">
+                <mat-icon>{{icon}}</mat-icon>
+            </div>
+            <div>
+                {{message}}
+            </div>
+        </div>
+        <div>
+            <button mat-button color="primary" (click)="executeCallback()">{{callbackText}}</button>
+        </div>
+    </mat-card-content>
+</mat-card>

@@ -44,7 +44,7 @@ export class FilterListComponent implements OnInit {
 
   }
 
-  refresh() {
+  refresh = () => {
     this.fetchError = false;
     this.spinner.show();
 
@@ -57,7 +57,7 @@ export class FilterListComponent implements OnInit {
     });
   }
 
-  openCreateFilterDialog() {
+  openCreateFilterDialog = () => {
     const dialogRef = this.dialog.open(FilterCreateComponent, {
       width: "30%"
     });

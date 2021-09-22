@@ -35,7 +35,7 @@ export class FilterCreateComponent implements OnInit {
     });
   }
 
-  submit() {
+  submit = () => {
     this.validateAllFields();
     if (this.createFilterForm.valid) {
       let name = this.createFilterForm.get('name')?.value;

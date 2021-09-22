@@ -1,8 +1,9 @@
 <h2 mat-dialog-title>Create New Filter</h2>
 <div mat-dialog-content>
-    <div *ngIf="createError">
-        <span style="color: red;"> Failed to create filter. Please Retry.</span>
-    </div>
+    <app-message *ngIf="createError" type="error" message="Failed to create filter." [callback]="submit"
+        callbackText="Retry">
+    </app-message>
+    <br>
     <form fxLayout="column" fxLayoutGap="10px" [formGroup]="createFilterForm">
         <mat-form-field>
             <mat-label>Name</mat-label>

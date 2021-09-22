@@ -12,6 +12,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationComponent, ConfirmationInfo } from '../../common/confirmation/confirmation.component';
 import { Tab, TabAreaService } from 'src/app/services/tab-area.service';
 import { FilterNotificationService } from '../filter-notification.service';
+import { MessageComponent } from '../../common/message/message.component';
 
 @Component({
   selector: 'app-filter-edit',
@@ -46,7 +47,7 @@ export class FilterEditComponent implements OnInit {
 
   constructor(private editorService: EditorService, private filterService: FilterService,
     private filterNotificationService: FilterNotificationService, private dialog: MatDialog,
-    private snackBar: MatSnackBar, private spinner: NgxSpinnerService) {
+    private spinner: NgxSpinnerService) {
     this.filterLanguageParser = new FilterLanguageParser();
   }
 
@@ -54,7 +55,7 @@ export class FilterEditComponent implements OnInit {
     this.refresh();
   }
 
-  refresh() {
+  refresh = () => {
     this.fetchError = false;
     this.spinner.show();
     this.filterService.getFilter(this.filterTab.id).subscribe(filter => {
@@ -83,7 +84,7 @@ export class FilterEditComponent implements OnInit {
     return s1 == s2;
   }
 
-  save(): void {
+  save = () => {
     //Validate fields
     Object.values(this.editFilterForm.controls).forEach(control => {
       control.markAllAsTouched();
@@ -117,16 +118,19 @@ export class FilterEditComponent implements OnInit {
         this.filterNotificationService.triggerUpdateNotification(filter);
         this.spinner.hide();
       }, error => {
-        this.snackBar.open("Failed to save filter ' " + name + " ', Please Retry.", "OK", {
-          verticalPosition: "bottom",
-          horizontalPosition: "center"
+        this.dialog.open(MessageComponent, {
+          data: {
+            type: "error",
+            message: "Failed to save filter.",
+            callbackText: "Retry",
+            callback: this.save
+          }
         });
-        this.spinner.hide();
       })
     }
   }
 
-  delete() {
+  delete = () => {
     const dialogRef = this.dialog.open(ConfirmationComponent, {
       data: {
         title: "Delete Filter",
@@ -142,9 +146,13 @@ export class FilterEditComponent implements OnInit {
           this.spinner.hide();
           this.filterNotificationService.triggerDeleteNotification(filter.id);
         }, error => {
-          this.snackBar.open("Failed to delete filter., Please Retry.", "OK", {
-            verticalPosition: "bottom",
-            horizontalPosition: "center"
+          this.dialog.open(MessageComponent, {
+            data: {
+              type: "error",
+              message: "Failed to delete filter.",
+              callbackText: "Retry",
+              callback: this.delete
+            }
           });
           this.spinner.hide();
         });

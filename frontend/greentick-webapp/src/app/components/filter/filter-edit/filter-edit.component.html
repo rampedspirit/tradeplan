@@ -1,9 +1,6 @@
-<div *ngIf="fetchError" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px" style="color: red;">
-    <mat-icon>error</mat-icon>
-    <span>Failed To Get Filter.</span>
-    <button mat-stroked-button color="primary" (click)="refresh()">Please Retry</button>
-</div>
-
+<app-message *ngIf="fetchError" type="error" message="Failed to connect to our servers." [callback]="refresh"
+    callbackText="Refresh">
+</app-message>
 <form *ngIf="editFilterForm" fxLayout="column" fxLayoutGap="10px" [formGroup]="editFilterForm" fxFlexFill>
     <div fxLayout="row" fxLayoutAlign="space-between center">
         <mat-form-field>
@@ -22,6 +19,7 @@
         <mat-error *ngIf="descriptionControl && descriptionControl.invalid">Please enter a valid description.
         </mat-error>
     </mat-form-field>
+    <mat-error *ngIf="codeControl && codeControl.invalid">Please enter a valid code. </mat-error>
     <div style="border: 1px solid rgb(124, 119, 119);padding-top: 10px;height: 400px;">
         <ngx-monaco-editor matInput [formControl]="codeControl" [options]="editorOptions"
             (onInit)="onEditorInit($event)" style="height: 100%;">
