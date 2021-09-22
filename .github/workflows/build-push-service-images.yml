@@ -46,3 +46,12 @@ jobs:
       run: |
         docker build filter/ -f filter/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg DB_USER_NAME=${{ secrets.DB_USER_NAME }} --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }}
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    
+    - name: Build and Push condition-service Image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: ${{ github.event.inputs.RepoName }}
+        IMAGE_TAG: gtk-condition-service-${{ github.event.inputs.ImageVersion }}
+      run: |
+        docker build filter/ -f filter/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg DB_USER_NAME=${{ secrets.DB_USER_NAME }} --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.bhs.gtk.condition.api.ConditionApi;
 import com.bhs.gtk.condition.model.Condition;
@@ -17,6 +18,7 @@ import com.bhs.gtk.condition.service.ConditionServiceImpl;
 
 
 @Controller
+@CrossOrigin
 public class ConditionManager implements ConditionApi {
 	
 	@Autowired

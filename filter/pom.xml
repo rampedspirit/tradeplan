@@ -138,15 +138,9 @@
 							<pluginExecutions>
 								<pluginExecution>
 									<pluginExecutionFilter>
-										<groupId>
-											io.swagger.codegen.v3
-										</groupId>
-										<artifactId>
-											swagger-codegen-maven-plugin
-										</artifactId>
-										<versionRange>
-											[3.0.0,)
-										</versionRange>
+										<groupId>io.swagger.codegen.v3</groupId>
+										<artifactId>swagger-codegen-maven-plugin</artifactId>
+										<versionRange>[3.0.0,)</versionRange>
 										<goals>
 											<goal>generate</goal>
 										</goals>
