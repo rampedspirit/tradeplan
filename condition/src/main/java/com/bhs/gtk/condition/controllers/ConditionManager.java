@@ -24,6 +24,12 @@ public class ConditionManager implements ConditionApi {
 	@Autowired
 	private ConditionServiceImpl conditionServiceImpl;
 
+
+	@Override
+	public ResponseEntity<Void> checkHealth() {
+		return new ResponseEntity<Void>(HttpStatus.OK);
+	}
+
 	@Override
 	public ResponseEntity<Condition> createCondition(@Valid Condition body) {
 		Condition condition = conditionServiceImpl.createCondition(body);

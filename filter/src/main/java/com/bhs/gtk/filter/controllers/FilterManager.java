@@ -16,13 +16,17 @@ import com.bhs.gtk.filter.model.Filter;
 import com.bhs.gtk.filter.model.PatchModel;
 import com.bhs.gtk.filter.service.FilterServiceImpl;
 
-
 @Controller
 @CrossOrigin
-public class FilterManager implements FilterApi{
-	
+public class FilterManager implements FilterApi {
+
 	@Autowired
 	private FilterServiceImpl filterServiceImpl;
+
+	@Override
+	public ResponseEntity<Void> checkHealth() {
+		return new ResponseEntity<Void>(HttpStatus.OK);
+	}
 
 	@Override
 	public ResponseEntity<Filter> createFilter(@Valid Filter body) {
@@ -53,6 +57,4 @@ public class FilterManager implements FilterApi{
 		Filter filter = filterServiceImpl.updateFilter(body, id);
 		return new ResponseEntity<Filter>(filter, HttpStatus.OK);
 	}
-
-
 }

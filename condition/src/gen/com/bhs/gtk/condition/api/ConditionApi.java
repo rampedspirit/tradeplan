@@ -25,10 +25,18 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.List;
 import java.util.Map;
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-09-22T11:39:28.124829500+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-09-22T20:44:29.771666800+05:30[Asia/Calcutta]")
 
 @Api(value = "Condition", description = "the Condition API")
 public interface ConditionApi {
+
+    @ApiOperation(value = "checks the health of service", nickname = "checkHealth", notes = "checks the health of service", tags={ "condition", })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Request sucessfully processed.") })
+    @RequestMapping(value = "/v1/condition/healthcheck",
+        method = RequestMethod.GET)
+    ResponseEntity<Void> checkHealth();
+
 
     @ApiOperation(value = "create new condition", nickname = "createCondition", notes = "create new condition", response = Condition.class, tags={ "condition", })
     @ApiResponses(value = { 
@@ -43,8 +51,8 @@ public interface ConditionApi {
 
     @ApiOperation(value = "delete", nickname = "deleteCondition", notes = "delete condition of given id", response = Condition.class, tags={ "condition", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 204, message = "filter with give id is deleted successfully.", response = Condition.class),
-        @ApiResponse(code = 404, message = "Requested filter not found.", response = Error.class) })
+        @ApiResponse(code = 204, message = "condition with give id is deleted successfully.", response = Condition.class),
+        @ApiResponse(code = 404, message = "Requested condition not found.", response = Error.class) })
     @RequestMapping(value = "/v1/condition/{id}",
         produces = { "application/json" }, 
         method = RequestMethod.DELETE)
@@ -65,7 +73,7 @@ public interface ConditionApi {
     @ApiResponses(value = { 
         @ApiResponse(code = 206, message = "Request sucessfully processed.", response = Condition.class),
         @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class),
-        @ApiResponse(code = 404, message = "Requested filter not found.", response = Error.class) })
+        @ApiResponse(code = 404, message = "Requested condition not found.", response = Error.class) })
     @RequestMapping(value = "/v1/condition/{id}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
@@ -74,7 +82,7 @@ public interface ConditionApi {
 
     @ApiOperation(value = "update condition", nickname = "updateCondition", notes = "update condition of given id", response = Condition.class, tags={ "condition", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Filter with give id is updated successfully.", response = Condition.class),
+        @ApiResponse(code = 200, message = "condition with give id is updated successfully.", response = Condition.class),
         @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class),
         @ApiResponse(code = 404, message = "Requested screener not found.", response = Error.class) })
     @RequestMapping(value = "/v1/condition/{id}",

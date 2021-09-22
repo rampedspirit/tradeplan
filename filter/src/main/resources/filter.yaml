@@ -7,6 +7,17 @@ servers:
   - url: 'http://localhost:5000/'
   - url: 'https://localhost:5000/'
 paths:
+  /v1/filter/healthcheck:
+    get:
+      tags:
+        - filter
+      summary: checks the health of service
+      description: checks the health of service
+      operationId: checkHealth
+      responses:
+        '200':
+          description: >-
+            Request sucessfully processed.
   /v1/filter:
     post:
       tags:
