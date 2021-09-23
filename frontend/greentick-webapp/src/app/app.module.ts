@@ -33,13 +33,15 @@ import { VerifyComponent } from './components/auth/verify/verify.component';
 import { FilterCreateComponent } from './components/filter/filter-create/filter-create.component';
 import { FilterEditComponent } from './components/filter/filter-edit/filter-edit.component';
 import { FilterListComponent } from './components/filter/filter-list/filter-list.component';
-import { ApiModule } from './_gen';
+import { ApiModule, BASE_PATH } from './_gen';
 import { HttpClientModule } from '@angular/common/http';
 import { FilterNameSearchPipe } from './components/filter/filter-name-search.pipe';
 import { MonacoWrapper } from './services/editor.service';
 import { MonacoEditorModule } from 'ngx-monaco-editor';
 import { ConfirmationComponent } from './components/common/confirmation/confirmation.component';
 import { MessageComponent } from './components/common/message/message.component';
+import { variable } from '@angular/compiler/src/output/output_ast';
+import { environment } from 'src/environments/environment';
 
 Amplify.configure({
   Auth: {
@@ -93,15 +95,18 @@ Amplify.configure({
       onMonacoLoad: AppModule.onMonacoLoad
     })
   ],
-  providers: [],
+  providers: [{
+    provide: BASE_PATH,
+    useValue: environment.basePath
+  }],
   bootstrap: [AppComponent]
 })
-export class AppModule { 
-  
+export class AppModule {
+
   /**
    * Initialize the Monaco Editor Configurations
    */
-   static onMonacoLoad() {
+  static onMonacoLoad() {
     let monaco: any = (<any>window).monaco;
     MonacoWrapper.register = monaco.languages.register;
     MonacoWrapper.setLanguageConfiguration = monaco.languages.setLanguageConfiguration;
