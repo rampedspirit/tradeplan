@@ -30,11 +30,12 @@ jobs:
         with:
           node-version: '16'
           cache: 'npm'
+          cache-dependency-path: frontend/greentick-webapp
 
       # Install the node modules
       - name: NPM Install
         run: npm install
-        working-directory: frontend/greentick-webapp
+        working-directory: frontend/greentick-webapp        
 
       # Create production build
       - name: Production Build
