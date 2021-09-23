@@ -34,10 +34,12 @@ jobs:
       # Install the node modules
       - name: NPM Install
         run: npm install
+        working-directory: frontend/greentick-webapp
 
       # Create production build
       - name: Production Build
         run: npm run build -- --prod # This is equivalent to 'ng build --prod'
+        working-directory: frontend/greentick-webapp
 
       # Deploy to S3
       # This is a third party action used to sync our production build app with the AWS S3 bucket
@@ -53,4 +55,4 @@ jobs:
           # note: use IAM role with limited role for below access-key-id and secret-access-key
           AWS_ACCESS_KEY_ID: ${{ secrets.REPO_AWS_ACCESS_KEY_ID }} # Access Key ID
           AWS_SECRET_ACCESS_KEY: ${{ secrets.REPO_AWS_SECRET_ACCESS_KEY }} # Access Secret Key
-          SOURCE_DIR: "dist/greentick-webapp" # build folder
+          SOURCE_DIR: "frontend/greentick-webapp/dist/greentick-webapp" # build folder
