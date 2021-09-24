@@ -25,7 +25,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.List;
 import java.util.Map;
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-09-22T20:44:29.771666800+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-09-24T15:34:38.557240300+05:30[Asia/Calcutta]")
 
 @Api(value = "Condition", description = "the Condition API")
 public interface ConditionApi {
@@ -33,7 +33,7 @@ public interface ConditionApi {
     @ApiOperation(value = "checks the health of service", nickname = "checkHealth", notes = "checks the health of service", tags={ "condition", })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Request sucessfully processed.") })
-    @RequestMapping(value = "/v1/condition/healthcheck",
+    @RequestMapping(value = "/",
         method = RequestMethod.GET)
     ResponseEntity<Void> checkHealth();
 
