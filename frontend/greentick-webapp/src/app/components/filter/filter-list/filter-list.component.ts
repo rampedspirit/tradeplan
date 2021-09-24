@@ -59,7 +59,7 @@ export class FilterListComponent implements OnInit {
 
   openCreateFilterDialog = () => {
     const dialogRef = this.dialog.open(FilterCreateComponent, {
-      width: "30%"
+      minWidth: "30%"
     });
   }
 
