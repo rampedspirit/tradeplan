@@ -1,0 +1,634 @@
+openapi: 3.0.0
+info:
+  description: These are Screener service APIs
+  version: 1.0.0
+  title: Screener
+servers:
+  - url: 'http://localhost:5000/'
+  - url: 'https://localhost:5000/'
+paths:
+  /v1/screener:
+    post:
+      tags:
+        - screener
+      summary: create new screener
+      description: create new screener
+      operationId: createScreener
+      requestBody:
+        description: payload to create screener
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScreenerRequest'
+        required: true
+      responses:
+        '201':
+          description: Condition created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScreenerResponse'
+        '400':
+          description: Request is not understood.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      tags:
+        - screener
+      summary: get all screener
+      description: get screener
+      operationId: getAllScreeners
+      responses:
+        '200':
+          description: >-
+            Request sucessfully processed.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScreenerResponse'
+        '400':
+          description: Request is not understood.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  '/v1/screener/{screenerId}':
+    get:
+      tags:
+        - screener
+      summary: get screener of given id
+      description: get screener
+      operationId: getScreener
+      parameters:
+        - in: path
+          name: screenerId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '206':
+          description: >-
+            Request sucessfully processed.
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/ScreenerResponse'
+        '400':
+          description: Request is not understood.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Requested filter not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags:
+        - screener
+      summary: update screener
+      description: update screener of given id
+      operationId: updateScreener
+      parameters:
+        - in: path
+          name: screenerId
+          schema:
+            type: string
+            format: uuid
+          required: true
+      requestBody:
+        description: >- 
+         Payload to change screener of given Id. Only Name, description, watchlist and condition of the screener can be changed. It is also important to note, change of watchlist or condition will remove associated execution result of the screener.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchModel'
+        required: true
+      responses:
+        '200':
+          description: Screener with give id is updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScreenerResponse'
+        '400':
+          description: Request is not understood.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Requested screener not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - screener
+      summary: delete
+      description: delete screener of given id
+      operationId: deleteScreener
+      parameters:
+        - in: path
+          name: screenerId
+          schema:
+            type: string
+            format: uuid
+          required: true
+      responses:
+        '204':
+          description: screener with give id is deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScreenerResponse'
+        '404':
+          description: Requested screener not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  '/v1/screener/{screenerId}/execution':     
+    post:
+      tags:
+        - execution
+      summary: create new executable
+      description: create new executable
+      operationId: createExecutable
+      parameters:
+        - in: path
+          name: screenerId
+          schema:
+            type: string
+            format: uuid
+          required: true
+      requestBody:
+        description: payload to create executable
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecutionRequest'
+        required: true
+      responses:
+        '201':
+          description: executable created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScreenerResult'
+        '400':
+          description: Request is not understood.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error' 
+    get:
+      tags:
+        - execution
+      summary: get all executables of given screener
+      description: get all executables of given screener
+      operationId: getExecutables
+      parameters:
+        - in: path
+          name: screenerId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '206':
+          description: >-
+            Request sucessfully processed.
+          content:
+            application/json:
+              schema:
+               type: array
+               items:
+                $ref: '#/components/schemas/Executable'              
+
+                
+        '400':
+          description: Request is not understood.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Requested filter not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  '/v1/screener/execution/{executionId}':
+    patch:
+      tags:
+        - execution
+      summary: update executable
+      description: update executable of given id
+      operationId: updateExecutable
+      parameters:
+        - in: path
+          name: executionId
+          schema:
+            type: string
+            format: uuid
+          required: true          
+      requestBody:
+        description: >- 
+         Payload to change executable of given Id. Only Note can be changed. 
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchModel'
+        required: true
+      responses:
+        '200':
+          description: Executable  with give id is updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Executable'
+        '400':
+          description: Request is not understood.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Requested screener not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'  
+
+  '/v1/screener/execution/result/{executionId}':
+    get:
+      tags:
+        - result
+      summary: get screener result
+      description: get screener result
+      operationId: getScreenrResult
+      parameters:
+        - in: path
+          name: executionId
+          required: true
+          schema:
+            type: string
+            format: uuid            
+      responses:
+        '206':
+          description: >-
+            Request sucessfully processed.
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/ScreenerResult'
+        '400':
+          description: Request is not understood.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Requested filter not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  '/v1/screener/execution/result/{conditionResultId}':
+    get:
+      tags:
+        - result
+      summary: get condition result
+      description: get condition result
+      operationId: getConditionResult
+      parameters:
+        - in: path
+          name: conditionResultId
+          required: true
+          schema:
+            type: string
+            format: uuid             
+      responses:
+        '206':
+          description: >-
+            Request sucessfully processed.
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/ConditionResult'
+        '400':
+          description: Request is not understood.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Requested filter not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'                
+
+  '/v1/screener/execution/result/{filterResultId}':
+    get:
+      tags:
+        - result
+      summary: get filter result
+      description: get filter result
+      operationId: getFilterResult
+      parameters:
+        - in: path
+          name: filterResultId
+          required: true
+          schema:
+            type: string
+            format: uuid            
+      responses:
+        '206':
+          description: >-
+            Request sucessfully processed.
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/FilterResult'
+        '400':
+          description: Request is not understood.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Requested filter not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'  
+
+components:
+  schemas:
+    ScreenerRequest:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: name of condition
+        description:
+          type: string
+          description: description of condition
+        watchListId:
+          type: string
+          format: uuid
+          description: >-
+            watch list identifier
+        conditionId:
+          type: string
+          format: uuid
+          description: >-
+            condition identifier.
+
+    ScreenerResponse:
+      required:
+        - name
+      type: object
+      properties:
+        screenerId:
+          type: string
+          format: uuid
+          description: >-
+            screener identifier
+        name:
+          type: string
+          description: name of condition
+        description:
+          type: string
+          description: description of condition
+        watchListId:
+          type: string
+          format: uuid
+          description: >-
+            watch list identifier
+        conditionId:
+          type: string
+          format: uuid
+          description: >-
+            condition identifier.
+    
+    ExecutionRequest:
+      required:
+        - marketTime
+      type: object
+      properties:
+        marketTime:
+          type: string
+          description: market time at which screener to be executed.
+          format: date-time
+        note:
+          type: string
+          description: note related to execution
+        scrips:
+          type: array
+          items:
+           type: string
+          description: >-
+            scrip names
+            
+
+    ScreenerResult:
+      required:
+        - marketTime
+      type: object
+      properties:
+        screenerId:
+          type: string
+          format: uuid
+          description: >-
+            screener identifier
+        executionId:
+         type: string
+         format: uuid
+         description: >-
+            unique identifier of the execution, using which result can be obtained
+        marketTime:
+          type: string
+          description: market time at which screener to be executed.
+          format: date-time
+        note:
+          type: string
+          description: note related to execution            
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConditionScripResult'
+          description: screener result
+    
+    Executable:
+      required:
+        - marketTime
+      type: object
+      properties:
+        screenerId:
+          type: string
+          format: uuid
+          description: >-
+            screener identifier       
+        executionId:
+         type: string
+         format: uuid
+         description: >-
+            unique identifier of the execution, using which result can be obtained
+        marketTime:
+          type: string
+          description: market time at which screener to be executed.
+          format: date-time
+        note:
+          type: string
+          description: note related to execution      
+
+    ConditionScripResult:
+      required:
+        - conditionResultId
+      type: object
+      properties:
+        conditionResultId:
+         type: string
+         format: uuid
+         description: >-
+            condition result  identifier.
+        scripName:
+         type: string
+         description: >-
+            name of scrip.
+        result:
+          type: string
+          description: market time at which screener to be executed.
+          enum: [PASS, FAIL, EVALUATING, INVALID]
+          
+    ConditionResult:
+      required:
+        - conditionResultId
+      type: object
+      properties:
+        screenerId:
+         type: string
+         format: uuid
+         description: >-
+            unique identifier of the screener to which execution is associated.
+        executionId:
+         type: string
+         format: uuid
+         description: >-
+            unique identifier of the execution, using which result can be obtained
+        conditionResultId:
+         type: string
+         format: uuid
+         description: >-
+            condition result  identifier.
+        scripName:
+         type: string
+         description: >-
+            name of scrip.
+        result:
+          type: string
+          description: market time at which screener to be executed.
+          enum: [PASS, FAIL, EVALUATING, INVALID]                
+        conditionCode:
+          type: string
+          description: condition code with filter details tagged.
+          
+    FilterResult:
+      required:
+        - filterResultId
+      type: object
+      properties:
+        screenerId:
+         type: string
+         format: uuid
+         description: >-
+            unique identifier of the screener to which execution is associated.
+        executionId:
+         type: string
+         format: uuid
+         description: >-
+            unique identifier of the execution, using which result can be obtained
+        conditionResultId:
+         type: string
+         format: uuid
+         description: >-
+            condition result  identifier.      
+        filterResultId:
+         type: string
+         format: uuid
+         description: >-
+            unique identifier of the filter result
+        filterCode:
+          type: string
+          description: filter code with result of statements tagged.          
+ 
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: brief information about error
+        resolution:
+          type: string
+          description: possibly hints to solve the error
+        errorCode:
+          type: string
+          description: pattern to unqiuely identify error root cause and origin.
+          
+    PatchModel:
+      title: Update Properties
+      type: object
+      properties:
+        patchData:
+          type: array
+          description: attributes to be updated.
+          items:
+            $ref: '#/components/schemas/PatchData'
+      description: >-
+        All patch operations follow the json patch api standard. The patch
+        object is provided by the user in the patch operation for the particular
+        resource.
+    PatchData:
+      required:
+        - operation
+        - property
+        - value
+      type: object
+      properties:
+        operation:
+          type: string
+          description: 'Action to be performed on given resource. '
+          example: REPLACE
+          enum:
+            - REPLACE
+        property:
+          type: string
+          description: >-
+            The property of the json attribute to be replaced.
+          example: NAME
+          enum:
+           - NAME
+           - DESCRIPTION
+           - WATCHLIST_ID
+           - CONDITION_ID
+           - NOTE
+        value:
+          type: string
+          description: The new value of the json attribute to be patched.
