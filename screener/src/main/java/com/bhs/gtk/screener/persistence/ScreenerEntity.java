@@ -31,4 +31,53 @@ public class ScreenerEntity {
 	@Column
 	private UUID conditionId;
 
+	protected ScreenerEntity() {}
+	
+	public ScreenerEntity(String name, String description, UUID watchlistId, UUID conditionId) {
+		this.name = name;
+		this.setDescription(description);
+		this.watchlistId = watchlistId;
+		this.conditionId = conditionId;
+	}
+	
+	public UUID getScreenerId() {
+		return screenerId;
+	}
+
+	public void setScreenerId(UUID screenerId) {
+		this.screenerId = screenerId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public UUID getWatchlistId() {
+		return watchlistId;
+	}
+
+	public void setWatchlistId(UUID watchlistId) {
+		this.watchlistId = watchlistId;
+	}
+
+	public UUID getConditionId() {
+		return conditionId;
+	}
+
+	public void setConditionId(UUID conditionId) {
+		this.conditionId = conditionId;
+	}
+
 }
