@@ -20,7 +20,6 @@ import { MessageComponent } from '../../common/message/message.component';
 })
 export class FilterEditComponent implements OnInit {
 
-  private filterTab: Tab;
   private filterLanguageParser: FilterLanguageParser;
 
   fetchError: boolean;
@@ -28,9 +27,7 @@ export class FilterEditComponent implements OnInit {
   editorOptions = new FilterLanguageEditorOptions();
 
   @Input()
-  set tab(value: Tab) {
-    this.filterTab = value;
-  }
+  tab: Tab;
 
   get nameControl(): FormControl {
     return this.editFilterForm.get('name') as FormControl;
@@ -57,7 +54,7 @@ export class FilterEditComponent implements OnInit {
   refresh = () => {
     this.fetchError = false;
     this.spinner.show();
-    this.filterService.getFilter(this.filterTab.id).subscribe(filter => {
+    this.filterService.getFilter(this.tab.id).subscribe(filter => {
       this.editFilterForm = new FormGroup({
         name: new FormControl(filter.name, [Validators.required]),
         description: new FormControl(filter.description, [Validators.required]),
@@ -66,7 +63,7 @@ export class FilterEditComponent implements OnInit {
 
       this.editFilterForm.valueChanges.subscribe(change => {
         let changedFilter: Filter = change;
-        this.filterTab.dirtyFlag = changedFilter.name != filter.name ||
+        this.tab.dirtyFlag = changedFilter.name != filter.name ||
           changedFilter.description != filter.description ||
           !this.isSame(changedFilter.code, filter.code);
       });
@@ -111,9 +108,9 @@ export class FilterEditComponent implements OnInit {
           property: 'CODE',
           value: code
         }]
-      }, this.filterTab.id).subscribe(filter => {
-        this.filterTab.title = filter.name;
-        this.filterTab.dirtyFlag = false;
+      }, this.tab.id).subscribe(filter => {
+        this.tab.title = filter.name;
+        this.tab.dirtyFlag = false;
         this.filterNotificationService.triggerUpdateNotification(filter);
         this.spinner.hide();
       }, error => {
@@ -141,7 +138,7 @@ export class FilterEditComponent implements OnInit {
     dialogRef.afterClosed().subscribe(okToDelete => {
       if (okToDelete) {
         this.spinner.show();
-        this.filterService.deleteFilter(this.filterTab.id).subscribe(filter => {
+        this.filterService.deleteFilter(this.tab.id).subscribe(filter => {
           this.spinner.hide();
           this.filterNotificationService.triggerDeleteNotification(filter.id);
         }, error => {

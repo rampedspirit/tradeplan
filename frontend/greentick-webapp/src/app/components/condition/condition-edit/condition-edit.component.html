@@ -19,5 +19,10 @@
         <mat-error *ngIf="descriptionControl && descriptionControl.invalid">Please enter a valid description.
         </mat-error>
     </mat-form-field>
+    <mat-error *ngIf="codeControl && codeControl.invalid">Please enter a valid code. </mat-error>
+    <div style="border: 1px solid rgb(124, 119, 119);padding-top: 10px;height: 400px;">
+        <ngx-monaco-editor matInput [formControl]="codeControl" [options]="editorOptions"
+            (onInit)="onEditorInit($event)" style="height: 100%;">
+        </ngx-monaco-editor>
+    </div>
 </form>
-<app-condition-builder [conditionQuery]="conditionQuery"> </app-condition-builder>

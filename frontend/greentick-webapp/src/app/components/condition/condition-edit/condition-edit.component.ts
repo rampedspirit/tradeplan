@@ -1,15 +1,14 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { QueryBuilderConfig } from 'angular2-query-builder';
 import { NgxSpinnerService } from 'ngx-spinner';
+import { ConditionLanguageEditorOptions } from 'src/app/lang/condition/condition-language.editor.options';
 import { Tab } from 'src/app/services/tab-area.service';
 import { Condition, ConditionService } from 'src/gen/condition';
-import { Filter, FilterService } from 'src/gen/filter';
 import { ConfirmationComponent } from '../../common/confirmation/confirmation.component';
 import { MessageComponent } from '../../common/message/message.component';
-import { ConditionQuery } from '../condition-builder/condition-query';
 import { ConditionNotificationService } from '../condition-notification.service';
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 @Component({
   selector: 'app-condition-edit',
@@ -20,7 +19,7 @@ export class ConditionEditComponent implements OnInit {
 
   fetchError: boolean;
   editConditionForm: FormGroup;
-  conditionQuery: ConditionQuery;
+  editorOptions = new ConditionLanguageEditorOptions();
 
   @Input()
   tab: Tab;
@@ -33,13 +32,17 @@ export class ConditionEditComponent implements OnInit {
     return this.editConditionForm.get('description') as FormControl;
   }
 
+  get codeControl(): FormControl {
+    return this.editConditionForm.get('code') as FormControl;
+  }
+
+
   constructor(private conditionService: ConditionService,
     private conditionNotificationService: ConditionNotificationService,
     private dialog: MatDialog, private spinner: NgxSpinnerService) { }
 
   ngOnInit(): void {
     this.refresh();
-    this.conditionQuery = new ConditionQuery(true);
   }
 
   refresh = () => {
@@ -48,17 +51,27 @@ export class ConditionEditComponent implements OnInit {
     this.conditionService.getCondition(this.tab.id).subscribe(condition => {
       this.editConditionForm = new FormGroup({
         name: new FormControl(condition.name, [Validators.required]),
-        description: new FormControl(condition.description, [Validators.required])
+        description: new FormControl(condition.description, [Validators.required]),
+        code: new FormControl(condition.code, [Validators.required])
       });
 
       this.editConditionForm.valueChanges.subscribe(change => {
-        this.tab.dirtyFlag = true;
+        let changedCondition: Condition = change;
+        this.tab.dirtyFlag = changedCondition.name != condition.name ||
+          changedCondition.description != condition.description ||
+          !this.isSame(changedCondition.code, condition.code);
       });
       this.spinner.hide();
     }, error => {
       this.fetchError = true;
       this.spinner.hide();
     });
+  }
+
+  private isSame(str1: string, str2: string): boolean {
+    let s1 = str1 == null ? "" : str1;
+    let s2 = str2 == null ? "" : str2;
+    return s1 == s2;
   }
 
   save = () => {
@@ -128,6 +141,15 @@ export class ConditionEditComponent implements OnInit {
           this.spinner.hide();
         });
       }
+    });
+  }
+
+  /**
+  * EDITOR Configurations
+  */
+  onEditorInit(editor: monaco.editor.IStandaloneCodeEditor) {
+    editor.onDidChangeModelContent((event) => {
+      let model = editor.getModel();
     });
   }
 }

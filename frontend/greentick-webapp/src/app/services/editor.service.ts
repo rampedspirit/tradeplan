@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { FilterLanguage } from '../lang/filter/filter-language';
-import { FillterLanguageConfiguration } from '../lang/filter/filter-language.configuration';
+import { GreentickLanguageConfiguration } from '../lang/greentick-language.configuration';
 import { FilterLanguageConstants } from '../lang/filter/filter-language.constants';
-import { FilterLanguageFormatter } from '../lang/filter/filter-language.formatter';
+import { GreentickLanguageFormatter } from '../lang/greentick-language.formatter';
 import { FilterLanguageIntellisense } from '../lang/filter/filter-language.intellisense';
 import { FilterLanguageTheme } from '../lang/filter/filter-language.theme';
+import { ConditionLanguageConstants } from '../lang/condition/condition-language.constants';
 
 export class MonacoWrapper {
   static register: (language: monaco.languages.ILanguageExtensionPoint) => void;
@@ -30,13 +31,20 @@ export class MonacoWrapper {
   static setModelMarkers: (model: monaco.editor.ITextModel, owner: string, markers: monaco.editor.IMarkerData[]) => void;
 
   static onEditorLoad() {
+    //FILTER
     let intellisense: FilterLanguageIntellisense = new FilterLanguageIntellisense();
     MonacoWrapper.registerLanguage(FilterLanguageConstants.LanguageId,
-      new FillterLanguageConfiguration(),
+      new GreentickLanguageConfiguration(),
       new FilterLanguage(),
-      new FilterLanguageFormatter(), intellisense, intellisense);
-
+      new GreentickLanguageFormatter(), intellisense, intellisense);
     MonacoWrapper.registerTheme(FilterLanguageConstants.ThemeId, new FilterLanguageTheme());
+
+    //CONDITION
+    MonacoWrapper.registerLanguage(ConditionLanguageConstants.LanguageId,
+      new GreentickLanguageConfiguration(),
+      new FilterLanguage(),
+      new GreentickLanguageFormatter(), null, null);
+    MonacoWrapper.registerTheme(ConditionLanguageConstants.ThemeId, new FilterLanguageTheme());
   }
 
   private static registerLanguage(id: string,

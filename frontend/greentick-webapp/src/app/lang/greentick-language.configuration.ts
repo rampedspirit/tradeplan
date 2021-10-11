@@ -1,6 +1,6 @@
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
-export class FillterLanguageConfiguration implements monaco.languages.LanguageConfiguration {
+export class GreentickLanguageConfiguration implements monaco.languages.LanguageConfiguration {
     surroundingPairs = [{
         open: "[",
         close: "]"

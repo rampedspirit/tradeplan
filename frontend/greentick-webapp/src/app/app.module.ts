@@ -53,8 +53,6 @@ import { ConditionListComponent } from './components/condition/condition-list/co
 import { ConditionCreateComponent } from './components/condition/condition-create/condition-create.component';
 import { ConditionEditComponent } from './components/condition/condition-edit/condition-edit.component';
 import { ConditionNameSearchPipe } from './components/condition/condition-name-search.pipe';
-import { QueryBuilderModule } from 'angular2-query-builder';
-import { ConditionBuilderComponent } from './components/condition/condition-builder/condition-builder.component';
 
 Amplify.configure({
   Auth: {
@@ -84,8 +82,7 @@ Amplify.configure({
     ConditionListComponent,
     ConditionCreateComponent,
     ConditionEditComponent,
-    ConditionNameSearchPipe,
-    ConditionBuilderComponent
+    ConditionNameSearchPipe
   ],
   imports: [
     BrowserModule,
@@ -111,7 +108,6 @@ Amplify.configure({
     MatDialogModule,
     MatButtonToggleModule,
     MatBadgeModule,
-    QueryBuilderModule,
     MatSelectModule,
     MonacoEditorModule.forRoot({
       onMonacoLoad: AppModule.onMonacoLoad

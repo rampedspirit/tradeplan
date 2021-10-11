@@ -1,6 +1,6 @@
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
-export class FilterLanguageFormatter implements monaco.languages.DocumentFormattingEditProvider {
+export class GreentickLanguageFormatter implements monaco.languages.DocumentFormattingEditProvider {
 
     public provideDocumentFormattingEdits(model: monaco.editor.ITextModel, options: monaco.languages.FormattingOptions, token: monaco.CancellationToken): monaco.languages.ProviderResult<monaco.languages.TextEdit[]> {
         return [{
