@@ -1,10 +1,8 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialogRef } from '@angular/material/dialog';
 import { NgxSpinnerService } from 'ngx-spinner';
-import { TabAreaService } from 'src/app/services/tab-area.service';
-import { Filter, FilterService } from 'src/app/_gen';
+import {  FilterService } from 'src/gen/filter';
 import { FilterNotificationService } from '../filter-notification.service';
 
 @Component({

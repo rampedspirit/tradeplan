@@ -1,0 +1,24 @@
+<h2 mat-dialog-title>Create New Condition</h2>
+<div mat-dialog-content>
+    <app-message *ngIf="createError" type="error" message="Failed to create condition." [callback]="submit"
+        callbackText="Retry">
+    </app-message>
+    <br>
+    <form fxLayout="column" fxLayoutGap="10px" [formGroup]="createConditionForm">
+        <mat-form-field>
+            <mat-label>Name</mat-label>
+            <input matInput [formControl]="nameControl">
+            <mat-error *ngIf="nameControl && nameControl.invalid">Please enter valid condition name.</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Description</mat-label>
+            <textarea matInput [formControl]="descriptionControl"> </textarea>
+            <mat-error *ngIf="descriptionControl && descriptionControl.invalid">Please enter valid description.
+            </mat-error>
+        </mat-form-field>
+    </form>
+</div>
+<div mat-dialog-actions>
+    <button mat-button [mat-dialog-close]="false">CANCEL</button>
+    <button mat-button (click)="submit()" cdkFocusInitial>OK</button>
+</div>

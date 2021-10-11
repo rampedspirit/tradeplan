@@ -6,6 +6,7 @@ import { LoginComponent } from './components/auth/login/login.component';
 import { ResetComponent } from './components/auth/reset/reset.component';
 import { SignupComponent } from './components/auth/signup/signup.component';
 import { VerifyComponent } from './components/auth/verify/verify.component';
+import { ConditionListComponent } from './components/condition/condition-list/condition-list.component';
 import { FilterListComponent } from './components/filter/filter-list/filter-list.component';
 import { MainComponent } from './components/main/main.component';
 
@@ -15,7 +16,8 @@ const routes: Routes = [
     component: MainComponent,
     canActivate: [AuthGuard],
     children: [
-      { path: "filter/list", component: FilterListComponent }
+      { path: "filter/list", component: FilterListComponent },
+      { path: "condition/list", component: ConditionListComponent }
     ]
   },
   {

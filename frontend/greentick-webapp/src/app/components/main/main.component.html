@@ -1,24 +1,13 @@
 <div fxLayout="row" fxLayout.sm="column" fxLayout.xs="column" fxFlexFill fxLayoutGap="2px">
+
     <!--Main Nav-->
-    <div class="container" fxLayout="column" fxLayout.sm="row" fxLayout.xs="row">
-        <div class="main-nav-item">
-            <button mat-icon-button matTooltip="FILTERS" [routerLink]="['/filter/list']">
-                <mat-icon>filter_list</mat-icon>
-            </button>
-        </div>
-        <mat-divider></mat-divider>
-        <div class="main-nav-item">
-            <button mat-icon-button matTooltip="CONDITIONS">
-                <mat-icon>perm_data_setting</mat-icon>
-            </button>
-        </div>
-        <mat-divider></mat-divider>
-        <div class="main-nav-item">
-            <button mat-icon-button matTooltip="SCREENER">
-                <mat-icon>control_point_duplicate</mat-icon>
-            </button>
-        </div>
-        <mat-divider></mat-divider>
+    <div class="container">
+        <mat-button-toggle-group [vertical]="!isSmallScreen">
+            <mat-button-toggle class="main-nav-item" matTooltip="FILTERS" [routerLink]="['/filter/list']"> F
+            </mat-button-toggle>
+            <mat-button-toggle class="main-nav-item" matTooltip="CONDITIONS" [routerLink]="['/condition/list']"> C
+            </mat-button-toggle>
+        </mat-button-toggle-group>
     </div>
 
     <!--List Area-->
@@ -42,6 +31,9 @@
                 </ng-template>
                 <div class="tab-container" *ngIf="tab.type == 'filter'">
                     <app-filter-edit [tab]="tab"></app-filter-edit>
+                </div>
+                <div class="tab-container" *ngIf="tab.type == 'condition'">
+                    <app-condition-edit [tab]="tab"></app-condition-edit>
                 </div>
             </mat-tab>
         </mat-tab-group>

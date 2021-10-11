@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { Filter } from 'src/app/_gen';
+import { Subject } from 'rxjs';
+import { Filter } from 'src/gen/filter';
 
 @Injectable({
   providedIn: 'root'

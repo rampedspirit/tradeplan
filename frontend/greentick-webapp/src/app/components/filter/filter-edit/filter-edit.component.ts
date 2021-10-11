@@ -1,16 +1,15 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FilterLanguageEditorOptions } from 'src/app/lang/filter/filter-language.editor.options';
 import { FilterLanguageParser, LibraryError, SytntaxError } from 'src/app/lang/filter/filter-language.parser';
 import { EditorService } from 'src/app/services/editor.service';
-import { Filter, FilterService } from 'src/app/_gen';
+import { Filter, FilterService } from 'src/gen/filter';
 
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { NgxSpinnerService } from 'ngx-spinner';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { ConfirmationComponent, ConfirmationInfo } from '../../common/confirmation/confirmation.component';
-import { Tab, TabAreaService } from 'src/app/services/tab-area.service';
+import { ConfirmationComponent } from '../../common/confirmation/confirmation.component';
+import { Tab } from 'src/app/services/tab-area.service';
 import { FilterNotificationService } from '../filter-notification.service';
 import { MessageComponent } from '../../common/message/message.component';
 

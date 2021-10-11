@@ -4,7 +4,8 @@
 
 export const environment = {
   production: false,
-  basePath: "http://localhost:5000/"
+  filterApiBasePath: "http://localhost:5000/",
+  conditionApiBasePath: "http://localhost:5001/"
 };
 
 /*

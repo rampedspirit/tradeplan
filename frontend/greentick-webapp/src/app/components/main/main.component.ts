@@ -1,3 +1,4 @@
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Tab, TabAreaService } from 'src/app/services/tab-area.service';
@@ -10,7 +11,20 @@ import { ConfirmationComponent } from '../common/confirmation/confirmation.compo
 })
 export class MainComponent implements OnInit {
 
-  constructor(public tabAreaService: TabAreaService, private dialog: MatDialog) { }
+  isSmallScreen: boolean;
+
+  constructor(public tabAreaService: TabAreaService, private dialog: MatDialog,
+    private breakpointObserver: BreakpointObserver) {
+    breakpointObserver.observe([
+      Breakpoints.XSmall,
+      Breakpoints.Small,
+      Breakpoints.Medium,
+      Breakpoints.Large,
+      Breakpoints.XLarge,
+    ]).subscribe(breakpointState => {
+      this.isSmallScreen = breakpointState.breakpoints[Breakpoints.XSmall] || breakpointState.breakpoints[Breakpoints.Small];
+    })
+  }
 
   ngOnInit(): void {
   }

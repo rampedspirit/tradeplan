@@ -1,11 +1,9 @@
-import { ThisReceiver, ThrowStmt } from '@angular/compiler';
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
-import { Component, OnInit, ViewChild, ViewChildren } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSelectionList, MatSelectionListChange } from '@angular/material/list';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { Tab, TabAreaService } from 'src/app/services/tab-area.service';
-import { Filter, FilterService } from 'src/app/_gen';
+import { Filter, FilterService } from 'src/gen/filter';
 import { FilterCreateComponent } from '../filter-create/filter-create.component';
 import { FilterNotificationService } from '../filter-notification.service';
 
@@ -40,8 +38,7 @@ export class FilterListComponent implements OnInit {
     this.filterNotificationService.deleteSubject.subscribe(id => {
       this.refresh();
       this.tabAreaService.closeTab(id);
-    })
-
+    });
   }
 
   refresh = () => {

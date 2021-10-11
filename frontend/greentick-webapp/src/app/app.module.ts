@@ -14,6 +14,7 @@ import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatSelectModule } from '@angular/material/select';
 
 import { SignupComponent } from './components/auth/signup/signup.component';
 import { LoginComponent } from './components/auth/login/login.component';
@@ -23,7 +24,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatBadgeModule } from '@angular/material/badge';
 
 import { NgxSpinnerModule } from "ngx-spinner";
 
@@ -33,15 +35,26 @@ import { VerifyComponent } from './components/auth/verify/verify.component';
 import { FilterCreateComponent } from './components/filter/filter-create/filter-create.component';
 import { FilterEditComponent } from './components/filter/filter-edit/filter-edit.component';
 import { FilterListComponent } from './components/filter/filter-list/filter-list.component';
-import { ApiModule, BASE_PATH } from './_gen';
 import { HttpClientModule } from '@angular/common/http';
 import { FilterNameSearchPipe } from './components/filter/filter-name-search.pipe';
 import { MonacoWrapper } from './services/editor.service';
 import { MonacoEditorModule } from 'ngx-monaco-editor';
 import { ConfirmationComponent } from './components/common/confirmation/confirmation.component';
 import { MessageComponent } from './components/common/message/message.component';
-import { variable } from '@angular/compiler/src/output/output_ast';
 import { environment } from 'src/environments/environment';
+
+import { ApiModule as FilterApiModule } from 'src/gen/filter';
+import { BASE_PATH as FILTER_API_BASE_PATH } from 'src/gen/filter';
+
+import { ApiModule as ConditionApiModule } from 'src/gen/condition';
+import { BASE_PATH as CONDITION_API_BASE_PATH } from 'src/gen/condition';
+
+import { ConditionListComponent } from './components/condition/condition-list/condition-list.component';
+import { ConditionCreateComponent } from './components/condition/condition-create/condition-create.component';
+import { ConditionEditComponent } from './components/condition/condition-edit/condition-edit.component';
+import { ConditionNameSearchPipe } from './components/condition/condition-name-search.pipe';
+import { QueryBuilderModule } from 'angular2-query-builder';
+import { ConditionBuilderComponent } from './components/condition/condition-builder/condition-builder.component';
 
 Amplify.configure({
   Auth: {
@@ -67,13 +80,19 @@ Amplify.configure({
     FilterEditComponent,
     FilterNameSearchPipe,
     ConfirmationComponent,
-    MessageComponent
+    MessageComponent,
+    ConditionListComponent,
+    ConditionCreateComponent,
+    ConditionEditComponent,
+    ConditionNameSearchPipe,
+    ConditionBuilderComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
-    ApiModule,
+    FilterApiModule,
+    ConditionApiModule,
     HttpClientModule,
     MatCardModule,
     MatButtonModule,
@@ -90,14 +109,21 @@ Amplify.configure({
     MatListModule,
     MatTabsModule,
     MatDialogModule,
-    MatSnackBarModule,
+    MatButtonToggleModule,
+    MatBadgeModule,
+    QueryBuilderModule,
+    MatSelectModule,
     MonacoEditorModule.forRoot({
       onMonacoLoad: AppModule.onMonacoLoad
     })
   ],
   providers: [{
-    provide: BASE_PATH,
-    useValue: environment.basePath
+    provide: FILTER_API_BASE_PATH,
+    useValue: environment.filterApiBasePath
+  },
+  {
+    provide: CONDITION_API_BASE_PATH,
+    useValue: environment.conditionApiBasePath
   }],
   bootstrap: [AppComponent]
 })

@@ -1,0 +1,35 @@
+<div fxLayout="row" fxLayoutAlign="space-between center" fxLayout.sm="column" fxLayoutAlign.sm="center start"
+    fxLayout.xs="column" fxLayoutAlign.xs="center start">
+    <div>
+        <h3><b>CONDITIONS</b></h3>
+    </div>
+    <div>
+        <button mat-flat-button color="primary" (click)="openCreateConditionDialog()">NEW CONDITION</button>
+    </div>
+</div>
+
+<div fxLayout="column">
+    <mat-form-field>
+        <mat-label>
+            <mat-icon>search</mat-icon> Search
+        </mat-label>
+        <input matInput #conditionSearch>
+    </mat-form-field>
+</div>
+
+<app-message *ngIf="conditions!=null && conditions.length==0" type="warn" message="No Conditions Available."
+    [callback]="openCreateConditionDialog" callbackText="Create Condition">
+</app-message>
+
+<app-message *ngIf="fetchError" type="error" message="Failed to connect to our servers." [callback]="refresh"
+    callbackText="Refresh">
+</app-message>
+
+<mat-selection-list #conditionList [multiple]="false" (selectionChange)="onSelectionChange($event)">
+    <mat-list-option *ngFor="let condition of ( conditions | conditionNameSearch:conditionSearch.value)"
+        [value]="condition">
+        {{condition.name}}
+    </mat-list-option>
+</mat-selection-list>
+
+<ngx-spinner type="ball-spin-clockwise"></ngx-spinner>

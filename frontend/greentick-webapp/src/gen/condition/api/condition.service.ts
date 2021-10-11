@@ -1,6 +1,6 @@
 /**
- * Filter
- * These are filter service APIs
+ * Condition
+ * These are condition service APIs
  *
  * OpenAPI spec version: 1.0.0
  * 
@@ -17,7 +17,7 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 
 import { Observable }                                        from 'rxjs';
 
-import { Filter } from '../model/filter';
+import { Condition } from '../model/condition';
 import { PatchModel } from '../model/patchModel';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -25,9 +25,9 @@ import { Configuration }                                     from '../configurat
 
 
 @Injectable()
-export class FilterService {
+export class ConditionService {
 
-    protected basePath = 'http://localhost:5000/';
+    protected basePath = 'http://localhost:5001/';
     public defaultHeaders = new HttpHeaders();
     public configuration = new Configuration();
 
@@ -57,19 +57,54 @@ export class FilterService {
 
 
     /**
-     * create new filter
-     * create new filter
-     * @param body payload to create filter
+     * checks the health of service
+     * checks the health of service
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public createFilter(body: Filter, observe?: 'body', reportProgress?: boolean): Observable<Filter>;
-    public createFilter(body: Filter, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Filter>>;
-    public createFilter(body: Filter, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Filter>>;
-    public createFilter(body: Filter, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public checkHealth(observe?: 'body', reportProgress?: boolean): Observable<any>;
+    public checkHealth(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
+    public checkHealth(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
+    public checkHealth(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.request<any>('get',`${this.basePath}/`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * create new condition
+     * create new condition
+     * @param body payload to create condition
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public createCondition(body: Condition, observe?: 'body', reportProgress?: boolean): Observable<Condition>;
+    public createCondition(body: Condition, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Condition>>;
+    public createCondition(body: Condition, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Condition>>;
+    public createCondition(body: Condition, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (body === null || body === undefined) {
-            throw new Error('Required parameter body was null or undefined when calling createFilter.');
+            throw new Error('Required parameter body was null or undefined when calling createCondition.');
         }
 
         let headers = this.defaultHeaders;
@@ -92,7 +127,7 @@ export class FilterService {
             headers = headers.set('Content-Type', httpContentTypeSelected);
         }
 
-        return this.httpClient.request<Filter>('post',`${this.basePath}/v1/filter`,
+        return this.httpClient.request<Condition>('post',`${this.basePath}/v1/condition`,
             {
                 body: body,
                 withCredentials: this.configuration.withCredentials,
@@ -105,18 +140,18 @@ export class FilterService {
 
     /**
      * delete
-     * delete filter of given id
+     * delete condition of given id
      * @param id 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public deleteFilter(id: string, observe?: 'body', reportProgress?: boolean): Observable<Filter>;
-    public deleteFilter(id: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Filter>>;
-    public deleteFilter(id: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Filter>>;
-    public deleteFilter(id: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public deleteCondition(id: string, observe?: 'body', reportProgress?: boolean): Observable<Condition>;
+    public deleteCondition(id: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Condition>>;
+    public deleteCondition(id: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Condition>>;
+    public deleteCondition(id: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling deleteFilter.');
+            throw new Error('Required parameter id was null or undefined when calling deleteCondition.');
         }
 
         let headers = this.defaultHeaders;
@@ -134,7 +169,7 @@ export class FilterService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<Filter>('delete',`${this.basePath}/v1/filter/${encodeURIComponent(String(id))}`,
+        return this.httpClient.request<Condition>('delete',`${this.basePath}/v1/condition/${encodeURIComponent(String(id))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -145,15 +180,15 @@ export class FilterService {
     }
 
     /**
-     * get all filter
-     * get filters
+     * get all conditions
+     * get conditions
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getAllFilters(observe?: 'body', reportProgress?: boolean): Observable<Array<Filter>>;
-    public getAllFilters(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<Filter>>>;
-    public getAllFilters(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<Filter>>>;
-    public getAllFilters(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public getAllConditions(observe?: 'body', reportProgress?: boolean): Observable<Array<Condition>>;
+    public getAllConditions(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<Condition>>>;
+    public getAllConditions(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<Condition>>>;
+    public getAllConditions(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         let headers = this.defaultHeaders;
 
@@ -170,7 +205,7 @@ export class FilterService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<Array<Filter>>('get',`${this.basePath}/v1/filter`,
+        return this.httpClient.request<Array<Condition>>('get',`${this.basePath}/v1/condition`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -181,19 +216,19 @@ export class FilterService {
     }
 
     /**
-     * get filter of given id
-     * get filter
+     * get condition of given id
+     * get condition
      * @param id 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getFilter(id: string, observe?: 'body', reportProgress?: boolean): Observable<Filter>;
-    public getFilter(id: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Filter>>;
-    public getFilter(id: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Filter>>;
-    public getFilter(id: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public getCondition(id: string, observe?: 'body', reportProgress?: boolean): Observable<Condition>;
+    public getCondition(id: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Condition>>;
+    public getCondition(id: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Condition>>;
+    public getCondition(id: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling getFilter.');
+            throw new Error('Required parameter id was null or undefined when calling getCondition.');
         }
 
         let headers = this.defaultHeaders;
@@ -211,7 +246,7 @@ export class FilterService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<Filter>('get',`${this.basePath}/v1/filter/${encodeURIComponent(String(id))}`,
+        return this.httpClient.request<Condition>('get',`${this.basePath}/v1/condition/${encodeURIComponent(String(id))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -222,24 +257,24 @@ export class FilterService {
     }
 
     /**
-     * update filter
-     * update filter of given id
-     * @param body payload to create filter
+     * update condition
+     * update condition of given id
+     * @param body payload to create Condition
      * @param id 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public updateFilter(body: PatchModel, id: string, observe?: 'body', reportProgress?: boolean): Observable<Filter>;
-    public updateFilter(body: PatchModel, id: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Filter>>;
-    public updateFilter(body: PatchModel, id: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Filter>>;
-    public updateFilter(body: PatchModel, id: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public updateCondition(body: PatchModel, id: string, observe?: 'body', reportProgress?: boolean): Observable<Condition>;
+    public updateCondition(body: PatchModel, id: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Condition>>;
+    public updateCondition(body: PatchModel, id: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Condition>>;
+    public updateCondition(body: PatchModel, id: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (body === null || body === undefined) {
-            throw new Error('Required parameter body was null or undefined when calling updateFilter.');
+            throw new Error('Required parameter body was null or undefined when calling updateCondition.');
         }
 
         if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling updateFilter.');
+            throw new Error('Required parameter id was null or undefined when calling updateCondition.');
         }
 
         let headers = this.defaultHeaders;
@@ -262,7 +297,7 @@ export class FilterService {
             headers = headers.set('Content-Type', httpContentTypeSelected);
         }
 
-        return this.httpClient.request<Filter>('patch',`${this.basePath}/v1/filter/${encodeURIComponent(String(id))}`,
+        return this.httpClient.request<Condition>('patch',`${this.basePath}/v1/condition/${encodeURIComponent(String(id))}`,
             {
                 body: body,
                 withCredentials: this.configuration.withCredentials,

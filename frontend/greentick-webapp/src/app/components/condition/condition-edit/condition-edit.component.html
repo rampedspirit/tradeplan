@@ -1,0 +1,23 @@
+<app-message *ngIf="fetchError" type="error" message="Failed to connect to our servers." [callback]="refresh"
+    callbackText="Refresh">
+</app-message>
+<form *ngIf="editConditionForm" fxLayout="column" fxLayoutGap="10px" [formGroup]="editConditionForm" fxFlexFill>
+    <div fxLayout="row" fxLayoutAlign="space-between center">
+        <mat-form-field>
+            <mat-label>Name</mat-label>
+            <input matInput [formControl]="nameControl">
+            <mat-error *ngIf="nameControl && nameControl.invalid">Please enter valid name.</mat-error>
+        </mat-form-field>
+        <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+            <button mat-flat-button color="primary" (click)="save()">SAVE</button>
+            <button mat-flat-button color="warn" (click)="delete()">DELETE</button>
+        </div>
+    </div>
+    <mat-form-field>
+        <mat-label>Description</mat-label>
+        <textarea matInput [formControl]="descriptionControl"></textarea>
+        <mat-error *ngIf="descriptionControl && descriptionControl.invalid">Please enter a valid description.
+        </mat-error>
+    </mat-form-field>
+</form>
+<app-condition-builder [conditionQuery]="conditionQuery"> </app-condition-builder>

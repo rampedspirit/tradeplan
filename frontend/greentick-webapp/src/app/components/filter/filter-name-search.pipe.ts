@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { Filter } from 'src/app/_gen';
+import { Filter } from 'src/gen/filter';
 
 @Pipe({
   name: 'filterNameSearch'
