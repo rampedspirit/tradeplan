@@ -9,6 +9,10 @@ import { ConfirmationComponent } from '../../common/confirmation/confirmation.co
 import { MessageComponent } from '../../common/message/message.component';
 import { ConditionNotificationService } from '../condition-notification.service';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import { ConditionLanguageParser, LibraryError, SytntaxError } from 'src/app/lang/condition/condition-language.parser';
+import { EditorService } from 'src/app/services/editor.service';
+import { FilterService } from 'src/gen/filter';
+import { ConditionLanguageIntellisense } from 'src/app/lang/condition/condition-language.intellisense';
 
 @Component({
   selector: 'app-condition-edit',
@@ -17,7 +21,11 @@ import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 })
 export class ConditionEditComponent implements OnInit {
 
+  private conditionLanguageParser: ConditionLanguageParser;
+
   fetchError: boolean;
+  fetchError2: boolean;
+
   editConditionForm: FormGroup;
   editorOptions = new ConditionLanguageEditorOptions();
 
@@ -37,12 +45,15 @@ export class ConditionEditComponent implements OnInit {
   }
 
 
-  constructor(private conditionService: ConditionService,
-    private conditionNotificationService: ConditionNotificationService,
-    private dialog: MatDialog, private spinner: NgxSpinnerService) { }
+  constructor(private filterService: FilterService, private editorService: EditorService,
+    private conditionService: ConditionService, private conditionNotificationService: ConditionNotificationService,
+    private dialog: MatDialog, private spinner: NgxSpinnerService) {
+    this.conditionLanguageParser = new ConditionLanguageParser();
+  }
 
   ngOnInit(): void {
     this.refresh();
+    this.refresh2();
   }
 
   refresh = () => {
@@ -68,6 +79,18 @@ export class ConditionEditComponent implements OnInit {
     });
   }
 
+  refresh2 = () => {
+    this.fetchError2 = false;
+    this.spinner.show();
+    this.filterService.getAllFilters().subscribe(filters => {
+      ConditionLanguageIntellisense.FILTERS = filters;
+      this.spinner.hide();
+    }, error => {
+      this.fetchError2 = true;
+      this.spinner.hide();
+    });
+  }
+
   private isSame(str1: string, str2: string): boolean {
     let s1 = str1 == null ? "" : str1;
     let s2 = str2 == null ? "" : str2;
@@ -83,6 +106,7 @@ export class ConditionEditComponent implements OnInit {
     if (this.editConditionForm.valid) {
       let name = this.editConditionForm.get('name')?.value;
       let description = this.editConditionForm.get('description')?.value;
+      let code = this.editConditionForm.get('code')?.value;
 
       this.spinner.show();
       this.conditionService.updateCondition({
@@ -95,6 +119,11 @@ export class ConditionEditComponent implements OnInit {
           operation: 'REPLACE',
           property: 'DESCRIPTION',
           value: description
+        },
+        {
+          operation: 'REPLACE',
+          property: 'CODE',
+          value: code
         }]
       }, this.tab.id).subscribe(condition => {
         this.tab.title = condition.name;
@@ -145,11 +174,57 @@ export class ConditionEditComponent implements OnInit {
   }
 
   /**
-  * EDITOR Configurations
-  */
+   * EDITOR Configurations
+   */
   onEditorInit(editor: monaco.editor.IStandaloneCodeEditor) {
     editor.onDidChangeModelContent((event) => {
       let model = editor.getModel();
+      this.updateSyntaxError(model);
+      this.updateLibraryError(model);
     });
+  }
+
+  private updateSyntaxError(model: monaco.editor.ITextModel) {
+    let syntaxError: SytntaxError = this.conditionLanguageParser.parseForSyntaxError(model.getValue());
+    if (syntaxError) {
+      this.editorService.setModelMarkers(model, "Sytax Error", [
+        {
+          startLineNumber: syntaxError.startLineNumber,
+          startColumn: syntaxError.startColumn,
+          endLineNumber: syntaxError.endLineNumber,
+          endColumn: syntaxError.endColumn,
+          message: syntaxError.message,
+          severity: monaco.MarkerSeverity.Error
+        }
+      ]);
+    } else {
+      this.editorService.setModelMarkers(model, "Sytax Error", []);
+    }
+  }
+
+  private updateLibraryError(model: monaco.editor.ITextModel) {
+    let libraryErrors: LibraryError[] = this.conditionLanguageParser.parseForLibraryErrors(model.getValue(), this.isValidFilterName);
+    if (libraryErrors) {
+      let markers: monaco.editor.IMarkerData[] = libraryErrors.filter(libraryError => libraryError != null)
+        .map(libraryError => {
+          return {
+            startLineNumber: libraryError.startLineNumber,
+            startColumn: libraryError.startColumn,
+            endLineNumber: libraryError.endLineNumber,
+            endColumn: libraryError.endColumn,
+            message: libraryError.message,
+            severity: monaco.MarkerSeverity.Error
+          }
+        });
+      this.editorService.setModelMarkers(model, "Library Error", markers);
+    } else {
+      this.editorService.setModelMarkers(model, "Library Error", []);
+    }
+  }
+  private isValidFilterName(name: string): boolean {
+    if (ConditionLanguageIntellisense.FILTERS) {
+      return ConditionLanguageIntellisense.FILTERS.find(filter => filter.name == name) != null;
+    }
+    return false;
   }
 }

@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { NgxSpinnerService } from 'ngx-spinner';
-import {  FilterService } from 'src/gen/filter';
+import { FilterService } from 'src/gen/filter';
 import { FilterNotificationService } from '../filter-notification.service';
+import { FilterValidators } from '../filter-validators';
 
 @Component({
   selector: 'app-filter-create',
@@ -28,7 +29,7 @@ export class FilterCreateComponent implements OnInit {
 
   ngOnInit(): void {
     this.createFilterForm = new FormGroup({
-      name: new FormControl(null, [Validators.required]),
+      name: new FormControl(null, [Validators.required, FilterValidators.nospace], [FilterValidators.notunique(this.filterService)]),
       description: new FormControl(null, [Validators.required])
     });
   }

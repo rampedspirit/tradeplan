@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FilterLanguageEditorOptions } from 'src/app/lang/filter/filter-language.editor.options';
 import { FilterLanguageParser, LibraryError, SytntaxError } from 'src/app/lang/filter/filter-language.parser';
-import { EditorService } from 'src/app/services/editor.service';
+import { EditorService, MonacoWrapper } from 'src/app/services/editor.service';
 import { Filter, FilterService } from 'src/gen/filter';
 
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
@@ -12,6 +12,7 @@ import { ConfirmationComponent } from '../../common/confirmation/confirmation.co
 import { Tab } from 'src/app/services/tab-area.service';
 import { FilterNotificationService } from '../filter-notification.service';
 import { MessageComponent } from '../../common/message/message.component';
+import { FilterValidators } from '../filter-validators';
 
 @Component({
   selector: 'app-filter-edit',
@@ -56,7 +57,8 @@ export class FilterEditComponent implements OnInit {
     this.spinner.show();
     this.filterService.getFilter(this.tab.id).subscribe(filter => {
       this.editFilterForm = new FormGroup({
-        name: new FormControl(filter.name, [Validators.required]),
+        name: new FormControl(filter.name, [Validators.required, FilterValidators.nospace],
+          [FilterValidators.notunique(this.filterService, [filter.name])]),
         description: new FormControl(filter.description, [Validators.required]),
         code: new FormControl(filter.code, [Validators.required])
       });

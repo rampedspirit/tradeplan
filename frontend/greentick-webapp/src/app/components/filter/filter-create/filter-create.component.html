@@ -8,7 +8,9 @@
         <mat-form-field>
             <mat-label>Name</mat-label>
             <input matInput [formControl]="nameControl">
-            <mat-error *ngIf="nameControl && nameControl.invalid">Please enter valid filter name.</mat-error>
+            <mat-error *ngIf="nameControl.errors?.required">Filter name should not be blank.</mat-error>
+            <mat-error *ngIf="nameControl.errors?.hasSpace">Filter name should not have spaces.</mat-error>
+            <mat-error *ngIf="nameControl.errors?.notUnique">Filter name should be unique.</mat-error>
         </mat-form-field>
         <mat-form-field>
             <mat-label>Description</mat-label>

@@ -34,7 +34,7 @@ export class FilterLanguageIntellisense implements monaco.languages.CompletionIt
         let func: LFunction = this.library.functions.find(f => f.name == word);
         if (func) {
             return {
-                contents: [{ value: this.getFunctionDocumentationOld(func) }]
+                contents: [{ value: this.getFunctionDocumentation(func) }]
             }
         }
         return {
@@ -127,7 +127,7 @@ export class FilterLanguageIntellisense implements monaco.languages.CompletionIt
             .map(arg => arg.defaultValue).join(",");
     }
 
-    private getFunctionDocumentationOld(func: LFunction): string {
+    private getFunctionDocumentation(func: LFunction): string {
         let documentation = "# " + func.name
             + "\n"
             + func.description
@@ -141,15 +141,6 @@ export class FilterLanguageIntellisense implements monaco.languages.CompletionIt
         if (func.moreInfo) {
             documentation += "\n" + func.moreInfo;
         }
-        return documentation;
-    }
-
-    private getFunctionDocumentation(func: LFunction): string {
-        let documentation = "```javascript"
-            + "\n" + "require 'redcarpet'"
-            + "\n" + "markdown = Redcarpet.new('Hello World!')"
-            + "\n" + "puts markdown.to_html"
-            + "\n" + "```";
         return documentation;
     }
 
