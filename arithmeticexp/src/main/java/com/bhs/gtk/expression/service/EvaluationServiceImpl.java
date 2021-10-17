@@ -1,0 +1,205 @@
+package com.bhs.gtk.expression.service;
+
+import java.util.Optional;
+import java.util.zip.CRC32C;
+
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.bhs.gtk.expression.model.EvaluationResponse;
+import com.bhs.gtk.expression.model.Expression;
+import com.bhs.gtk.expression.model.ExpressionGroup;
+import com.bhs.gtk.expression.model.ExpressionType;
+import com.bhs.gtk.expression.model.Function;
+import com.bhs.gtk.expression.model.FunctionChain;
+import com.bhs.gtk.expression.model.NumericValue;
+import com.bhs.gtk.expression.persistence.ExpressionResultEntity;
+import com.bhs.gtk.expression.persistence.ExpressionResultRepository;
+
+@Service
+public class EvaluationServiceImpl implements EvaluationService {
+
+    @Autowired
+	private ExpressionResultRepository expressionResultRepository;
+	
+	@Override
+	public Expression convert(String evalRequest) {
+		JSONObject evalObject = new JSONObject(evalRequest);
+		String type = (String) evalObject.get("type");
+		Expression expression = prepareExpression(getExpression(type), evalObject);
+		return expression;
+	}
+	
+	private Expression prepareExpression(Expression expression, JSONObject evalObject) {
+		Expression readyExpression = expression;
+		if(readyExpression instanceof ExpressionGroup) {
+			readyExpression = updateExpressionGroup(readyExpression, evalObject);
+		}else if(readyExpression instanceof FunctionChain) {
+			readyExpression = updateFunctionChain(readyExpression, evalObject);
+		}else if(readyExpression instanceof NumericValue) {
+			readyExpression = updateNumericValue(readyExpression, evalObject);
+		}
+		readyExpression.setEvalTime(getEvaluationTime(evalObject));
+		readyExpression.setScrip(getScrip(evalObject));
+		return readyExpression;
+	}
+
+	private String getScrip(JSONObject evalObject) {
+		String scrip = StringUtils.EMPTY;
+		try {
+			scrip = (String) evalObject.get("scrip");
+		} catch (JSONException jsonException) {
+			// no scrip exists.
+			return StringUtils.EMPTY;
+		}
+		return scrip;
+	}
+	
+	private String getEvaluationTime(JSONObject evalObject) {
+		String evalTime = StringUtils.EMPTY;
+		try {
+			evalTime = (String) evalObject.get("evalTime");
+		} catch (JSONException jsonException) {
+			// no eval time exists.
+			return StringUtils.EMPTY;
+		}
+		return evalTime;
+	}
+
+	private Expression updateNumericValue(Expression readyExpression, JSONObject evalObject) {
+		NumericValue numericValue = (NumericValue) readyExpression;
+		double value = -99999;
+		try {
+			String valueText = (String) evalObject.get("value");
+			value = Double.valueOf(valueText);
+		} catch (JSONException jsonException) {
+//			throw new Exception("This should not happen, for type 'value', numeric value should always present.\r\n" + 
+//					"Either grammar is changed or has error or grammar text is modified from\r\n" + 
+//					"outside the system.");
+		} catch (NumberFormatException numberFormatException) {
+//			throw new Exception("This should not happen, for type 'value', numeric value should always present in correct format.\r\n" + 
+//					"Either grammar is changed or has error or grammar text is modified from\r\n" + 
+//					"outside the system.");
+		}
+		numericValue.setValue(value);
+		numericValue.setOperation(getOperation(evalObject));
+		return numericValue;
+	}
+
+	private Expression updateFunctionChain(Expression expression, JSONObject evalObject) {
+		FunctionChain functionChain = (FunctionChain) expression;
+		JSONArray functions = evalObject.getJSONArray("functions");
+		for (Object fn : functions) {
+			JSONObject nextFunction = (JSONObject) fn;
+			if (StringUtils.equals("function", nextFunction.getString("type"))) {
+				functionChain.addFunction(getFunction(nextFunction));
+			} else {
+				// no other type expected here. throw illegal argument exception.
+			}
+		}
+		functionChain.setOperation(getOperation(evalObject));
+		return functionChain;
+	}
+	
+	private String getOperation(JSONObject evalObject) {
+		String operation = StringUtils.EMPTY;
+		try {
+			operation = (String) evalObject.get("operation");
+		} catch (JSONException jsonException) {
+			// no operation exists.
+			return StringUtils.EMPTY;
+		}
+		return operation;
+	}
+
+	private Function getFunction(JSONObject functionJson) {
+		Function function = new Function((String)functionJson.get("name"));
+		for( Object arg: functionJson.getJSONArray("args"))  {
+			function.addArgument((String)arg);
+		}
+		return function;
+	}
+
+	private Expression updateExpressionGroup(Expression expression, JSONObject evalObject) {
+		ExpressionGroup expressionGroup = (ExpressionGroup)expression;
+		JSONArray expressionArray = evalObject.getJSONArray("expressions");
+		for(Object expJson : expressionArray ) {
+			JSONObject nextEvalObject = (JSONObject)expJson;
+			String type = (String)nextEvalObject.get("type");
+			Expression nextExpression = prepareExpression(getExpression(type), nextEvalObject);
+			expressionGroup.addExpression(nextExpression);
+		}
+		expressionGroup.setOperation(getOperation(evalObject));
+		return expressionGroup;
+	}
+
+	private Expression getExpression(String type) {
+		Expression expression = null;
+		switch (ExpressionType.valueOf(type.toUpperCase())) {
+		case EXPRESSIONGROUP:
+				expression = new ExpressionGroup(); break;
+		case FUNCTIONCHAIN:
+			expression = new FunctionChain(); break;
+		case VALUE:
+			expression = new NumericValue(); break;
+	   default:
+		   //throw exception
+		   return null;
+		}
+		return expression;
+	}
+
+	@Override
+	public EvaluationResponse evaluate(String evalRequest) {
+		
+        //verify whether evalRequest required
+		// if not send available result.
+		//if yes:
+		   // convert request to get evaluable
+		   // evaluate evaluable
+		  // save result in DB
+		  // send evaluated result.
+		long checksum = getChecksum(evalRequest);
+		Optional<ExpressionResultEntity> expressionResultContainer = expressionResultRepository.findById(checksum);
+		if(expressionResultContainer.isPresent()) {
+			ExpressionResultEntity expressionResult = expressionResultContainer.get();
+			return getEvaluationResponse(expressionResult);
+		}
+
+		
+		Expression expression = convert(evalRequest);
+		//Evaluation logic yet to be written.
+		ExpressionResultEntity resultEntity =  getExpressionResultEntity(checksum,evalRequest,100.2,"COMPLETED");
+		
+		ExpressionResultEntity expressionResult = expressionResultRepository.save(resultEntity);
+		
+		return getEvaluationResponse(expressionResult);
+	}
+
+	private ExpressionResultEntity getExpressionResultEntity(long checksum, String evalRequest, double result, String status) {
+		ExpressionResultEntity resultEntity = new ExpressionResultEntity(checksum, evalRequest, result, status);
+		return resultEntity;
+	}
+
+	private EvaluationResponse getEvaluationResponse(ExpressionResultEntity expressionResult) {
+		long checkSum = expressionResult.getChecksum();
+		String expressionText = expressionResult.getExpression();
+		double result = expressionResult.getResult();
+		String status = expressionResult.getStatus();
+		return new EvaluationResponse(checkSum, expressionText, result, status);
+	}
+
+	private long getChecksum(String evalRequest) {
+		CRC32C crc = new CRC32C();
+		byte[] bytes = evalRequest.getBytes();
+		crc.update(bytes, 0, bytes.length);
+		return crc.getValue();
+	}
+	
+	
+
+}
