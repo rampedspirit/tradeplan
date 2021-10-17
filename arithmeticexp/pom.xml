@@ -18,7 +18,6 @@
 	</properties>
 	<dependencies>
 	
-	 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -35,7 +34,6 @@
 			<scope>test</scope>
 		</dependency>
 		
-	
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>
@@ -60,6 +58,10 @@
 			<artifactId>jackson-datatype-threetenbp</artifactId>
 			<version>2.6.4</version>
 		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
 		<!--  db related dependencies -->
 		<dependency>
             <groupId>org.springframework.boot</groupId>
@@ -75,6 +77,11 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.12.0</version>
+		</dependency>
+		<dependency>
+   		 <groupId>org.json</groupId>
+   		 <artifactId>json</artifactId>
+  		  <version>20210307</version>
 		</dependency>
 	</dependencies>
 
