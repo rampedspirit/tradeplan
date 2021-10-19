@@ -5,12 +5,11 @@ import { GreentickLanguageConfiguration } from '../lang/greentick-language.confi
 import { FilterLanguageConstants } from '../lang/filter/filter-language.constants';
 import { GreentickLanguageFormatter } from '../lang/greentick-language.formatter';
 import { FilterLanguageIntellisense } from '../lang/filter/filter-language.intellisense';
-import { FilterLanguageTheme } from '../lang/filter/filter-language.theme';
+import { GreentickLanguageTheme } from '../lang/greentick-language.theme';
 import { ConditionLanguageConstants } from '../lang/condition/condition-language.constants';
 import { ConditionLanguage } from '../lang/condition/condition-language';
-import { ConditionLanguageTheme } from '../lang/condition/condition-language.theme';
 import { ConditionLanguageIntellisense } from '../lang/condition/condition-language.intellisense';
-import { FilterService } from 'src/gen/filter';
+import { GreentickLanguageConstants } from '../lang/greentick-language.constants';
 
 export class MonacoWrapper {
   static register: (language: monaco.languages.ILanguageExtensionPoint) => void;
@@ -35,20 +34,21 @@ export class MonacoWrapper {
   static setModelMarkers: (model: monaco.editor.ITextModel, owner: string, markers: monaco.editor.IMarkerData[]) => void;
 
   static onEditorLoad() {
+    MonacoWrapper.registerTheme(GreentickLanguageConstants.ThemeId, new GreentickLanguageTheme());
+
     //FILTER
     let filterLangIntellisense: FilterLanguageIntellisense = new FilterLanguageIntellisense();
     MonacoWrapper.registerLanguage(FilterLanguageConstants.LanguageId,
       new GreentickLanguageConfiguration(),
       new FilterLanguage(),
       new GreentickLanguageFormatter(), filterLangIntellisense, filterLangIntellisense);
-    MonacoWrapper.registerTheme(FilterLanguageConstants.ThemeId, new FilterLanguageTheme());
+
     //CONDITION
     let conditionLangIntellisense: ConditionLanguageIntellisense = new ConditionLanguageIntellisense();
     MonacoWrapper.registerLanguage(ConditionLanguageConstants.LanguageId,
       new GreentickLanguageConfiguration(),
       new ConditionLanguage(),
       new GreentickLanguageFormatter(), conditionLangIntellisense, conditionLangIntellisense);
-    MonacoWrapper.registerTheme(ConditionLanguageConstants.ThemeId, new ConditionLanguageTheme());
   }
 
   private static registerLanguage(id: string,

@@ -64,7 +64,9 @@ export class ConditionLanguageParser {
         let libraryErrors: LibraryError[] = [];
         let lines: string[] = query.split("\n");
         for (let i = 0; i < lines.length; i++) {
-            Array.from(lines[i].matchAll(/\w*[^AND | OR]/g))
+            let matches: RegExpMatchArray[] = Array.from(lines[i].matchAll(/\w*/g));
+            matches
+                .filter(match => match[0].trim().length > 0 && !match[0].match("AND|OR"))
                 .map(match => isValidFilterName(match[0]) ? null : this.getLibraryError(i + 1, match.index, match.index + match[0].length))
                 .forEach(libraryError => libraryErrors.push(libraryError));
         }
