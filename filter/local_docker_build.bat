@@ -1,1 +1,0 @@
-docker build . -f Dockerfile --build-arg DB_USER_NAME=postgres --build-arg DB_PASSWORD=password -t filter-service
