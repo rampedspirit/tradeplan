@@ -43,11 +43,14 @@ import { ConfirmationComponent } from './components/common/confirmation/confirma
 import { MessageComponent } from './components/common/message/message.component';
 import { environment } from 'src/environments/environment';
 
-import { ApiModule as FilterApiModule, FilterService } from 'src/gen/filter';
+import { ApiModule as FilterApiModule } from 'src/gen/filter';
 import { BASE_PATH as FILTER_API_BASE_PATH } from 'src/gen/filter';
 
 import { ApiModule as ConditionApiModule } from 'src/gen/condition';
 import { BASE_PATH as CONDITION_API_BASE_PATH } from 'src/gen/condition';
+
+import { ApiModule as ScreenerApiModule } from 'src/gen/screener';
+import { BASE_PATH as SCREENER_API_BASE_PATH } from 'src/gen/screener';
 
 import { ConditionListComponent } from './components/condition/condition-list/condition-list.component';
 import { ConditionCreateComponent } from './components/condition/condition-create/condition-create.component';
@@ -90,6 +93,7 @@ Amplify.configure({
     BrowserAnimationsModule,
     FilterApiModule,
     ConditionApiModule,
+    ScreenerApiModule,
     HttpClientModule,
     MatCardModule,
     MatButtonModule,
@@ -120,6 +124,10 @@ Amplify.configure({
   {
     provide: CONDITION_API_BASE_PATH,
     useValue: environment.conditionApiBasePath
+  },
+  {
+    provide: SCREENER_API_BASE_PATH,
+    useValue: environment.screenerApiBasePath
   }],
   bootstrap: [AppComponent]
 })
