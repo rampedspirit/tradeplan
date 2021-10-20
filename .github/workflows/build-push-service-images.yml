@@ -58,3 +58,15 @@ jobs:
       run: |
         docker build condition/ -f condition/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg DB_USER_NAME=${{ secrets.DB_USER_NAME }} --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }}
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+    - name: Build screener-service
+      run: mvn -B package --file screener/pom.xml
+
+    - name: Push screener-service Image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: ${{ github.event.inputs.RepoName }}
+        IMAGE_TAG: gtk-screener-service-${{ github.event.inputs.ImageVersion }}
+      run: |
+        docker build screener/ -f screener/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg DB_USER_NAME=${{ secrets.DB_USER_NAME }} --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
