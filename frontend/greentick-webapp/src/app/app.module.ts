@@ -57,6 +57,10 @@ import { ConditionListComponent } from './components/condition/condition-list/co
 import { ConditionCreateComponent } from './components/condition/condition-create/condition-create.component';
 import { ConditionEditComponent } from './components/condition/condition-edit/condition-edit.component';
 import { ConditionNameSearchPipe } from './components/condition/condition-name-search.pipe';
+import { ScreenerListComponent } from './components/screener/screener-list/screener-list.component';
+import { ScreenerCreateComponent } from './components/screener/screener-create/screener-create.component';
+import { ScreenerEditComponent } from './components/screener/screener-edit/screener-edit.component';
+import { ScreenerNameSearchPipe } from './components/screener/screener-name-search.pipe';
 
 Amplify.configure({
   Auth: {
@@ -86,7 +90,11 @@ Amplify.configure({
     ConditionListComponent,
     ConditionCreateComponent,
     ConditionEditComponent,
-    ConditionNameSearchPipe
+    ConditionNameSearchPipe,
+    ScreenerListComponent,
+    ScreenerCreateComponent,
+    ScreenerEditComponent,
+    ScreenerNameSearchPipe
   ],
   imports: [
     BrowserModule,

@@ -9,6 +9,7 @@ import { VerifyComponent } from './components/auth/verify/verify.component';
 import { ConditionListComponent } from './components/condition/condition-list/condition-list.component';
 import { FilterListComponent } from './components/filter/filter-list/filter-list.component';
 import { MainComponent } from './components/main/main.component';
+import { ScreenerListComponent } from './components/screener/screener-list/screener-list.component';
 
 const routes: Routes = [
   {
@@ -17,7 +18,8 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       { path: "filter/list", component: FilterListComponent },
-      { path: "condition/list", component: ConditionListComponent }
+      { path: "condition/list", component: ConditionListComponent },
+      { path: "screener/list", component: ScreenerListComponent }
     ]
   },
   {

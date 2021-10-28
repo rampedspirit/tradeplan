@@ -1,0 +1,38 @@
+<app-message *ngIf="fetchError" type="error" message="Failed to connect to our servers." [callback]="refresh"
+    callbackText="Refresh">
+</app-message>
+<form *ngIf="editScreenerForm" fxLayout="column" fxLayoutGap="10px" [formGroup]="editScreenerForm" fxFlexFill>
+    <div fxLayout="row" fxLayoutAlign="space-between center">
+        <mat-form-field>
+            <mat-label>Name</mat-label>
+            <input matInput [formControl]="nameControl">
+            <mat-error *ngIf="nameControl && nameControl.invalid">Please enter valid name.</mat-error>
+        </mat-form-field>
+        <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+            <button mat-flat-button color="primary" (click)="save()">SAVE</button>
+            <button mat-flat-button color="warn" (click)="delete()">DELETE</button>
+        </div>
+    </div>
+
+    <mat-form-field>
+        <mat-label>Description</mat-label>
+        <textarea matInput [formControl]="descriptionControl"></textarea>
+        <mat-error *ngIf="descriptionControl && descriptionControl.invalid">Please enter a valid description.
+        </mat-error>
+    </mat-form-field>
+
+    <mat-form-field *ngIf="conditions && conditions.length>0">
+        <mat-label>Condition</mat-label>
+        <mat-select [formControl]="conditionControl">
+            <mat-option *ngFor="let condition of conditions" [value]="condition.id">
+                {{condition.name}}
+            </mat-option>
+        </mat-select>
+        <mat-error *ngIf="conditionControl && conditionControl.invalid">Please select a valid condition.
+        </mat-error>
+    </mat-form-field>
+
+    <app-message *ngIf="conditions!=null && conditions.length==0" type="error" message="No Conditions Available. Please create condition first."
+        [callback]="navigateToConditionsList" callbackText="Create Condition">
+    </app-message>
+</form>

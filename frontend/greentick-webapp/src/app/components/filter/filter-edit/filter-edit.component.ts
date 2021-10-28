@@ -116,6 +116,7 @@ export class FilterEditComponent implements OnInit {
         this.filterNotificationService.triggerUpdateNotification(filter);
         this.spinner.hide();
       }, error => {
+        this.spinner.hide();
         this.dialog.open(MessageComponent, {
           data: {
             type: "error",

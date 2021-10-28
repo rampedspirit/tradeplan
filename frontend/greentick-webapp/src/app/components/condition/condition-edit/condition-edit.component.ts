@@ -131,6 +131,7 @@ export class ConditionEditComponent implements OnInit {
         this.conditionNotificationService.triggerUpdateNotification(condition);
         this.spinner.hide();
       }, error => {
+        this.spinner.hide();
         this.dialog.open(MessageComponent, {
           data: {
             type: "error",

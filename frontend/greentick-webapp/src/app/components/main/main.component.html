@@ -3,6 +3,9 @@
     <!--Main Nav-->
     <div class="container">
         <mat-button-toggle-group [vertical]="!isSmallScreen">
+            <mat-button-toggle class="main-nav-item" matTooltip="SCREENERS" [routerLink]="['/screener/list']"> S
+            </mat-button-toggle>
+            <mat-button-toggle class="main-nav-item"> &nbsp; </mat-button-toggle>
             <mat-button-toggle class="main-nav-item" matTooltip="FILTERS" [routerLink]="['/filter/list']"> F
             </mat-button-toggle>
             <mat-button-toggle class="main-nav-item" matTooltip="CONDITIONS" [routerLink]="['/condition/list']"> C
@@ -34,6 +37,9 @@
                 </div>
                 <div class="tab-container" *ngIf="tab.type == 'condition'">
                     <app-condition-edit [tab]="tab"></app-condition-edit>
+                </div>
+                <div class="tab-container" *ngIf="tab.type == 'screener'">
+                    <app-screener-edit [tab]="tab"></app-screener-edit>
                 </div>
             </mat-tab>
         </mat-tab-group>
