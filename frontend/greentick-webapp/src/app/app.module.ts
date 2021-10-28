@@ -26,6 +26,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatBadgeModule } from '@angular/material/badge';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 import { NgxSpinnerModule } from "ngx-spinner";
 
@@ -113,6 +114,7 @@ Amplify.configure({
     MatButtonToggleModule,
     MatBadgeModule,
     MatSelectModule,
+    MatProgressSpinnerModule,
     MonacoEditorModule.forRoot({
       onMonacoLoad: AppModule.onMonacoLoad
     })

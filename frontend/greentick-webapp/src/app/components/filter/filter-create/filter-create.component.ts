@@ -13,6 +13,8 @@ import { FilterValidators } from '../filter-validators';
 })
 export class FilterCreateComponent implements OnInit {
 
+  isValidating: boolean;
+
   createFilterForm: FormGroup;
   createError: boolean;
 
@@ -29,7 +31,11 @@ export class FilterCreateComponent implements OnInit {
 
   ngOnInit(): void {
     this.createFilterForm = new FormGroup({
-      name: new FormControl(null, [Validators.required, FilterValidators.nospace], [FilterValidators.notunique(this.filterService)]),
+      name: new FormControl(null, {
+        validators: [Validators.required, FilterValidators.noSpace],
+        asyncValidators: [FilterValidators.notUniqueWithCallback(this.filterService, () => this.isValidating = true, () => this.isValidating = false)],
+        updateOn: 'blur'
+      }),
       description: new FormControl(null, [Validators.required])
     });
   }

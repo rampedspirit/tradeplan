@@ -57,8 +57,8 @@ export class FilterEditComponent implements OnInit {
     this.spinner.show();
     this.filterService.getFilter(this.tab.id).subscribe(filter => {
       this.editFilterForm = new FormGroup({
-        name: new FormControl(filter.name, [Validators.required, FilterValidators.nospace],
-          [FilterValidators.notunique(this.filterService, [filter.name])]),
+        name: new FormControl(filter.name, [Validators.required, FilterValidators.noSpace],
+          [FilterValidators.notUnique(this.filterService, [filter.name])]),
         description: new FormControl(filter.description, [Validators.required]),
         code: new FormControl(filter.code, [Validators.required])
       });
