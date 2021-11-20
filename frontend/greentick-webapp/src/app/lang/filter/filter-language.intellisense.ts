@@ -1,7 +1,7 @@
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { FilterLanguageLibrary } from './filter-language-library';
 import { FilterLanguageParser, SytntaxError } from './filter-language.parser';
-import { LFunction, LOperator } from './filter-language.types';
+import { LArgument, LFunction, LOperator } from './filter-language.types';
 import { TokenType } from './token-type';
 
 export class FilterLanguageIntellisense implements monaco.languages.CompletionItemProvider, monaco.languages.HoverProvider {
@@ -33,8 +33,9 @@ export class FilterLanguageIntellisense implements monaco.languages.CompletionIt
         let word: string = model.getWordAtPosition(position)?.word;
         let func: LFunction = this.library.functions.find(f => f.name == word);
         if (func) {
+            let functionDoc = this.getFunctionDocumentation(func);
             return {
-                contents: [{ value: this.getFunctionDocumentation(func) }]
+                contents: [this.toMarkDownString(functionDoc)]
             }
         }
         return {
@@ -114,7 +115,8 @@ export class FilterLanguageIntellisense implements monaco.languages.CompletionIt
             label: func.name,
             kind: kind,
             documentation: {
-                value: this.getFunctionDocumentation(func)
+                value: this.getFunctionDocumentation(func),
+                isTrusted: true
             },
             insertText: func.name + "(" + this.getDefaultArguments(func) + ")",
             insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
@@ -128,20 +130,19 @@ export class FilterLanguageIntellisense implements monaco.languages.CompletionIt
     }
 
     private getFunctionDocumentation(func: LFunction): string {
-        let documentation = "# " + func.name
-            + "\n"
-            + func.description
-            + "\n\n"
-            + "| Argument | Required | Description |"
-            + "\n"
-            + "|:--|:--|:--|"
-            + "\n"
-            + func.arguments.map(arg => "| " + arg.name + " | " + !arg.isOptional + " | " + arg.description + " |").join("\n");
+        return func.description + "\n" + func.arguments.map(arg => this.toArgumentDoc(arg)).join("\n") +
+            "\n\n[see more](command:open-documentation?{\"type\":\"function\",\"name\":\"" + func.name + "\"})";
+    }
 
-        if (func.moreInfo) {
-            documentation += "\n" + func.moreInfo;
+    private toArgumentDoc(arg: LArgument): string {
+        let optional = arg.isOptional ? " (optional) " : "";
+        return "- " + "*" + arg.name + optional + "* - " + arg.description;
+    }
+    private toMarkDownString(value: string): monaco.IMarkdownString {
+        return {
+            value: value,
+            isTrusted: true
         }
-        return documentation;
     }
 
     createValueCompletionItem(value: string): any {

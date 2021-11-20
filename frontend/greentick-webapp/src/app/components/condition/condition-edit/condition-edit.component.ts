@@ -13,6 +13,7 @@ import { ConditionLanguageParser, LibraryError, SytntaxError } from 'src/app/lan
 import { EditorService } from 'src/app/services/editor.service';
 import { FilterService } from 'src/gen/filter';
 import { ConditionLanguageIntellisense } from 'src/app/lang/condition/condition-language.intellisense';
+import { FilterNotificationService } from '../../filter/filter-notification.service';
 
 @Component({
   selector: 'app-condition-edit',
@@ -45,15 +46,27 @@ export class ConditionEditComponent implements OnInit {
   }
 
 
-  constructor(private filterService: FilterService, private editorService: EditorService,
+  constructor(private filterService: FilterService, private filterNotificationService: FilterNotificationService,
     private conditionService: ConditionService, private conditionNotificationService: ConditionNotificationService,
-    private dialog: MatDialog, private spinner: NgxSpinnerService) {
+    private dialog: MatDialog, private spinner: NgxSpinnerService, private editorService: EditorService) {
     this.conditionLanguageParser = new ConditionLanguageParser();
   }
 
   ngOnInit(): void {
     this.refresh();
     this.refresh2();
+
+    this.filterNotificationService.createSubject.subscribe(condition => {
+      this.refresh2();
+    });
+
+    this.filterNotificationService.updateSubject.subscribe(condition => {
+      this.refresh2();
+    });
+
+    this.filterNotificationService.deleteSubject.subscribe(id => {
+      this.refresh2();
+    });
   }
 
   refresh = () => {

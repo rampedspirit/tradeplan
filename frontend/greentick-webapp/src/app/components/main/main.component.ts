@@ -1,6 +1,7 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { EditorService } from 'src/app/services/editor.service';
 import { Tab, TabAreaService } from 'src/app/services/tab-area.service';
 import { ConfirmationComponent } from '../common/confirmation/confirmation.component';
 

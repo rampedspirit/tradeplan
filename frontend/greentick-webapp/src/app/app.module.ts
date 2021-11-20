@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, NgZone } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -26,9 +26,10 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatBadgeModule } from '@angular/material/badge';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { NgxSpinnerModule } from "ngx-spinner";
+import { MatTableModule } from '@angular/material/table';
 
 import { Amplify } from 'aws-amplify';
 import { ResetComponent } from './components/auth/reset/reset.component';
@@ -61,6 +62,8 @@ import { ScreenerListComponent } from './components/screener/screener-list/scree
 import { ScreenerCreateComponent } from './components/screener/screener-create/screener-create.component';
 import { ScreenerEditComponent } from './components/screener/screener-edit/screener-edit.component';
 import { ScreenerNameSearchPipe } from './components/screener/screener-name-search.pipe';
+import { Router, ROUTER_CONFIGURATION } from '@angular/router';
+import { DocumentComponent } from './components/document/document.component';
 
 Amplify.configure({
   Auth: {
@@ -94,7 +97,8 @@ Amplify.configure({
     ScreenerListComponent,
     ScreenerCreateComponent,
     ScreenerEditComponent,
-    ScreenerNameSearchPipe
+    ScreenerNameSearchPipe,
+    DocumentComponent
   ],
   imports: [
     BrowserModule,
@@ -123,6 +127,8 @@ Amplify.configure({
     MatBadgeModule,
     MatSelectModule,
     MatProgressSpinnerModule,
+    MatSidenavModule,
+    MatTableModule,
     MonacoEditorModule.forRoot({
       onMonacoLoad: AppModule.onMonacoLoad
     })
@@ -143,6 +149,14 @@ Amplify.configure({
 })
 export class AppModule {
 
+  private static NGZONE: NgZone;
+  private static ROUTER: Router;
+
+  constructor(private ngZone: NgZone, private router: Router) {
+    AppModule.NGZONE = ngZone;
+    AppModule.ROUTER = router;
+  }
+
   /**
    * Initialize the Monaco Editor Configurations
    */
@@ -155,8 +169,17 @@ export class AppModule {
     MonacoWrapper.registerCompletionItemProvider = monaco.languages.registerCompletionItemProvider;
     MonacoWrapper.registerHoverProvider = monaco.languages.registerHoverProvider;
     MonacoWrapper.defineTheme = monaco.editor.defineTheme;
-    MonacoWrapper.setModelMarkers = monaco.editor.setModelMarkers
+    MonacoWrapper.setModelMarkers = monaco.editor.setModelMarkers;
 
     MonacoWrapper.onEditorLoad();
+
+    monaco.editor.registerCommand("open-documentation", (ctx: any, args: any) => AppModule.openDocumentation(ctx, args));
+  }
+
+  static openDocumentation(ctx: any, args: any) {
+    if (args.type == "function") {
+      let baseUrl = window.location.href.replace(AppModule.ROUTER.url, '');
+      window.open(baseUrl + "/doc/" + args.name, '_blank');
+    }
   }
 }

@@ -38,22 +38,20 @@ export class FilterLanguageLibrary {
     }
 
     @Function("Gives 'Open' value of selected candle", true, true, ["collect", "change", "percentchange", "abs", "ceil", "floor", "round"],
-        `   
-
-    Eg: Lets Assume that the current date is 24-Aug-2021, time 12:23 PM. Market started at 9:15 AM and ends at 3:30 PM.
-    1) open(m,5m,0)	: Starting point "m" = 12:23 PM, "5m" = In 5min chart, "0" = In the lastest completed 5 min candle, Get the open value, i.e open at 12:15 PM candle.
-
-    2) open(m,5m,-1)	: Starting point "m" = 12:23PM, "5m" = Open 5min chart, "-1" = open value of 2nd completly closed candle BEFORE 12:23PM, i.e Latest closed candle = "0" = 12:15PM 				  candle, one before this candle = "-1" = 12:10 PM candle's open.
-
-    3) open(h,15m,-2)	: open value of 11:30 AM's 15min candle
-    4) open(h,15m,0)	: open value of 12:00 PM's 15min candle.
-    5) open(d,m,0)	: open value of 9:15 AM's 1min candle
-    6) open(W,d,-1)	: open value on 20-Aug-2021 in daily chart
-    7) open(M,W,0)	: open value on 2-Aug-2021 in weekly chart
-    8) open(h,W,-1)	: open vlaue on 9-Aug-2021 in weekly chart
-    9) open(h,1m,5)	: open value of 12:20 PM's 1min candle
-    10) open(30m,15m,-1)	: open value of 11:45 AM's 15min candle
-    
+        `
+Eg: Lets Assume that the current date is 24-Aug-2021, time 12:23 PM. Market started at 9:15 AM and ends at 3:30 PM.
+<ol>
+    <li>open(m,5m,0)	: Starting point "m" = 12:23 PM, "5m" = In 5min chart, "0" = In the lastest completed 5 min candle, Get the open value, i.e open at 12:15 PM candle..</li>
+    <li>open(m,5m,-1) : Starting point "m" = 12:23PM, "5m" = Open 5min chart, "-1" = open value of 2nd completly closed candle BEFORE 12:23PM, i.e Latest closed candle = "0" = 12:15PM candle, one before this candle = "-1" = 12:10 PM candle's open.</li>
+    <li>open(h,15m,-2) : open value of 11:30 AM's 15min candle</li>
+    <li>open(h,15m,0) : open value of 12:00 PM's 15min candle.</li>
+    <li>open(d,m,0) : open value of 9:15 AM's 1min candle</li>
+    <li>open(W,d,-1) : open value on 20-Aug-2021 in daily chart</li>
+    <li>open(M,W,0) : open value on 2-Aug-2021 in weekly chart</li>
+    <li>open(h,W,-1) : open vlaue on 9-Aug-2021 in weekly chart</li>
+    <li>open(h,1m,5) : open value of 12:20 PM's 1min candle</li>
+    <li>open(30m,15m,-1) : open value of 11:45 AM's 15min candle</li>
+</ol>
     `)
     private open(@Arg("START TIME of currently RUNNING/ONGOING/LIVE candle", "m", false) ReferenceTimeFrame: ReferencetimeframeType,
         @Arg("Chart time frame ", "15m", false) TimeFrame: TimeframeType,
