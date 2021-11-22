@@ -1,0 +1,17 @@
+`<p>candle = holds all OLHCV values of a selected candle.</p>
+<p>Lets Assume that the current date is 24-Aug-2021, time 12:23 PM. Market started at 9:15 AM and ends at 3:30 PM</p>
+<ol>
+    <li>candle(m,5m,0) : Starting point "m" = 12:23PM, "5m" = Open 5min chart, "0" = Get the Latest OLHCV values in 5min
+        chart, i.e all OLHCV values of 12:15 PM's 5 min candle</li>
+    <li>candle(m,5m,-1) : Starting point "m" = 12:23PM, Timeframe/chart = 5m, "-1" = 2nd completly closed candle BEFORE
+        12:23PM, i.e Latest closed candle = "0" = 12:15PM candle, one before this candle = "-1" = 12:10 PM candle, So
+        OLHCV values of 12:10 PM candle.</li>
+    <li>candle(h,15m,-2) : OLHCV values of 11:30 AM's 15min candle</li>
+    <li>candle(h,15m,0) : OLHCV values of 12:00 PM's 15min candle</li>
+    <li>candle(d,m,0) : OLHCV values of 9:15 AM's 1min candle</li>
+    <li>candle(W,d,-1) : OLHCV values on 20-Aug-2021 in daily chart</li>
+    <li>candle(M,W,0) : OLHCV values on 2-Aug-2021 in weekly chart</li>
+    <li>candle(h,W,-1) : OLHCV values on 9-Aug-2021 in weekly chart</li>
+    <li>candle(h,1m,+5) : OLHCV values of 12:20 PM's 1min candle</li>
+    <li>candle(30m,15m,-1) : OLHCV values of 11:45 AM's 15min candle </li>
+</ol>

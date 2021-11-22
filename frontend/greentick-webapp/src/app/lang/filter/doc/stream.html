@@ -1,0 +1,56 @@
+<p>Note: Stream fucntion can ONLY BE USED for indicator's having signal lines by DEFAULT. All indicator line and
+    indicator's signal line crossover related queries are addressed by stream function.</p>
+<p>3 options are there for stream:</p>
+<p>macd indicator has been taken as example to show the usage.</p>
+<ul>
+    <li>crossover(0,BULLISH): Checks if the macd's signal line at latest closed candle has "crossed above" the macd
+        line.</li>
+    <li>crossovercount(BULLISH): checks the number of times BULLISH or BEARSIH crossovers has occured between macd line
+        and macd signal line in a given period.</li>
+    <li>valueAt(0): Gives the value of macd's signal line at latest completed candle.</li>
+</ul>
+
+<p>Lets Assume that the current date is 24-Aug-2021, time 12:23 PM. Market started at 9:15 AM and ends at 3:30 PM</p>
+<ol>
+    <li>candle(m,15m,0).macd(9,20,10).stream(100).crossover(0,BULLISH) = 1 : This means,
+        <ul>
+            <li>"candle(m,5m,0)" : Starting point "m" = 12:23PM, "5m" = Open 5min chart, "0" = Get the Latest OLHCV
+                values in 5min chart, i.e all OLHCV values of 12:15 PM's 5 min candle.</li>
+            <li>"macd(9,20,9)" : calculates the value of "macd line" for 9 ema and 20 ema period at 12:15 PM's candle.
+            </li>
+            <li>"stream(100)": using macd line, stream will calculate macd signal line for last 100 period. So, this
+                will have 100 macd signal values.</li>
+            <li>"crossover(0,BULLISH)" : For collected macd line and macd signal line, at 12:15 PM, this will check if
+                macd signal line has made "BULLISH" crossover or not. "1" means crossover has happend and "0" means its
+                not crossed. Similarly, for BEARISH crossover can also be checked.</li>
+        </ul>
+        This code will check if at latest closed candle, a BULLISH crossover of macd line and macd signal line has
+        occured or not.
+    </li>
+    <li>candle(m,15m,0).macd(12,26).stream(100).crossoverCount(BULLISH) > 5 : This means,
+        <ul>
+            <li>"candle(m,5m,0)" : Starting point "m" = 12:23PM, "5m" = Open 5min chart, "0" = Get the Latest OLHCV
+                values in 5min chart, i.e all OLHCV values of 12:15 PM's 5 min candle.</li>
+            <li>"macd(9,20,9)" : calculates the value of "macd line" for 9 ema and 20 ema period at 12:15 PM's candle.
+            </li>
+            <li>"stream(100)": using macd line, stream will calculate macd signal line for last 100 period. So, this
+                will have 100 macd signal values.</li>
+            <li>"crossoverCount(BULLISH)" : This will count the number of times the BULLISH crossover has occured
+                between macd line and macd signal line.</li>
+        </ul>
+        This code will counts the number of times the macd line and macd signal line has made BULLISH crossovers and
+        check if the count is greater than 5 or not.
+    </li>
+    <li>candle(m,15m,0).macd(12,26).stream(100).valueAt(0) > 100 : This means,
+        <ul>
+            <li>"candle(m,5m,0)" : Starting point "m" = 12:23PM, "5m" = Open 5min chart, "0" = Get the Latest OLHCV
+                values in 5min chart, i.e all OLHCV values of 12:15 PM's 5 min candle.</li>
+            <li>"macd(9,20,9)" : calculates the value of "macd line" for 9 ema and 20 ema period at 12:15 PM's candle.
+            </li>
+            <li>"stream(100)": using macd line, stream will calculate macd signal line for last 100 period. So, this
+                will have 100 macd signal values.</li>
+            <li>"valueAt(0)" : Gives the macg signal line value at latest closed candle, i.e at 12:15 PM.</li>
+        </ul>
+        This code will check if the latest macd signal line value is greater than 100 or not.
+    </li>
+</ol>

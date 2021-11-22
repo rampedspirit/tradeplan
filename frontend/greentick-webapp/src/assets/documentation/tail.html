@@ -1,0 +1,17 @@
+<p>tail= (open - low)
+<p>Lets Assume that the current date is 24-Aug-2021, time 12:23 PM. Market started at 9:15 AM and ends at 3:30 PM
+<ol>
+    <li>tail(m,5m,0) : Starting point "m" = 12:23PM, "5m" = Open 5min chart, "0" = Get the Latest tail value in 5min
+        chart, i.e tail value of 12:15 PM 5 min candle.</li>
+    <li>tail(m,5m,-1) : Starting point "m" = 12:23PM, Timeframe/chart = 5m, "-1" = 2nd completly closed candle BEFORE
+        12:23PM, i.e Latest closed candle = "0" = 12:15PM candle, one before this candle = "-1" = 12:10 PM candle, So
+        tail value of 12:10 PM candle.</li>
+    <li>tail(h,15m,-2) : tail value of 11:30 AM's 15min candle</li>
+    <li>tail(h,15m,0) : tail value of 12:00 PM's 15min candle</li>
+    <li>tail(d,m,0) : tail value of 9:15 AM's 1min candle</li>
+    <li>tail(W,d,-1) : tail value on 20-Aug-2021 in daily chart</li>
+    <li>tail(M,W,0) : tail value on 2-Aug-2021 in weekly chart</li>
+    <li>tail(h,W,-1) : tail value on 9-Aug-2021 in weekly chart</li>
+    <li>tail(h,1m,5) : tail value of 12:20 PM's 1min candle</li>
+    <li>tail(30m,15m,-1) : tail value of 11:45 AM's 15min candle</li>
+</ol>

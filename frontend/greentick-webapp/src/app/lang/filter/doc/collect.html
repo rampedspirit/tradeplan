@@ -1,0 +1,28 @@
+<p>collect = collects OLHCV data or the indicator values for user specified period.</p>
+<p>Lets Assume that the current date is 24-Aug-2021, time 12:23 PM. Market started at 9:15 AM and ends at 3:30 PM</p>
+<ol>
+    <li>open(m,15m,0).collect(100).sma(12) : This means
+        <ul>
+            <li>"open(m,15m,0)" : Starting point "m" = 12:23 PM, "5m" = In 5min chart, "0" = In the lastest completed 5
+                min candle, Get the open value, i.e open at 12:15 PM candle.</li>
+            <li>"collect(100)" : From 12:15PM, collect the "open" values of last 100 period is 15 mins chart.</li>
+            <li>"sma(12)" : For collected 100 open values, calculate the 12 period sma.</li>
+            <li>"valueAt(0)" : Gives the 12 period sma value at 12:15 PM.</li>
+        </ul>
+        The above code calculates the 12 period sma of last 100 collected values and gives the latest value.
+    </li>
+    <li>
+        candle(m,15m,0).macd(12,26,10).collect(100).sma(12).valueAt(0) > 100 : This means
+        <ul>
+            <li>"candle(m,5m,0)" : Starting point "m" = 12:23PM, "5m" = Open 5min chart, "0" = Get the Latest OLHCV
+                values in 5min chart, i.e all OLHCV values of 12:15 PM's 5 min candle.</li>
+            <li>"macd(9,20,10)" : calculate the value of "macd line" for 9 ema and 20 ema period at 12:15 PM's candle.
+            </li>
+            <li>"collect(100)" : collectes macd line values for last 100 period from 12:15 PM.</li>
+            <li>"sma(12)" : For collect 100 value in step "c", sma(12) will calculates the 12 period sma.</li>
+            <li>"valueAt" : Gives the value of 12 period sma of last 100 period macd line at 12:15 PM.</li>
+        </ul>
+        This code will check if the 12 period sma of last 100 collected macd line values at 12:15 PM is greater than 100
+        or not.
+    </li>
+</ol>

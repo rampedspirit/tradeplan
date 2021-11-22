@@ -44,7 +44,7 @@ export function getOperators(target: any, propertyKey: string): LOperator[] {
  * @param isChainOptional default true
  * @returns 
  */
-export function Function(description: string, isStandalone = false, isChainOptional = true, nextFunctions: string[] = [], moreInfo: string = null) {
+export function Function(description: string, isStandalone = false, isChainOptional = true, nextFunctions: string[] = []) {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
         let functions: LFunction[] = Reflect.getOwnMetadata(FUNCTIONS_KEY, target, FUNCTIONS_KEY.valueOf()) || [];
         let argumentInfoRegistry: Map<string, LArgumentInfo> = Reflect.getOwnMetadata(ARGUMENT_INFO_REGISTRY_KEY, target, ARGUMENT_INFO_REGISTRY_KEY.valueOf()) || new Map();
@@ -68,7 +68,6 @@ export function Function(description: string, isStandalone = false, isChainOptio
         functions.push({
             name: propertyKey,
             description: description,
-            moreInfo: moreInfo,
             isStandalone: isStandalone,
             isChainOptional: isChainOptional,
             arguments: args,

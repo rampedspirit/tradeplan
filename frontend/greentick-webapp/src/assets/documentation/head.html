@@ -1,0 +1,17 @@
+<p>Head = (High - close)</p>
+<p>Assume that the current date is 24-Aug-2021, time 12:23 PM. Market started at 9:15 AM and ends at 3:30 PM</p>
+<ol>
+    <li>head(m,5m,0) : Starting point "m" = 12:23PM, "5m" = Open 5min chart, "0" = Get the Latest head value in 5min
+        chart, i.e head value of 12:15 PM 5 min candle</li>
+    <li>head(m,5m,-1) : Starting point "m" = 12:23PM, Timeframe/chart = 5m, "-1" = 2nd completly closed candle BEFORE
+        12:23PM, i.e Latest closed candle = "0" = 12:15PM candle, one before this candle = "-1" = 12:10 PM candle, So
+        head value of 12:10 PM candle.</li>
+    <li>head(h,15m,-2) : head value of 11:30 AM's 15min candle</li>
+    <li>head(h,15m,0) : head value of 12:00 PM's 15min candle</li>
+    <li>head(d,m,0) : volume of 9:15 AM's 1min candle</li>
+    <li>head(W,d,-1) : head value on 20-Aug-2021 in daily chart</li>
+    <li>head(M,W,0) : head value on 2-Aug-2021 in weekly chart</li>
+    <li>head(h,W,-1) : head value on 9-Aug-2021 in weekly chart</li>
+    <li>head(h,1m,5) : head value of 12:20 PM's 1min candle</li>
+    <li>head(30m,15m,-1) : head value of 11:45 AM's 15min candle</li>
+</ol>

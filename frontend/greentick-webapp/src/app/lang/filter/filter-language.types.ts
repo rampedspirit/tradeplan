@@ -16,7 +16,7 @@ export interface LArgument extends LArgumentType, LArgumentInfo {
 export interface LFunction {
     name: string;
     description: string;
-    moreInfo:string;
+    moreInfo?:string;
     isStandalone: boolean;
     isChainOptional: boolean;
     arguments: LArgument[];

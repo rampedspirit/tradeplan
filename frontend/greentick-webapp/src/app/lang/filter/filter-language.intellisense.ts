@@ -17,9 +17,17 @@ export class FilterLanguageIntellisense implements monaco.languages.CompletionIt
         let result: SytntaxError = new FilterLanguageParser().parseForSyntaxError(textUntilPosition);
         if (result) {
             return {
-                suggestions: this.getCompletionItems(result.expectedTokenTypes, textUntilPosition, context.triggerCharacter)
+                suggestions: this.getCompletionItems(result.expectedTokenTypes, textUntilPosition)
+            }
+        } else if (this.hasNextFunction(textUntilPosition)) {
+            let result: SytntaxError = new FilterLanguageParser().parseForSyntaxError(textUntilPosition + "#");
+            if (result) {
+                return {
+                    suggestions: this.getCompletionItems(result.expectedTokenTypes, textUntilPosition)
+                }
             }
         }
+
         return {
             suggestions: []
         }
@@ -43,8 +51,12 @@ export class FilterLanguageIntellisense implements monaco.languages.CompletionIt
         }
     }
 
-    private getCompletionItems(expectedTokens: Set<TokenType>, text: string, triggerCharacter: string): monaco.languages.CompletionItem[] {
+    private getCompletionItems(expectedTokens: Set<TokenType>, text: string): monaco.languages.CompletionItem[] {
         let completionItems: monaco.languages.CompletionItem[] = [];
+
+        if (expectedTokens.has(TokenType.DOT) && this.hasNextFunction(text)) {
+            completionItems.push(this.createDotCompletionItem());
+        }
 
         if (expectedTokens.has(TokenType.ARGUMENT)) {
             let functions: string[] = text.match(/\w*\(\w*(,\w*)*\)*/g);
@@ -111,7 +123,7 @@ export class FilterLanguageIntellisense implements monaco.languages.CompletionIt
 
     createFunctionCompletionItem(func: LFunction, kind: monaco.languages.CompletionItemKind,
         sortText: string): any {
-        return {
+        let completionItem = {
             label: func.name,
             kind: kind,
             documentation: {
@@ -120,8 +132,15 @@ export class FilterLanguageIntellisense implements monaco.languages.CompletionIt
             },
             insertText: func.name + "(" + this.getDefaultArguments(func) + ")",
             insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-            sortText: sortText
+            sortText: sortText,
+            command: { id: "editor.action.triggerSuggest", title: "" }
         };
+
+        if (!func.nextFunctions || func.nextFunctions.length == 0) {
+            completionItem.insertText += " ";
+        }
+
+        return completionItem;
     }
 
     private getDefaultArguments(func: LFunction): string {
@@ -145,6 +164,17 @@ export class FilterLanguageIntellisense implements monaco.languages.CompletionIt
         }
     }
 
+    private hasNextFunction(text: string) {
+        let functions: string[] = text.match(/\w*\(\w*(,\w*)*\)*/g);
+        if (functions) {
+            let lastFunction: string = functions[functions.length - 1];
+            let functionName: string = lastFunction.match(/\w*/)[0];
+            let func: LFunction = this.library.functions.find(f => f.name == functionName);
+            return func.nextFunctions && func.nextFunctions.length > 0;
+        }
+        return false;
+    }
+
     createValueCompletionItem(value: string): any {
         return {
             label: value,
@@ -160,9 +190,20 @@ export class FilterLanguageIntellisense implements monaco.languages.CompletionIt
             label: operator.name,
             kind: kind,
             documentation: operator.name,
-            insertText: operator.symbol,
+            insertText: operator.symbol + " ",
             insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-            sortText: sortText
+            sortText: sortText,
+            command: { id: "editor.action.triggerSuggest", title: "" }
+        };
+    }
+
+    createDotCompletionItem(): any {
+        return {
+            label: ".",
+            kind: monaco.languages.CompletionItemKind.Value,
+            insertText: ".",
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            command: { id: "editor.action.triggerSuggest", title: "" }
         };
     }
 }

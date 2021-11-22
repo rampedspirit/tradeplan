@@ -1,0 +1,19 @@
+<p>Lets Assume that the current date is 24-Aug-2021, time 12:23 PM. Market started at 9:15 AM and ends at 3:30 PM.</p>
+<ol>
+    <li>low(m,5m,0) : Starting point "m" = 12:23 PM, "5m" = open 5min chart, "0" = In the lastest completed 5 min
+        candle,
+        Get the low value, i.e low of 12:15 PM candle.</li>
+    <li>low(m,5m,-1) : Starting point "m" = 12:23PM, "5m" = open 5min chart, "-1" = low value of 2nd completly closed
+        candle
+        BEFORE 12:23PM, i.e Latest closed candle = "0" = 12:15PM candle, one before this candle = "-1" = 12:10 PM
+        candle's
+        low.</li>
+    <li>low(h,15m,-2) : low value of 11:30 AM's 15min candle</li>
+    <li>low(h,15m,0) : low value of 12:00 PM's 15min candle</li>
+    <li>low(d,m,0) : low value of 9:15 AM's 1min candle</li>
+    <li>low(W,d,-1) : low value on 20-Aug-2021 in daily chart</li>
+    <li>low(M,W,0) : low value on 2-Aug-2021 in weekly chart</li>
+    <li>low(h,W,-1) : low vlaue on 9-Aug-2021 in weekly chart</li>
+    <li>low(h,1m,5) : low value of 12:20 PM's 1min candle</li>
+    <li>low(30m,15m,-1) : low value of 11:45 AM's 15min candle</li>
+</ol>

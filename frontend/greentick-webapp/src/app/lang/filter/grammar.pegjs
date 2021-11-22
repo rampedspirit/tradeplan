@@ -56,7 +56,7 @@ comparison_expression
     }
 
 arithmetic_expression
-  = head:mul_div_expression tail:(_ ("+" / "-") _ mul_div_expression)* 
+  = head:mul_div_expression tail:(ws ("+" / "-") ws mul_div_expression)* 
   {
       	let expressions = [head];
         for (var i = 0; i < tail.length; i++) {
@@ -76,7 +76,7 @@ arithmetic_expression
   }
 
 mul_div_expression
-  = head:power_expression tail:(_ ("*" / "/") _ power_expression)* 
+  = head:power_expression tail:(ws ("*" / "/") ws power_expression)* 
   {
 		let expressions = [head];
         for (var i = 0; i < tail.length; i++) {
@@ -96,7 +96,7 @@ mul_div_expression
   }
 
 power_expression
-  = head:arithmetic_operand tail:(_ ("^") _ arithmetic_operand)* 
+  = head:arithmetic_operand tail:(ws ("^") ws arithmetic_operand)* 
   {
 		let expressions = [head];
         for (var i = 0; i < tail.length; i++) {

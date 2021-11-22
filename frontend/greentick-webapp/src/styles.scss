@@ -10,6 +10,22 @@ body {
   font-family: Roboto, "Helvetica Neue", sans-serif; 
 }
 
+/*Scroll Bar Styling*/
+/* width */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #3f51b5;
+}
+
 /*MONACO editor related styling*/
 
 // .monaco-hover-content{
@@ -20,3 +36,4 @@ body {
 div.hover-row.status-bar {
   display: none !important;
 }
+
