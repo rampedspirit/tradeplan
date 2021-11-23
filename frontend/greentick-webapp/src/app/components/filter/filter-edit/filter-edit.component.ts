@@ -170,10 +170,12 @@ export class FilterEditComponent implements OnInit {
     });
 
     editor.onMouseUp(event => {
-      if(editor.getValue().length == 0){
+      console.log(event);
+      if (!event.target.detail?.isAfterLines) {
         editor.trigger(null, 'editor.action.triggerSuggest', null);
       }
     });
+
     editor.onKeyUp(event => {
       if (event.code == "Space") {
         editor.trigger(null, 'editor.action.triggerSuggest', null);

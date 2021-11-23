@@ -133,13 +133,7 @@ export class FilterLanguageIntellisense implements monaco.languages.CompletionIt
             insertText: func.name + "(" + this.getDefaultArguments(func) + ")",
             insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
             sortText: sortText,
-            command: { id: "editor.action.triggerSuggest", title: "" }
         };
-
-        if (!func.nextFunctions || func.nextFunctions.length == 0) {
-            completionItem.insertText += " ";
-        }
-
         return completionItem;
     }
 
@@ -190,10 +184,9 @@ export class FilterLanguageIntellisense implements monaco.languages.CompletionIt
             label: operator.name,
             kind: kind,
             documentation: operator.name,
-            insertText: operator.symbol + " ",
+            insertText: operator.symbol,
             insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
             sortText: sortText,
-            command: { id: "editor.action.triggerSuggest", title: "" }
         };
     }
 
@@ -203,7 +196,6 @@ export class FilterLanguageIntellisense implements monaco.languages.CompletionIt
             kind: monaco.languages.CompletionItemKind.Value,
             insertText: ".",
             insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-            command: { id: "editor.action.triggerSuggest", title: "" }
         };
     }
 }
