@@ -25,10 +25,15 @@ import com.bhs.gtk.expression.model.NumericValue;
 public class EvaluationRequestConverter {
 	
 	public Expression convert(String evalRequest) {
-		JSONObject evalObject = new JSONObject(evalRequest);
-		String type = (String) evalObject.get("type");
-		Expression expression = prepareExpression(getExpression(type), evalObject);
-		return expression;
+		try {
+			JSONObject evalObject = new JSONObject(evalRequest);
+			String type = (String) evalObject.get("type");
+			Expression expression = prepareExpression(getExpression(type), evalObject);
+			return expression;
+		}catch (JSONException e) {
+			System.err.println(e.getMessage());
+			return null;
+		}
 	}
 	
 	private Expression getExpression(String type) {
@@ -114,8 +119,13 @@ public class EvaluationRequestConverter {
 	
 	private Function getFunction(JSONObject functionJson) {
 		Function function = new Function((String)functionJson.get("name"));
-		for( Object arg: functionJson.getJSONArray("args"))  {
-			function.addArgument((String)arg);
+		//Arguments is array of array. Hence, two loops are required.
+		//Example : "args": [ [ "15m", "0", "-2" ] ]
+		//TODO: Fix the array of array issue from grammar.
+		for( Object argumentArray: functionJson.getJSONArray("args"))  {
+			for(Object arg : ((JSONArray)argumentArray)) {
+				function.addArgument((String)arg);
+			}
 		}
 		return function;
 	}
