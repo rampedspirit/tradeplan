@@ -6,9 +6,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.validation.constraints.NotNull;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bhs.gtk.screener.model.PatchData;
+import com.bhs.gtk.screener.model.PatchData.PropertyEnum;
 import com.bhs.gtk.screener.model.PatchModel;
 import com.bhs.gtk.screener.model.ScreenerRequest;
 import com.bhs.gtk.screener.model.ScreenerResponse;
@@ -43,13 +47,9 @@ public class ScreenerServiceImpl implements ScreernerService {
 
 	@Override
 	public ScreenerResponse getScreener(UUID screenerId) {
-		if(screenerId == null) {
-			//throw exception
-			return null;
-		}
-		Optional<ScreenerEntity> screenerEntityContainer = screenerRepository.findById(screenerId);
-		if(screenerEntityContainer.isPresent()) {
-			return mapper.getScreenerResponse(screenerEntityContainer.get());
+		ScreenerEntity screenerEntity = getScreenerEntity(screenerId);
+		if(screenerEntity != null) {
+			return mapper.getScreenerResponse(screenerEntity);
 		}
 		//throw exception screener not found
 		return null;
@@ -57,12 +57,8 @@ public class ScreenerServiceImpl implements ScreernerService {
 
 	@Override
 	public ScreenerResponse deleteScreener(UUID screenerId) {
-		if(screenerId == null) {
-			//throw exception
-			return null;
-		}
-		if(screenerRepository.existsById(screenerId)) {
-			ScreenerEntity screenerEntity = screenerRepository.findById(screenerId).get();
+		ScreenerEntity screenerEntity = getScreenerEntity(screenerId);
+		if(screenerEntity != null) {
 			screenerRepository.delete(screenerEntity);
 			return mapper.getScreenerResponse(screenerEntity);
 		}
@@ -72,8 +68,60 @@ public class ScreenerServiceImpl implements ScreernerService {
 
 	@Override
 	public ScreenerResponse updateScreener(PatchModel patchModel, UUID screenerId) {
-		// TODO Auto-generated method stub
-		return null;
+		ScreenerEntity screenerEntity = getScreenerEntity(screenerId);
+		if(screenerEntity == null) {
+			return null;
+		}
+		for(PatchData pd : patchModel.getPatchData()) {
+			@NotNull PropertyEnum propertyName = pd.getProperty();
+			String value = pd.getValue();
+			update(screenerEntity, propertyName,value);
+		}
+		ScreenerEntity savedScreenerEntity = screenerRepository.save(screenerEntity);
+		return mapper.getScreenerResponse(savedScreenerEntity);
 	}
 
+	private boolean update(ScreenerEntity screenerEntity, PropertyEnum propertyName, String value) {
+		switch (propertyName) {
+		case NAME:
+			screenerEntity.setName(value);
+			break;
+		case DESCRIPTION:
+			screenerEntity.setDescription(value);
+			break;
+		case WATCHLIST_ID:
+			setWatchlistId(screenerEntity,value);
+			break;
+		case CONDITION_ID:
+			setConditionId(screenerEntity,value);
+			break;
+		default:
+			//throw unsupported exception.
+			break;
+		}
+		return true;
+	}
+
+	private void setConditionId(ScreenerEntity screenerEntity, String value) {
+		screenerEntity.setConditionId(UUID.fromString(value));
+		// TODO handle illegal argument exception
+		//TODO clear results associated with screener
+		
+	}
+
+	private void setWatchlistId(ScreenerEntity screenerEntity, String value) {
+		screenerEntity.setWatchlistId(UUID.fromString(value));
+		// TODO handle illegal argument exception
+		//TODO clear results associated with screener
+	}
+
+	private ScreenerEntity getScreenerEntity(UUID screenerId) {
+		if (screenerId != null) {
+			Optional<ScreenerEntity> screenerEntityContainer = screenerRepository.findById(screenerId);
+			if (screenerEntityContainer.isPresent()) {
+				return screenerEntityContainer.get();
+			}
+		}
+		return null;
+	}
 }

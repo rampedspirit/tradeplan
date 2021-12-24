@@ -48,7 +48,8 @@ public class ScreenerApiController implements ScreenerApi {
 
 	@Override
 	public ResponseEntity<ScreenerResponse> updateScreener(@Valid PatchModel body, UUID screenerId) {
-		return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+		ScreenerResponse screener = screenerServiceImpl.updateScreener(body, screenerId);
+		return new ResponseEntity<ScreenerResponse>(screener, HttpStatus.OK); 
 	}
 
 }
