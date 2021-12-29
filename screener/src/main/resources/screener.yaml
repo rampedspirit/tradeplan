@@ -19,11 +19,11 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ScreenerRequest'
+              $ref: '#/components/schemas/ScreenerCreateRequest'
         required: true
       responses:
         '201':
-          description: Condition created successfully.
+          description: screener created successfully.
           content:
             application/json:
               schema:
@@ -77,7 +77,7 @@ paths:
           content:
             application/json:
               schema:
-                  $ref: '#/components/schemas/ScreenerResponse'
+                  $ref: '#/components/schemas/ScreenerDetailedResponse'
         '400':
           description: Request is not understood.
           content:
@@ -105,11 +105,13 @@ paths:
           required: true
       requestBody:
         description: >- 
-         Payload to change screener of given Id. Only Name, description, watchlist and condition of the screener can be changed. It is also important to note, change of watchlist or condition will remove associated execution result of the screener.
+         Payload to change screener of given Id.
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchModel'
+              type: array
+              items:
+               $ref: '#/components/schemas/ScreenerPatchData'
         required: true
       responses:
         '200':
@@ -157,13 +159,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
                 
-  '/v1/screener/{screenerId}/execution':     
+  '/v1/screener/{screenerId}/run':     
     post:
       tags:
-        - execution
-      summary: create new executable
-      description: create new executable
-      operationId: createExecutable
+        - screener
+      summary: run screener
+      description: run screener at given marketTime
+      operationId: runScreener
       parameters:
         - in: path
           name: screenerId
@@ -176,7 +178,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ExecutionRequest'
+                $ref: '#/components/schemas/ExecutableCreateRequest'
         required: true
       responses:
         '201':
@@ -184,26 +186,28 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScreenerResult'
+                  $ref: '#/components/schemas/ScreenerDetailedResponse'
         '400':
           description: Request is not understood.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error' 
+                
+  '/v1/executable/{executionId}':                
     get:
       tags:
-        - execution
-      summary: get all executables of given screener
-      description: get all executables of given screener
-      operationId: getExecutables
+        - executable
+      summary: get executable
+      description: get executable
+      operationId: getExecutable
       parameters:
         - in: path
-          name: screenerId
-          required: true
+          name: executionId
           schema:
             type: string
             format: uuid
+          required: true            
       responses:
         '206':
           description: >-
@@ -211,11 +215,7 @@ paths:
           content:
             application/json:
               schema:
-               type: array
-               items:
-                $ref: '#/components/schemas/Executable'              
-
-                
+                $ref: '#/components/schemas/ExecutableResponse'              
         '400':
           description: Request is not understood.
           content:
@@ -228,11 +228,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-                
-  '/v1/screener/execution/{executionId}':
     patch:
       tags:
-        - execution
+        - executable
       summary: update executable
       description: update executable of given id
       operationId: updateExecutable
@@ -242,14 +240,14 @@ paths:
           schema:
             type: string
             format: uuid
-          required: true          
+          required: true
       requestBody:
         description: >- 
          Payload to change executable of given Id. Only Note can be changed. 
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchModel'
+              $ref: '#/components/schemas/ExecutablePatchData'
         required: true
       responses:
         '200':
@@ -257,7 +255,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Executable'
+                $ref: '#/components/schemas/ExecutableResponse'
         '400':
           description: Request is not understood.
           content:
@@ -269,22 +267,23 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'  
+                $ref: '#/components/schemas/Error'   
+                
 
-  '/v1/screener/execution/result/{executionId}':
+  '/v1/executable/{executionId}/result':
     get:
       tags:
-        - result
-      summary: get screener result
-      description: get screener result
-      operationId: getScreenrResult
+        - executable
+      summary: get result of executable of given screener
+      description: get result of executable of given screener
+      operationId: getResult
       parameters:
         - in: path
           name: executionId
-          required: true
           schema:
             type: string
-            format: uuid            
+            format: uuid
+          required: true            
       responses:
         '206':
           description: >-
@@ -292,7 +291,7 @@ paths:
           content:
             application/json:
               schema:
-                  $ref: '#/components/schemas/ScreenerResult'
+                $ref: '#/components/schemas/ExecutableDetailedResponse'              
         '400':
           description: Request is not understood.
           content:
@@ -304,81 +303,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-                
-  '/v1/screener/execution/result/{conditionResultId}':
-    get:
-      tags:
-        - result
-      summary: get condition result
-      description: get condition result
-      operationId: getConditionResult
-      parameters:
-        - in: path
-          name: conditionResultId
-          required: true
-          schema:
-            type: string
-            format: uuid             
-      responses:
-        '206':
-          description: >-
-            Request sucessfully processed.
-          content:
-            application/json:
-              schema:
-                  $ref: '#/components/schemas/ConditionResult'
-        '400':
-          description: Request is not understood.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: Requested filter not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'                
-
-  '/v1/screener/execution/result/{filterResultId}':
-    get:
-      tags:
-        - result
-      summary: get filter result
-      description: get filter result
-      operationId: getFilterResult
-      parameters:
-        - in: path
-          name: filterResultId
-          required: true
-          schema:
-            type: string
-            format: uuid            
-      responses:
-        '206':
-          description: >-
-            Request sucessfully processed.
-          content:
-            application/json:
-              schema:
-                  $ref: '#/components/schemas/FilterResult'
-        '400':
-          description: Request is not understood.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: Requested filter not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'  
+                $ref: '#/components/schemas/Error'                 
 
 components:
   schemas:
-    ScreenerRequest:
+    ScreenerCreateRequest:
       required:
         - name
       type: object
@@ -399,7 +328,8 @@ components:
           format: uuid
           description: >-
             condition identifier.
-
+            
+            
     ScreenerResponse:
       required:
         - name
@@ -426,30 +356,11 @@ components:
           format: uuid
           description: >-
             condition identifier.
-    
-    ExecutionRequest:
-      required:
-        - marketTime
-      type: object
-      properties:
-        marketTime:
-          type: string
-          description: market time at which screener to be executed.
-          format: date-time
-        note:
-          type: string
-          description: note related to execution
-        scrips:
-          type: array
-          items:
-           type: string
-          description: >-
-            scrip names
-            
+          
 
-    ScreenerResult:
+    ScreenerDetailedResponse:
       required:
-        - marketTime
+        - name
       type: object
       properties:
         screenerId:
@@ -457,160 +368,34 @@ components:
           format: uuid
           description: >-
             screener identifier
-        executionId:
-         type: string
-         format: uuid
-         description: >-
-            unique identifier of the execution, using which result can be obtained
-        marketTime:
+        name:
           type: string
-          description: market time at which screener to be executed.
-          format: date-time
-        note:
+          description: name of condition
+        description:
           type: string
-          description: note related to execution            
-        result:
-          type: array
-          items:
-            $ref: '#/components/schemas/ConditionScripResult'
-          description: screener result
-    
-    Executable:
-      required:
-        - marketTime
-      type: object
-      properties:
-        screenerId:
+          description: description of condition
+        watchListId:
           type: string
           format: uuid
           description: >-
-            screener identifier       
-        executionId:
-         type: string
-         format: uuid
-         description: >-
-            unique identifier of the execution, using which result can be obtained
-        marketTime:
+            watch list identifier
+        conditionId:
           type: string
-          description: market time at which screener to be executed.
-          format: date-time
-        note:
-          type: string
-          description: note related to execution      
-
-    ConditionScripResult:
-      required:
-        - conditionResultId
-      type: object
-      properties:
-        conditionResultId:
-         type: string
-         format: uuid
-         description: >-
-            condition result  identifier.
-        scripName:
-         type: string
-         description: >-
-            name of scrip.
-        result:
-          type: string
-          description: market time at which screener to be executed.
-          enum: [PASS, FAIL, EVALUATING, INVALID]
-          
-    ConditionResult:
-      required:
-        - conditionResultId
-      type: object
-      properties:
-        screenerId:
-         type: string
-         format: uuid
-         description: >-
-            unique identifier of the screener to which execution is associated.
-        executionId:
-         type: string
-         format: uuid
-         description: >-
-            unique identifier of the execution, using which result can be obtained
-        conditionResultId:
-         type: string
-         format: uuid
-         description: >-
-            condition result  identifier.
-        scripName:
-         type: string
-         description: >-
-            name of scrip.
-        result:
-          type: string
-          description: market time at which screener to be executed.
-          enum: [PASS, FAIL, EVALUATING, INVALID]                
-        conditionCode:
-          type: string
-          description: condition code with filter details tagged.
-          
-    FilterResult:
-      required:
-        - filterResultId
-      type: object
-      properties:
-        screenerId:
-         type: string
-         format: uuid
-         description: >-
-            unique identifier of the screener to which execution is associated.
-        executionId:
-         type: string
-         format: uuid
-         description: >-
-            unique identifier of the execution, using which result can be obtained
-        conditionResultId:
-         type: string
-         format: uuid
-         description: >-
-            condition result  identifier.      
-        filterResultId:
-         type: string
-         format: uuid
-         description: >-
-            unique identifier of the filter result
-        filterCode:
-          type: string
-          description: filter code with result of statements tagged.          
- 
-
-    Error:
-      type: object
-      properties:
-        message:
-          type: string
-          description: brief information about error
-        resolution:
-          type: string
-          description: possibly hints to solve the error
-        errorCode:
-          type: string
-          description: pattern to unqiuely identify error root cause and origin.
-          
-    PatchModel:
-      title: Update Properties
-      type: object
-      properties:
-        patchData:
+          format: uuid
+          description: >-
+            condition identifier.
+        executable:
           type: array
-          description: attributes to be updated.
           items:
-            $ref: '#/components/schemas/PatchData'
-      description: >-
-        All patch operations follow the json patch api standard. The patch
-        object is provided by the user in the patch operation for the particular
-        resource.
-    PatchData:
+            $ref: '#/components/schemas/ExecutableResponse'
+          description: all execuatbles which are attached to the screener with given watchlist and condition
+
+    ScreenerPatchData:
+      type: object
       required:
         - operation
         - property
         - value
-      type: object
       properties:
         operation:
           type: string
@@ -628,7 +413,132 @@ components:
            - DESCRIPTION
            - WATCHLIST_ID
            - CONDITION_ID
+        value:
+          type: string
+          description: The new value of the json attribute to be patched.
+          
+    
+    ExecutableCreateRequest:
+      required:
+        - marketTime
+      type: object
+      properties:
+        marketTime:
+          type: string
+          description: market time at which screener to be executed.
+          format: date-time
+        note:
+          type: string
+          description: note related to execution
+        ScripNames:
+          type: array
+          items : 
+            type: string
+          description: scrip names.
+
+    ExecutableResponse:
+      required:
+        - marketTime
+      type: object
+      properties:
+        executionId:
+         type: string
+         format: uuid
+         description: >-
+            unique identifier of the execution, using which result can be obtained
+        marketTime:
+          type: string
+          description: market time at which screener to be executed.
+          format: date-time
+        note:
+          type: string
+          description: note related to execution   
+        status:
+          type: string
+          description: status of execution
+        numberOfScripForExecution:
+          type: number
+          description: total number of scrip attached to this executable for execution
+        numberOfScripWithResultAvailable:
+          type: number
+          description: number of scrip attached this executable which are executed and have execution result.
+          
+    ExecutableDetailedResponse:
+      required:
+        - marketTime
+      type: object
+      properties:
+        executionId:
+         type: string
+         format: uuid
+         description: >-
+            unique identifier of the execution, using which result can be obtained
+        marketTime:
+          type: string
+          description: market time at which screener to be executed.
+          format: date-time
+        note:
+          type: string
+          description: note related to execution   
+        status:
+          type: string
+          description: status of execution
+        numberOfScripForExecution:
+          type: number
+          description: total number of scrip attached to this executable for execution
+        numberOfScripWithResultAvailable:
+          type: number
+          description: number of scrip attached this executable which are executed and have execution result.     
+        result:
+         type: array
+         items:
+           $ref: '#/components/schemas/ScripResult'   
+
+    ScripResult:
+      type: object
+      properties:
+       scripName:
+         type: string
+       status:
+         type: string
+         enum: [PASS, FAIL,SCHEDULED,RUNNING,INVALID]            
+
+    ExecutablePatchData:
+      title: executable patch data
+      type: object
+      required:
+        - operation
+        - property
+        - value
+      properties:
+        operation:
+          type: string
+          description: 'Action to be performed on given resource. '
+          example: REPLACE
+          enum:
+            - REPLACE
+        property:
+          type: string
+          description: >-
+            The property of the json attribute to be replaced.
+          example: NOTE
+          enum:
            - NOTE
         value:
           type: string
           description: The new value of the json attribute to be patched.
+      
+ 
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: brief information about error
+        resolution:
+          type: string
+          description: possibly hints to solve the error
+        errorCode:
+          type: string
+          description: pattern to unqiuely identify error root cause and origin.
+          

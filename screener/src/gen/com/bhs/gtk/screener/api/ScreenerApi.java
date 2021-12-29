@@ -6,8 +6,10 @@
 package com.bhs.gtk.screener.api;
 
 import com.bhs.gtk.screener.model.Error;
-import com.bhs.gtk.screener.model.PatchModel;
-import com.bhs.gtk.screener.model.ScreenerRequest;
+import com.bhs.gtk.screener.model.ExecutableCreateRequest;
+import com.bhs.gtk.screener.model.ScreenerCreateRequest;
+import com.bhs.gtk.screener.model.ScreenerDetailedResponse;
+import com.bhs.gtk.screener.model.ScreenerPatchData;
 import com.bhs.gtk.screener.model.ScreenerResponse;
 import java.util.UUID;
 import io.swagger.annotations.*;
@@ -26,20 +28,20 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.List;
 import java.util.Map;
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-09-25T06:41:13.746385900+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-12-28T23:38:24.439962500+05:30[Asia/Calcutta]")
 
 @Api(value = "Screener", description = "the Screener API")
 public interface ScreenerApi {
 
     @ApiOperation(value = "create new screener", nickname = "createScreener", notes = "create new screener", response = ScreenerResponse.class, tags={ "screener", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 201, message = "Condition created successfully.", response = ScreenerResponse.class),
+        @ApiResponse(code = 201, message = "screener created successfully.", response = ScreenerResponse.class),
         @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class) })
     @RequestMapping(value = "/v1/screener",
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    ResponseEntity<ScreenerResponse> createScreener(@ApiParam(value = "payload to create screener" ,required=true )  @Valid @RequestBody ScreenerRequest body);
+    ResponseEntity<ScreenerResponse> createScreener(@ApiParam(value = "payload to create screener" ,required=true )  @Valid @RequestBody ScreenerCreateRequest body);
 
 
     @ApiOperation(value = "delete", nickname = "deleteScreener", notes = "delete screener of given id", response = ScreenerResponse.class, tags={ "screener", })
@@ -62,15 +64,26 @@ public interface ScreenerApi {
     ResponseEntity<List<ScreenerResponse>> getAllScreeners();
 
 
-    @ApiOperation(value = "get screener of given id", nickname = "getScreener", notes = "get screener", response = ScreenerResponse.class, tags={ "screener", })
+    @ApiOperation(value = "get screener of given id", nickname = "getScreener", notes = "get screener", response = ScreenerDetailedResponse.class, tags={ "screener", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 206, message = "Request sucessfully processed.", response = ScreenerResponse.class),
+        @ApiResponse(code = 206, message = "Request sucessfully processed.", response = ScreenerDetailedResponse.class),
         @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class),
         @ApiResponse(code = 404, message = "Requested filter not found.", response = Error.class) })
     @RequestMapping(value = "/v1/screener/{screenerId}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    ResponseEntity<ScreenerResponse> getScreener(@ApiParam(value = "",required=true) @PathVariable("screenerId") UUID screenerId);
+    ResponseEntity<ScreenerDetailedResponse> getScreener(@ApiParam(value = "",required=true) @PathVariable("screenerId") UUID screenerId);
+
+
+    @ApiOperation(value = "run screener", nickname = "runScreener", notes = "run screener at given marketTime", response = ScreenerDetailedResponse.class, tags={ "screener", })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 201, message = "executable created successfully.", response = ScreenerDetailedResponse.class),
+        @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class) })
+    @RequestMapping(value = "/v1/screener/{screenerId}/run",
+        produces = { "application/json" }, 
+        consumes = { "application/json" },
+        method = RequestMethod.POST)
+    ResponseEntity<ScreenerDetailedResponse> runScreener(@ApiParam(value = "payload to create executable" ,required=true )  @Valid @RequestBody ExecutableCreateRequest body,@ApiParam(value = "",required=true) @PathVariable("screenerId") UUID screenerId);
 
 
     @ApiOperation(value = "update screener", nickname = "updateScreener", notes = "update screener of given id", response = ScreenerResponse.class, tags={ "screener", })
@@ -82,6 +95,6 @@ public interface ScreenerApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PATCH)
-    ResponseEntity<ScreenerResponse> updateScreener(@ApiParam(value = "Payload to change screener of given Id. Only Name, description, watchlist and condition of the screener can be changed. It is also important to note, change of watchlist or condition will remove associated execution result of the screener." ,required=true )  @Valid @RequestBody PatchModel body,@ApiParam(value = "",required=true) @PathVariable("screenerId") UUID screenerId);
+    ResponseEntity<ScreenerResponse> updateScreener(@ApiParam(value = "Payload to change screener of given Id." ,required=true )  @Valid @RequestBody List<ScreenerPatchData> body,@ApiParam(value = "",required=true) @PathVariable("screenerId") UUID screenerId);
 
 }

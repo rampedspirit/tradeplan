@@ -1,22 +1,25 @@
 package com.bhs.gtk.screener.model;
 
 import java.util.Objects;
+import com.bhs.gtk.screener.model.ExecutableResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * ScreenerResponse
+ * ScreenerDetailedResponse
  */
 @Validated
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-12-28T23:38:24.439962500+05:30[Asia/Calcutta]")
 
-public class ScreenerResponse   {
+public class ScreenerDetailedResponse   {
   @JsonProperty("screenerId")
   private UUID screenerId = null;
 
@@ -32,7 +35,11 @@ public class ScreenerResponse   {
   @JsonProperty("conditionId")
   private UUID conditionId = null;
 
-  public ScreenerResponse screenerId(UUID screenerId) {
+  @JsonProperty("executable")
+  @Valid
+  private List<ExecutableResponse> executable = null;
+
+  public ScreenerDetailedResponse screenerId(UUID screenerId) {
     this.screenerId = screenerId;
     return this;
   }
@@ -53,7 +60,7 @@ public class ScreenerResponse   {
     this.screenerId = screenerId;
   }
 
-  public ScreenerResponse name(String name) {
+  public ScreenerDetailedResponse name(String name) {
     this.name = name;
     return this;
   }
@@ -74,7 +81,7 @@ public class ScreenerResponse   {
     this.name = name;
   }
 
-  public ScreenerResponse description(String description) {
+  public ScreenerDetailedResponse description(String description) {
     this.description = description;
     return this;
   }
@@ -94,7 +101,7 @@ public class ScreenerResponse   {
     this.description = description;
   }
 
-  public ScreenerResponse watchListId(UUID watchListId) {
+  public ScreenerDetailedResponse watchListId(UUID watchListId) {
     this.watchListId = watchListId;
     return this;
   }
@@ -115,7 +122,7 @@ public class ScreenerResponse   {
     this.watchListId = watchListId;
   }
 
-  public ScreenerResponse conditionId(UUID conditionId) {
+  public ScreenerDetailedResponse conditionId(UUID conditionId) {
     this.conditionId = conditionId;
     return this;
   }
@@ -136,6 +143,35 @@ public class ScreenerResponse   {
     this.conditionId = conditionId;
   }
 
+  public ScreenerDetailedResponse executable(List<ExecutableResponse> executable) {
+    this.executable = executable;
+    return this;
+  }
+
+  public ScreenerDetailedResponse addExecutableItem(ExecutableResponse executableItem) {
+    if (this.executable == null) {
+      this.executable = new ArrayList<ExecutableResponse>();
+    }
+    this.executable.add(executableItem);
+    return this;
+  }
+
+  /**
+   * all execuatbles which are attached to the screener with given watchlist and condition
+   * @return executable
+  **/
+  @ApiModelProperty(value = "all execuatbles which are attached to the screener with given watchlist and condition")
+
+  @Valid
+
+  public List<ExecutableResponse> getExecutable() {
+    return executable;
+  }
+
+  public void setExecutable(List<ExecutableResponse> executable) {
+    this.executable = executable;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -145,29 +181,31 @@ public class ScreenerResponse   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ScreenerResponse screenerResponse = (ScreenerResponse) o;
-    return Objects.equals(this.screenerId, screenerResponse.screenerId) &&
-        Objects.equals(this.name, screenerResponse.name) &&
-        Objects.equals(this.description, screenerResponse.description) &&
-        Objects.equals(this.watchListId, screenerResponse.watchListId) &&
-        Objects.equals(this.conditionId, screenerResponse.conditionId);
+    ScreenerDetailedResponse screenerDetailedResponse = (ScreenerDetailedResponse) o;
+    return Objects.equals(this.screenerId, screenerDetailedResponse.screenerId) &&
+        Objects.equals(this.name, screenerDetailedResponse.name) &&
+        Objects.equals(this.description, screenerDetailedResponse.description) &&
+        Objects.equals(this.watchListId, screenerDetailedResponse.watchListId) &&
+        Objects.equals(this.conditionId, screenerDetailedResponse.conditionId) &&
+        Objects.equals(this.executable, screenerDetailedResponse.executable);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(screenerId, name, description, watchListId, conditionId);
+    return Objects.hash(screenerId, name, description, watchListId, conditionId, executable);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ScreenerResponse {\n");
+    sb.append("class ScreenerDetailedResponse {\n");
     
     sb.append("    screenerId: ").append(toIndentedString(screenerId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    watchListId: ").append(toIndentedString(watchListId)).append("\n");
     sb.append("    conditionId: ").append(toIndentedString(conditionId)).append("\n");
+    sb.append("    executable: ").append(toIndentedString(executable)).append("\n");
     sb.append("}");
     return sb.toString();
   }
