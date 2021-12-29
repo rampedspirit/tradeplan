@@ -6,6 +6,6 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ExecutionRespository extends CrudRepository<ExecutableEntity, UUID> {
+public interface ExecutableRespository extends CrudRepository<ExecutableEntity, UUID> {
 
 }

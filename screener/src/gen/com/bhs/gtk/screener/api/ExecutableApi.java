@@ -26,7 +26,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.List;
 import java.util.Map;
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-12-28T23:38:24.439962500+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-12-29T07:42:30.906286300+05:30[Asia/Calcutta]")
 
 @Api(value = "Executable", description = "the Executable API")
 public interface ExecutableApi {
@@ -36,10 +36,10 @@ public interface ExecutableApi {
         @ApiResponse(code = 206, message = "Request sucessfully processed.", response = ExecutableResponse.class),
         @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class),
         @ApiResponse(code = 404, message = "Requested filter not found.", response = Error.class) })
-    @RequestMapping(value = "/v1/executable/{executionId}",
+    @RequestMapping(value = "/v1/executable/{executableId}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    ResponseEntity<ExecutableResponse> getExecutable(@ApiParam(value = "",required=true) @PathVariable("executionId") UUID executionId);
+    ResponseEntity<ExecutableResponse> getExecutable(@ApiParam(value = "",required=true) @PathVariable("executableId") UUID executableId);
 
 
     @ApiOperation(value = "get result of executable of given screener", nickname = "getResult", notes = "get result of executable of given screener", response = ExecutableDetailedResponse.class, tags={ "executable", })
@@ -47,10 +47,10 @@ public interface ExecutableApi {
         @ApiResponse(code = 206, message = "Request sucessfully processed.", response = ExecutableDetailedResponse.class),
         @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class),
         @ApiResponse(code = 404, message = "Requested filter not found.", response = Error.class) })
-    @RequestMapping(value = "/v1/executable/{executionId}/result",
+    @RequestMapping(value = "/v1/executable/{executableId}/result",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    ResponseEntity<ExecutableDetailedResponse> getResult(@ApiParam(value = "",required=true) @PathVariable("executionId") UUID executionId);
+    ResponseEntity<ExecutableDetailedResponse> getResult(@ApiParam(value = "",required=true) @PathVariable("executableId") UUID executableId);
 
 
     @ApiOperation(value = "update executable", nickname = "updateExecutable", notes = "update executable of given id", response = ExecutableResponse.class, tags={ "executable", })
@@ -58,10 +58,10 @@ public interface ExecutableApi {
         @ApiResponse(code = 200, message = "Executable  with give id is updated successfully.", response = ExecutableResponse.class),
         @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class),
         @ApiResponse(code = 404, message = "Requested screener not found.", response = Error.class) })
-    @RequestMapping(value = "/v1/executable/{executionId}",
+    @RequestMapping(value = "/v1/executable/{executableId}",
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PATCH)
-    ResponseEntity<ExecutableResponse> updateExecutable(@ApiParam(value = "Payload to change executable of given Id. Only Note can be changed. " ,required=true )  @Valid @RequestBody ExecutablePatchData body,@ApiParam(value = "",required=true) @PathVariable("executionId") UUID executionId);
+    ResponseEntity<ExecutableResponse> updateExecutable(@ApiParam(value = "Payload to change executable of given Id. Only Note can be changed. " ,required=true )  @Valid @RequestBody ExecutablePatchData body,@ApiParam(value = "",required=true) @PathVariable("executableId") UUID executableId);
 
 }

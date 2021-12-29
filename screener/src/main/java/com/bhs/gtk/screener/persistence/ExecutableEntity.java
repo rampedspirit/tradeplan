@@ -24,7 +24,7 @@ public class ExecutableEntity {
 	@Id
 	@GeneratedValue(generator = "UUID")
 	@GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-	private UUID executionId;
+	private UUID executableId;
 	
 	@Column(length = PersistenceConstants.LARGE_TEXT_LIMIT)
 	private String note;
@@ -63,14 +63,13 @@ public class ExecutableEntity {
 		this.conditionId = conditionId;
 	}
 	
-	public UUID getExecutionId() {
-		return executionId;
+	public UUID getExecutableId() {
+		return executableId;
 	}
 
-	public void setExecutionId(UUID executionId) {
-		this.executionId = executionId;
+	public void setExecutableId(UUID executableId) {
+		this.executableId = executableId;
 	}
-
 
 	public String getStatus() {
 		return status;

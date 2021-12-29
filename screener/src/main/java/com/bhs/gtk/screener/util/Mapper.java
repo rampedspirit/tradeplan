@@ -1,15 +1,11 @@
 package com.bhs.gtk.screener.util;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,7 +33,7 @@ public class Mapper {
 	@Autowired
 	private ConditionResultRepository  conditionResultRepository;
 	
-	public ExecutableEntity getExecutionEntity(ExecutableCreateRequest executableCreateRequest, UUID watchlistId,UUID conditionId) {
+	public ExecutableEntity getExecutableEntity(ExecutableCreateRequest executableCreateRequest, UUID watchlistId,UUID conditionId) {
 		String note = executableCreateRequest.getNote();
 		Date marketTime = DateTimeUtils.toDate(executableCreateRequest.getMarketTime().toInstant());
 		return  new ExecutableEntity(note, marketTime, watchlistId, conditionId);
@@ -99,15 +95,15 @@ public class Mapper {
 		response.setDescription(screenerEntity.getDescription());
 		response.setWatchListId(screenerEntity.getWatchlistId());
 		response.setConditionId(screenerEntity.getConditionId());
-		response.setExecutable(getExecutableResponses(screenerEntity.getExecutionEntities()));
+		response.setExecutable(getExecutableResponses(screenerEntity.getExecutables()));
 		return response;
 	}
 
-	private List<ExecutableResponse> getExecutableResponses(List<ExecutableEntity> executionEntities) {
+	private List<ExecutableResponse> getExecutableResponses(List<ExecutableEntity> executables) {
 		List<ExecutableResponse> executableResponses = new ArrayList<>();
-		for(ExecutableEntity entity : executionEntities) {
+		for(ExecutableEntity entity : executables) {
 			ExecutableResponse response = new ExecutableResponse();
-			response.setExecutionId(entity.getExecutionId());
+			response.setExecutableId(entity.getExecutableId());
 			response.setMarketTime(convertDateToOffSetDatTime(entity.getMarketTime()));
 			response.setNote(entity.getNote());
 			response.setNumberOfScripForExecution(new BigDecimal(entity.getNumberOfScripForExecution()));

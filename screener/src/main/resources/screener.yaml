@@ -194,7 +194,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error' 
                 
-  '/v1/executable/{executionId}':                
+  '/v1/executable/{executableId}':                
     get:
       tags:
         - executable
@@ -203,7 +203,7 @@ paths:
       operationId: getExecutable
       parameters:
         - in: path
-          name: executionId
+          name: executableId
           schema:
             type: string
             format: uuid
@@ -236,7 +236,7 @@ paths:
       operationId: updateExecutable
       parameters:
         - in: path
-          name: executionId
+          name: executableId
           schema:
             type: string
             format: uuid
@@ -270,7 +270,7 @@ paths:
                 $ref: '#/components/schemas/Error'   
                 
 
-  '/v1/executable/{executionId}/result':
+  '/v1/executable/{executableId}/result':
     get:
       tags:
         - executable
@@ -279,7 +279,7 @@ paths:
       operationId: getResult
       parameters:
         - in: path
-          name: executionId
+          name: executableId
           schema:
             type: string
             format: uuid
@@ -441,7 +441,7 @@ components:
         - marketTime
       type: object
       properties:
-        executionId:
+        executableId:
          type: string
          format: uuid
          description: >-
@@ -468,7 +468,7 @@ components:
         - marketTime
       type: object
       properties:
-        executionId:
+        executableId:
          type: string
          format: uuid
          description: >-

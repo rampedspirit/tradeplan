@@ -19,11 +19,11 @@ import javax.validation.constraints.*;
  * ExecutableDetailedResponse
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-12-28T23:38:24.439962500+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-12-29T07:42:30.906286300+05:30[Asia/Calcutta]")
 
 public class ExecutableDetailedResponse   {
-  @JsonProperty("executionId")
-  private UUID executionId = null;
+  @JsonProperty("executableId")
+  private UUID executableId = null;
 
   @JsonProperty("marketTime")
   private OffsetDateTime marketTime = null;
@@ -44,25 +44,25 @@ public class ExecutableDetailedResponse   {
   @Valid
   private List<ScripResult> result = null;
 
-  public ExecutableDetailedResponse executionId(UUID executionId) {
-    this.executionId = executionId;
+  public ExecutableDetailedResponse executableId(UUID executableId) {
+    this.executableId = executableId;
     return this;
   }
 
   /**
    * unique identifier of the execution, using which result can be obtained
-   * @return executionId
+   * @return executableId
   **/
   @ApiModelProperty(value = "unique identifier of the execution, using which result can be obtained")
 
   @Valid
 
-  public UUID getExecutionId() {
-    return executionId;
+  public UUID getExecutableId() {
+    return executableId;
   }
 
-  public void setExecutionId(UUID executionId) {
-    this.executionId = executionId;
+  public void setExecutableId(UUID executableId) {
+    this.executableId = executableId;
   }
 
   public ExecutableDetailedResponse marketTime(OffsetDateTime marketTime) {
@@ -208,7 +208,7 @@ public class ExecutableDetailedResponse   {
       return false;
     }
     ExecutableDetailedResponse executableDetailedResponse = (ExecutableDetailedResponse) o;
-    return Objects.equals(this.executionId, executableDetailedResponse.executionId) &&
+    return Objects.equals(this.executableId, executableDetailedResponse.executableId) &&
         Objects.equals(this.marketTime, executableDetailedResponse.marketTime) &&
         Objects.equals(this.note, executableDetailedResponse.note) &&
         Objects.equals(this.status, executableDetailedResponse.status) &&
@@ -219,7 +219,7 @@ public class ExecutableDetailedResponse   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(executionId, marketTime, note, status, numberOfScripForExecution, numberOfScripWithResultAvailable, result);
+    return Objects.hash(executableId, marketTime, note, status, numberOfScripForExecution, numberOfScripWithResultAvailable, result);
   }
 
   @Override
@@ -227,7 +227,7 @@ public class ExecutableDetailedResponse   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ExecutableDetailedResponse {\n");
     
-    sb.append("    executionId: ").append(toIndentedString(executionId)).append("\n");
+    sb.append("    executableId: ").append(toIndentedString(executableId)).append("\n");
     sb.append("    marketTime: ").append(toIndentedString(marketTime)).append("\n");
     sb.append("    note: ").append(toIndentedString(note)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");

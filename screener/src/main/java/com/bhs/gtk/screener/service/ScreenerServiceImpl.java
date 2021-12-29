@@ -1,7 +1,6 @@
 package com.bhs.gtk.screener.service;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +17,7 @@ import com.bhs.gtk.screener.model.ScreenerPatchData.PropertyEnum;
 import com.bhs.gtk.screener.model.ScreenerResponse;
 import com.bhs.gtk.screener.persistence.ConditionResultEntity;
 import com.bhs.gtk.screener.persistence.ExecutableEntity;
-import com.bhs.gtk.screener.persistence.ExecutionRespository;
+import com.bhs.gtk.screener.persistence.ExecutableRespository;
 import com.bhs.gtk.screener.persistence.ScreenerEntity;
 import com.bhs.gtk.screener.persistence.ScreenerRepository;
 import com.bhs.gtk.screener.util.Mapper;
@@ -33,7 +32,7 @@ public class ScreenerServiceImpl implements ScreernerService {
 	private ScreenerRepository screenerRepository;
 	
 	@Autowired
-	private ExecutionRespository executionRespository;
+	private ExecutableRespository executableRespository;
 
 	@Override
 	public ScreenerResponse createScreener(ScreenerCreateRequest screenerCreateRequest) {
@@ -89,11 +88,11 @@ public class ScreenerServiceImpl implements ScreernerService {
 	public ScreenerDetailedResponse runScreener(ExecutableCreateRequest executableCreateRequest, UUID screenerId) {
 		ScreenerEntity screenerEntity = getScreenerEntity(screenerId);
 		if(screenerEntity != null) {
-			ExecutableEntity executionEntity = mapper.getExecutionEntity(executableCreateRequest,
+			ExecutableEntity executable = mapper.getExecutableEntity(executableCreateRequest,
 					screenerEntity.getWatchlistId(), screenerEntity.getConditionId());
 			List<ConditionResultEntity> resultEntities = mapper.getConditionResultEntities(executableCreateRequest, screenerEntity.getConditionId());
-			executionEntity.setConditionResultEntities(resultEntities);
-			ExecutableEntity savedEntity = executionRespository.save(executionEntity);
+			executable.setConditionResultEntities(resultEntities);
+			ExecutableEntity savedEntity = executableRespository.save(executable);
 			
 			//TODO: send async message to output topic of screener service and change status to EVALUATING and save in DB.
 			
