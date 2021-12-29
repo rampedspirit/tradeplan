@@ -29,7 +29,7 @@ import com.bhs.gtk.screener.persistence.ExecutableEntity;
 import com.bhs.gtk.screener.persistence.ScreenerEntity;
 
 @Component
-public class Mapper {
+public class Converter {
 
 	
 	@Autowired
@@ -41,10 +41,10 @@ public class Mapper {
 		return  new ExecutableEntity(note, marketTime, watchlistId, conditionId);
 	}
 	
-	public ExecutableResponse getExecutableResponse(ExecutableEntity executable) {
+	public ExecutableResponse convertToExecutableResponse(ExecutableEntity executable) {
 		ExecutableResponse response = new ExecutableResponse();
 		response.setExecutableId(executable.getExecutableId());
-		response.setMarketTime(convertDateToOffSetDatTime(executable.getMarketTime()));
+		response.setMarketTime(convertToOffSetDateTime(executable.getMarketTime()));
 		response.setNote(executable.getNote());
 		response.setStatus(executable.getStatus());
 		response.setNumberOfScripForExecution(new BigDecimal(executable.getNumberOfScripForExecution()));
@@ -53,10 +53,10 @@ public class Mapper {
 	}
 	
 	
-	public ExecutableDetailedResponse getExecutableDetailedResponse(ExecutableEntity executable) {
+	public ExecutableDetailedResponse convertToExecutableDetailedResponse(ExecutableEntity executable) {
 		ExecutableDetailedResponse response = new ExecutableDetailedResponse();
 		response.setExecutableId(executable.getExecutableId());
-		response.setMarketTime(convertDateToOffSetDatTime(executable.getMarketTime()));
+		response.setMarketTime(convertToOffSetDateTime(executable.getMarketTime()));
 		response.setNote(executable.getNote());
 		response.setStatus(executable.getStatus());
 		response.setNumberOfScripForExecution(new BigDecimal(executable.getNumberOfScripForExecution()));
@@ -100,22 +100,11 @@ public class Mapper {
 	public ScreenerEntity getScreenerEntity(ScreenerCreateRequest screenerRequest) {
 		ScreenerEntity entity = new ScreenerEntity(screenerRequest.getName(), screenerRequest.getDescription(),
 				screenerRequest.getWatchListId(), screenerRequest.getConditionId());
-//		for(int i=0; i<2;i++) {
-//			ExecutionEntity executionEntity = new ExecutionEntity(RandomStringUtils.randomAlphabetic(50), new Date(),
-//					screenerRequest.getWatchListId(), screenerRequest.getConditionId());
-//			for(int j=0; j<5; j++) {
-//				ConditionResultEntity conditionResultEntity = new ConditionResultEntity(UUID.randomUUID(), new Date(),
-//						RandomStringUtils.randomAlphabetic(4).toUpperCase(), "READY");
-//				conditionResultRepository.save(conditionResultEntity);
-//				executionEntity.getConditionResultEntities().add(conditionResultEntity);
-//			}
-//			entity.getExecutionEntities().add(executionEntity);
-//		}
 		return entity;
 	}
 	
 	
-	public ScreenerResponse getScreenerResponse(ScreenerEntity screenerEntity) {
+	public ScreenerResponse convertToScreenerResponse(ScreenerEntity screenerEntity) {
 		ScreenerResponse response = new ScreenerResponse();
 		response.setScreenerId(screenerEntity.getScreenerId());
 		response.setName(screenerEntity.getName());
@@ -125,23 +114,23 @@ public class Mapper {
 		return response;
 	}
 	
-	public ScreenerDetailedResponse getScreenerDetailedResponse(ScreenerEntity screenerEntity) {
+	public ScreenerDetailedResponse convertToScreenerDetailedResponse(ScreenerEntity screenerEntity) {
 		ScreenerDetailedResponse response = new ScreenerDetailedResponse();
 		response.setScreenerId(screenerEntity.getScreenerId());
 		response.setName(screenerEntity.getName());
 		response.setDescription(screenerEntity.getDescription());
 		response.setWatchListId(screenerEntity.getWatchlistId());
 		response.setConditionId(screenerEntity.getConditionId());
-		response.setExecutables(getExecutableResponses(screenerEntity.getExecutableEntities()));
+		response.setExecutables(convertToExecutableResponses(screenerEntity.getExecutableEntities()));
 		return response;
 	}
 
-	private List<ExecutableResponse> getExecutableResponses(List<ExecutableEntity> executables) {
+	private List<ExecutableResponse> convertToExecutableResponses(List<ExecutableEntity> executables) {
 		List<ExecutableResponse> executableResponses = new ArrayList<>();
 		for(ExecutableEntity entity : executables) {
 			ExecutableResponse response = new ExecutableResponse();
 			response.setExecutableId(entity.getExecutableId());
-			response.setMarketTime(convertDateToOffSetDatTime(entity.getMarketTime()));
+			response.setMarketTime(convertToOffSetDateTime(entity.getMarketTime()));
 			response.setNote(entity.getNote());
 			response.setNumberOfScripForExecution(new BigDecimal(entity.getNumberOfScripForExecution()));
 			response.setNumberOfScripWithResultAvailable(new BigDecimal(entity.getNumberOfScripWithResultAvailable()));
@@ -151,8 +140,8 @@ public class Mapper {
 		return executableResponses;
 	}
 	
-	private OffsetDateTime convertDateToOffSetDatTime(final Date date) {
-		return OffsetDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), ZoneId.systemDefault()); // NOSONAR
+	private OffsetDateTime convertToOffSetDateTime(final Date date) {
+		return OffsetDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), ZoneId.systemDefault());
 	}
 	
 }

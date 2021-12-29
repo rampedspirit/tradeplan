@@ -17,27 +17,23 @@ import com.bhs.gtk.screener.model.ScreenerPatchData.PropertyEnum;
 import com.bhs.gtk.screener.model.ScreenerResponse;
 import com.bhs.gtk.screener.persistence.ConditionResultEntity;
 import com.bhs.gtk.screener.persistence.ExecutableEntity;
-import com.bhs.gtk.screener.persistence.ExecutableRespository;
 import com.bhs.gtk.screener.persistence.ScreenerEntity;
 import com.bhs.gtk.screener.persistence.ScreenerRepository;
-import com.bhs.gtk.screener.util.Mapper;
+import com.bhs.gtk.screener.util.Converter;
 
 @Service
 public class ScreenerServiceImpl implements ScreernerService {
 	
 	@Autowired
-	Mapper mapper;
+	Converter converter;
 	
 	@Autowired
 	private ScreenerRepository screenerRepository;
 	
-	@Autowired
-	private ExecutableRespository executableRespository;
-
 	@Override
 	public ScreenerResponse createScreener(ScreenerCreateRequest screenerCreateRequest) {
-		ScreenerEntity entity = screenerRepository.save(mapper.getScreenerEntity(screenerCreateRequest));
-		return mapper.getScreenerResponse(entity);
+		ScreenerEntity entity = screenerRepository.save(converter.getScreenerEntity(screenerCreateRequest));
+		return converter.convertToScreenerResponse(entity);
 	}
 
 	@Override
@@ -45,7 +41,7 @@ public class ScreenerServiceImpl implements ScreernerService {
 		Iterator<ScreenerEntity> iterator = screenerRepository.findAll().iterator();
 		List<ScreenerResponse> screenerResponses = new ArrayList<>();
 		while(iterator.hasNext()) {
-			screenerResponses.add(mapper.getScreenerResponse(iterator.next()));
+			screenerResponses.add(converter.convertToScreenerResponse(iterator.next()));
 		}
 		return screenerResponses;
 	}
@@ -54,7 +50,7 @@ public class ScreenerServiceImpl implements ScreernerService {
 	public ScreenerDetailedResponse getScreener(UUID screenerId) {
 		ScreenerEntity screenerEntity = getScreenerEntity(screenerId);
 		if(screenerEntity != null) {
-			return mapper.getScreenerDetailedResponse(screenerEntity);
+			return converter.convertToScreenerDetailedResponse(screenerEntity);
 		}
 		//throw exception screener not found
 		return null;
@@ -65,7 +61,7 @@ public class ScreenerServiceImpl implements ScreernerService {
 		ScreenerEntity screenerEntity = getScreenerEntity(screenerId);
 		if(screenerEntity != null) {
 			screenerRepository.delete(screenerEntity);
-			return mapper.getScreenerResponse(screenerEntity);
+			return converter.convertToScreenerResponse(screenerEntity);
 		}
 		//throw exception
 		return null;
@@ -79,7 +75,7 @@ public class ScreenerServiceImpl implements ScreernerService {
 				update(screenerEntity, pData.getProperty(),pData.getValue());
 			}
 			ScreenerEntity savedEntity = screenerRepository.save(screenerEntity);
-			return mapper.getScreenerResponse(savedEntity);
+			return converter.convertToScreenerResponse(savedEntity);
 		}
 		return null;
 	}
@@ -88,19 +84,18 @@ public class ScreenerServiceImpl implements ScreernerService {
 	public ScreenerDetailedResponse runScreener(ExecutableCreateRequest executableCreateRequest, UUID screenerId) {
 		ScreenerEntity screenerEntity = getScreenerEntity(screenerId);
 		if(screenerEntity != null) {
-			ExecutableEntity executable = mapper.getExecutableEntity(executableCreateRequest,
+			ExecutableEntity executable = converter.getExecutableEntity(executableCreateRequest,
 					screenerEntity.getWatchlistId(), screenerEntity.getConditionId());
-			List<ConditionResultEntity> resultEntities = mapper.getConditionResultEntities(executableCreateRequest, screenerEntity.getConditionId());
+			List<ConditionResultEntity> resultEntities = converter.getConditionResultEntities(executableCreateRequest, screenerEntity.getConditionId());
 			executable.setConditionResultEntities(resultEntities);
 			
 			screenerEntity.getExecutableEntities().add(executable);
 			
-		//	ExecutableEntity savedEntity = executableRespository.save(executable);
 			ScreenerEntity savedScreenerEntity = screenerRepository.save(screenerEntity);
 			
 			//TODO: send async message to output topic of screener service and change status to EVALUATING and save in DB.
 			
-			return mapper.getScreenerDetailedResponse(savedScreenerEntity);
+			return converter.convertToScreenerDetailedResponse(savedScreenerEntity);
 		}
 		//throw exception
 		return null;

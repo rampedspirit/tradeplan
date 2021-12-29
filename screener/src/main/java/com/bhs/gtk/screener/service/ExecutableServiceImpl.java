@@ -12,14 +12,14 @@ import com.bhs.gtk.screener.model.ExecutablePatchData;
 import com.bhs.gtk.screener.model.ExecutableResponse;
 import com.bhs.gtk.screener.persistence.ExecutableEntity;
 import com.bhs.gtk.screener.persistence.ExecutableRespository;
-import com.bhs.gtk.screener.util.Mapper;
+import com.bhs.gtk.screener.util.Converter;
 
 @Service
 public class ExecutableServiceImpl implements ExecutableService{
 
 	
 	@Autowired
-	private Mapper mapper;
+	private Converter converter;
 	
 	@Autowired
 	private ExecutableRespository executableRespository;
@@ -28,7 +28,7 @@ public class ExecutableServiceImpl implements ExecutableService{
 	public ExecutableResponse getExecutable(UUID executableId) {
 		ExecutableEntity entity = getExecutableEntity(executableId);
 		if(entity != null) {
-			return mapper.getExecutableResponse(entity);
+			return converter.convertToExecutableResponse(entity);
 		}
 		//thow exeception
 		return null;
@@ -38,7 +38,7 @@ public class ExecutableServiceImpl implements ExecutableService{
 	public ExecutableDetailedResponse getResult(UUID executableId) {
 		ExecutableEntity entity = getExecutableEntity(executableId);
 		if(entity != null) {
-			return mapper.getExecutableDetailedResponse(entity);
+			return converter.convertToExecutableDetailedResponse(entity);
 		}
 		//thow exeception
 		return null;
@@ -52,7 +52,7 @@ public class ExecutableServiceImpl implements ExecutableService{
 					ExecutablePatchData.PropertyEnum.NOTE.name())) {
 				entity.setNote(executablePatchData.getValue());
 				ExecutableEntity savedEntity = executableRespository.save(entity);
-				return mapper.getExecutableResponse(savedEntity);
+				return converter.convertToExecutableResponse(savedEntity);
 			}
 		}
 		return null;
