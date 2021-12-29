@@ -39,7 +39,7 @@ jobs:
     - name: Push filter-service Image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: gtk-filter-service-${{ github.event.inputs.ImageVersion }}
+        IMAGE_TAG: ${{ github.event.inputs.ImageVersion }}
       run: |
         docker build filter/ -f filter/Dockerfile -t $IMAGE_TAG
         docker push $ECR_REGISTRY/gtk-filter-service:$IMAGE_TAG
