@@ -1,37 +1,43 @@
 package com.bhs.gtk.screener.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.validation.constraints.NotNull;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.bhs.gtk.screener.model.PatchData;
-import com.bhs.gtk.screener.model.PatchData.PropertyEnum;
-import com.bhs.gtk.screener.model.PatchModel;
-import com.bhs.gtk.screener.model.ScreenerRequest;
+import com.bhs.gtk.screener.model.ExecutableCreateRequest;
+import com.bhs.gtk.screener.model.ScreenerCreateRequest;
+import com.bhs.gtk.screener.model.ScreenerDetailedResponse;
+import com.bhs.gtk.screener.model.ScreenerPatchData;
+import com.bhs.gtk.screener.model.ScreenerPatchData.PropertyEnum;
 import com.bhs.gtk.screener.model.ScreenerResponse;
+import com.bhs.gtk.screener.persistence.ConditionResultEntity;
+import com.bhs.gtk.screener.persistence.ExecutableEntity;
+import com.bhs.gtk.screener.persistence.ExecutionRespository;
 import com.bhs.gtk.screener.persistence.ScreenerEntity;
 import com.bhs.gtk.screener.persistence.ScreenerRepository;
 import com.bhs.gtk.screener.util.Mapper;
 
 @Service
 public class ScreenerServiceImpl implements ScreernerService {
-
+	
 	@Autowired
 	Mapper mapper;
 	
 	@Autowired
-	ScreenerRepository screenerRepository;
+	private ScreenerRepository screenerRepository;
 	
+	@Autowired
+	private ExecutionRespository executionRespository;
+
 	@Override
-	public ScreenerResponse createScreener(ScreenerRequest screenerRequest) {
-		ScreenerEntity entity = screenerRepository.save(mapper.getScreenerEntity(screenerRequest));
+	public ScreenerResponse createScreener(ScreenerCreateRequest screenerCreateRequest) {
+		ScreenerEntity entity = screenerRepository.save(mapper.getScreenerEntity(screenerCreateRequest));
 		return mapper.getScreenerResponse(entity);
 	}
 
@@ -46,10 +52,10 @@ public class ScreenerServiceImpl implements ScreernerService {
 	}
 
 	@Override
-	public ScreenerResponse getScreener(UUID screenerId) {
+	public ScreenerDetailedResponse getScreener(UUID screenerId) {
 		ScreenerEntity screenerEntity = getScreenerEntity(screenerId);
 		if(screenerEntity != null) {
-			return mapper.getScreenerResponse(screenerEntity);
+			return mapper.getScreenerDetailedResponse(screenerEntity);
 		}
 		//throw exception screener not found
 		return null;
@@ -67,19 +73,36 @@ public class ScreenerServiceImpl implements ScreernerService {
 	}
 
 	@Override
-	public ScreenerResponse updateScreener(PatchModel patchModel, UUID screenerId) {
+	public ScreenerResponse updateScreener(List<ScreenerPatchData> patchData, UUID screenerId) {
 		ScreenerEntity screenerEntity = getScreenerEntity(screenerId);
-		if(screenerEntity == null) {
-			return null;
+		if(screenerEntity != null) {
+			for(ScreenerPatchData pData : patchData) {
+				update(screenerEntity, pData.getProperty(),pData.getValue());
+			}
+			ScreenerEntity savedEntity = screenerRepository.save(screenerEntity);
+			return mapper.getScreenerResponse(savedEntity);
 		}
-		for(PatchData pd : patchModel.getPatchData()) {
-			@NotNull PropertyEnum propertyName = pd.getProperty();
-			String value = pd.getValue();
-			update(screenerEntity, propertyName,value);
-		}
-		ScreenerEntity savedScreenerEntity = screenerRepository.save(screenerEntity);
-		return mapper.getScreenerResponse(savedScreenerEntity);
+		return null;
 	}
+	
+	@Override
+	public ScreenerDetailedResponse runScreener(ExecutableCreateRequest executableCreateRequest, UUID screenerId) {
+		ScreenerEntity screenerEntity = getScreenerEntity(screenerId);
+		if(screenerEntity != null) {
+			ExecutableEntity executionEntity = mapper.getExecutionEntity(executableCreateRequest,
+					screenerEntity.getWatchlistId(), screenerEntity.getConditionId());
+			List<ConditionResultEntity> resultEntities = mapper.getConditionResultEntities(executableCreateRequest, screenerEntity.getConditionId());
+			executionEntity.setConditionResultEntities(resultEntities);
+			ExecutableEntity savedEntity = executionRespository.save(executionEntity);
+			
+			//TODO: send async message to output topic of screener service and change status to EVALUATING and save in DB.
+			
+			return mapper.getScreenerDetailedResponse(screenerEntity);
+		}
+		//throw exception
+		return null;
+	}
+	
 
 	private boolean update(ScreenerEntity screenerEntity, PropertyEnum propertyName, String value) {
 		switch (propertyName) {
@@ -90,10 +113,10 @@ public class ScreenerServiceImpl implements ScreernerService {
 			screenerEntity.setDescription(value);
 			break;
 		case WATCHLIST_ID:
-			setWatchlistId(screenerEntity,value);
+			screenerEntity.setConditionId(UUID.fromString(value));
 			break;
 		case CONDITION_ID:
-			setConditionId(screenerEntity,value);
+			screenerEntity.setWatchlistId(UUID.fromString(value));
 			break;
 		default:
 			//throw unsupported exception.
@@ -102,19 +125,7 @@ public class ScreenerServiceImpl implements ScreernerService {
 		return true;
 	}
 
-	private void setConditionId(ScreenerEntity screenerEntity, String value) {
-		screenerEntity.setConditionId(UUID.fromString(value));
-		// TODO handle illegal argument exception
-		//TODO clear results associated with screener
-		
-	}
-
-	private void setWatchlistId(ScreenerEntity screenerEntity, String value) {
-		screenerEntity.setWatchlistId(UUID.fromString(value));
-		// TODO handle illegal argument exception
-		//TODO clear results associated with screener
-	}
-
+	
 	private ScreenerEntity getScreenerEntity(UUID screenerId) {
 		if (screenerId != null) {
 			Optional<ScreenerEntity> screenerEntityContainer = screenerRepository.findById(screenerId);
@@ -124,4 +135,5 @@ public class ScreenerServiceImpl implements ScreernerService {
 		}
 		return null;
 	}
+
 }

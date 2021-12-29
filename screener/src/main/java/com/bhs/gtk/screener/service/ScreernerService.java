@@ -3,14 +3,17 @@ package com.bhs.gtk.screener.service;
 import java.util.List;
 import java.util.UUID;
 
-import com.bhs.gtk.screener.model.PatchModel;
-import com.bhs.gtk.screener.model.ScreenerRequest;
+import com.bhs.gtk.screener.model.ExecutableCreateRequest;
+import com.bhs.gtk.screener.model.ScreenerCreateRequest;
+import com.bhs.gtk.screener.model.ScreenerDetailedResponse;
+import com.bhs.gtk.screener.model.ScreenerPatchData;
 import com.bhs.gtk.screener.model.ScreenerResponse;
 
 public interface ScreernerService {
-	public ScreenerResponse createScreener(ScreenerRequest screenerRequest);
+	public ScreenerResponse createScreener(ScreenerCreateRequest screenerCreateRequest);
 	public List<ScreenerResponse> getAllScreeners();
-	public ScreenerResponse getScreener(UUID screenerId);
+	public ScreenerDetailedResponse getScreener(UUID screenerId);
 	public ScreenerResponse deleteScreener(UUID screenerId);
-	public ScreenerResponse updateScreener(PatchModel patchModel, UUID screenerId);
+	public ScreenerResponse updateScreener(List<ScreenerPatchData> patchData, UUID screenerId);
+	public ScreenerDetailedResponse runScreener(ExecutableCreateRequest executableCreateRequest, UUID screenerId);
 }

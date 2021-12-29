@@ -11,19 +11,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
 import com.bhs.gtk.screener.api.ScreenerApi;
-import com.bhs.gtk.screener.model.PatchModel;
-import com.bhs.gtk.screener.model.ScreenerRequest;
+import com.bhs.gtk.screener.model.ExecutableCreateRequest;
+import com.bhs.gtk.screener.model.ScreenerCreateRequest;
+import com.bhs.gtk.screener.model.ScreenerDetailedResponse;
+import com.bhs.gtk.screener.model.ScreenerPatchData;
 import com.bhs.gtk.screener.model.ScreenerResponse;
 import com.bhs.gtk.screener.service.ScreenerServiceImpl;
 
 @Controller
 public class ScreenerApiController implements ScreenerApi {
+
 	
 	@Autowired
 	private ScreenerServiceImpl screenerServiceImpl;
 
 	@Override
-	public ResponseEntity<ScreenerResponse> createScreener(@Valid ScreenerRequest body) {
+	public ResponseEntity<ScreenerResponse> createScreener(@Valid ScreenerCreateRequest body) {
 		ScreenerResponse screenerResponse = screenerServiceImpl.createScreener(body);
 		return new ResponseEntity<ScreenerResponse>(screenerResponse, HttpStatus.CREATED);
 	}
@@ -41,15 +44,21 @@ public class ScreenerApiController implements ScreenerApi {
 	}
 
 	@Override
-	public ResponseEntity<ScreenerResponse> getScreener(UUID screenerId) {
-		ScreenerResponse screener = screenerServiceImpl.getScreener(screenerId);
-		return new ResponseEntity<ScreenerResponse>(screener, HttpStatus.OK); 
+	public ResponseEntity<ScreenerDetailedResponse> getScreener(UUID screenerId) {
+		ScreenerDetailedResponse screener = screenerServiceImpl.getScreener(screenerId);
+		return new ResponseEntity<ScreenerDetailedResponse>(screener, HttpStatus.OK); 
 	}
 
 	@Override
-	public ResponseEntity<ScreenerResponse> updateScreener(@Valid PatchModel body, UUID screenerId) {
+	public ResponseEntity<ScreenerResponse> updateScreener(@Valid List<ScreenerPatchData> body, UUID screenerId) {
 		ScreenerResponse screener = screenerServiceImpl.updateScreener(body, screenerId);
-		return new ResponseEntity<ScreenerResponse>(screener, HttpStatus.OK); 
+		return new ResponseEntity<ScreenerResponse>(screener, HttpStatus.OK);
 	}
-
+	
+	@Override
+	public ResponseEntity<ScreenerDetailedResponse> runScreener(@Valid ExecutableCreateRequest body, UUID screenerId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 }
