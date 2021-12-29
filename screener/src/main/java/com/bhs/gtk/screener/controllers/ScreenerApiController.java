@@ -57,8 +57,8 @@ public class ScreenerApiController implements ScreenerApi {
 	
 	@Override
 	public ResponseEntity<ScreenerDetailedResponse> runScreener(@Valid ExecutableCreateRequest body, UUID screenerId) {
-		// TODO Auto-generated method stub
-		return null;
+		ScreenerDetailedResponse screener = screenerServiceImpl.runScreener(body, screenerId);
+		return new ResponseEntity<ScreenerDetailedResponse>(screener, HttpStatus.OK); 
 	}
 	
 }
