@@ -15,11 +15,13 @@ import org.threeten.bp.OffsetDateTime;
 import org.threeten.bp.ZoneId;
 
 import com.bhs.gtk.screener.model.ExecutableCreateRequest;
+import com.bhs.gtk.screener.model.ExecutableDetailedResponse;
 import com.bhs.gtk.screener.model.ExecutableResponse;
 import com.bhs.gtk.screener.model.ScreenerCreateRequest;
 import com.bhs.gtk.screener.model.ScreenerDetailedResponse;
 import com.bhs.gtk.screener.model.ScreenerResponse;
 import com.bhs.gtk.screener.model.ScripResult;
+import com.bhs.gtk.screener.model.ScripResult.StatusEnum;
 import com.bhs.gtk.screener.persistence.ConditionResultEntity;
 import com.bhs.gtk.screener.persistence.ConditionResultId;
 import com.bhs.gtk.screener.persistence.ConditionResultRepository;
@@ -39,6 +41,41 @@ public class Mapper {
 		return  new ExecutableEntity(note, marketTime, watchlistId, conditionId);
 	}
 	
+	public ExecutableResponse getExecutableResponse(ExecutableEntity executable) {
+		ExecutableResponse response = new ExecutableResponse();
+		response.setExecutableId(executable.getExecutableId());
+		response.setMarketTime(convertDateToOffSetDatTime(executable.getMarketTime()));
+		response.setNote(executable.getNote());
+		response.setStatus(executable.getStatus());
+		response.setNumberOfScripForExecution(new BigDecimal(executable.getNumberOfScripForExecution()));
+		response.setNumberOfScripWithResultAvailable(new BigDecimal(executable.getNumberOfScripWithResultAvailable()));
+		return response;
+	}
+	
+	
+	public ExecutableDetailedResponse getExecutableDetailedResponse(ExecutableEntity executable) {
+		ExecutableDetailedResponse response = new ExecutableDetailedResponse();
+		response.setExecutableId(executable.getExecutableId());
+		response.setMarketTime(convertDateToOffSetDatTime(executable.getMarketTime()));
+		response.setNote(executable.getNote());
+		response.setStatus(executable.getStatus());
+		response.setNumberOfScripForExecution(new BigDecimal(executable.getNumberOfScripForExecution()));
+		response.setNumberOfScripWithResultAvailable(new BigDecimal(executable.getNumberOfScripWithResultAvailable()));
+		response.setResult(getScripResult(executable.getConditionResultEntities()));
+		return response;
+	}
+	
+	private List<ScripResult> getScripResult(List<ConditionResultEntity> conditionResultEntities) {
+		List<ScripResult> scripResults = new ArrayList<>();
+		for(ConditionResultEntity resultEntity : conditionResultEntities) {
+			ScripResult result = new ScripResult();
+			result.setScripName(resultEntity.getScripName());
+			result.setStatus(StatusEnum.valueOf(resultEntity.getStatus()));
+			scripResults.add(result);
+		}
+		return scripResults;
+	}
+
 	public List<ConditionResultEntity> getConditionResultEntities(ExecutableCreateRequest executableCreateRequest, UUID conditionId) {
 		List<ConditionResultEntity> resultEntities = new ArrayList<>();
 		List<ConditionResultEntity> savedResultEntities = new ArrayList<>();
@@ -95,7 +132,7 @@ public class Mapper {
 		response.setDescription(screenerEntity.getDescription());
 		response.setWatchListId(screenerEntity.getWatchlistId());
 		response.setConditionId(screenerEntity.getConditionId());
-		response.setExecutable(getExecutableResponses(screenerEntity.getExecutables()));
+		response.setExecutables(getExecutableResponses(screenerEntity.getExecutableEntities()));
 		return response;
 	}
 

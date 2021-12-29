@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.bhs.gtk.screener.model.ExecutableDetailedResponse;
 import com.bhs.gtk.screener.model.ExecutablePatchData;
@@ -13,6 +14,7 @@ import com.bhs.gtk.screener.persistence.ExecutableEntity;
 import com.bhs.gtk.screener.persistence.ExecutableRespository;
 import com.bhs.gtk.screener.util.Mapper;
 
+@Service
 public class ExecutableServiceImpl implements ExecutableService{
 
 	

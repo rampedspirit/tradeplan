@@ -92,11 +92,15 @@ public class ScreenerServiceImpl implements ScreernerService {
 					screenerEntity.getWatchlistId(), screenerEntity.getConditionId());
 			List<ConditionResultEntity> resultEntities = mapper.getConditionResultEntities(executableCreateRequest, screenerEntity.getConditionId());
 			executable.setConditionResultEntities(resultEntities);
-			ExecutableEntity savedEntity = executableRespository.save(executable);
+			
+			screenerEntity.getExecutableEntities().add(executable);
+			
+		//	ExecutableEntity savedEntity = executableRespository.save(executable);
+			ScreenerEntity savedScreenerEntity = screenerRepository.save(screenerEntity);
 			
 			//TODO: send async message to output topic of screener service and change status to EVALUATING and save in DB.
 			
-			return mapper.getScreenerDetailedResponse(screenerEntity);
+			return mapper.getScreenerDetailedResponse(savedScreenerEntity);
 		}
 		//throw exception
 		return null;

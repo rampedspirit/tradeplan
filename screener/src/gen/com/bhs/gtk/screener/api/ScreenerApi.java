@@ -28,7 +28,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.List;
 import java.util.Map;
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-12-29T07:42:30.906286300+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-12-29T22:17:30.858539100+05:30[Asia/Calcutta]")
 
 @Api(value = "Screener", description = "the Screener API")
 public interface ScreenerApi {
@@ -46,7 +46,7 @@ public interface ScreenerApi {
 
     @ApiOperation(value = "delete", nickname = "deleteScreener", notes = "delete screener of given id", response = ScreenerResponse.class, tags={ "screener", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 204, message = "screener with give id is deleted successfully.", response = ScreenerResponse.class),
+        @ApiResponse(code = 204, message = "screener with give id and all associated exectables of screener are deleted successfully.", response = ScreenerResponse.class),
         @ApiResponse(code = 404, message = "Requested screener not found.", response = Error.class) })
     @RequestMapping(value = "/v1/screener/{screenerId}",
         produces = { "application/json" }, 

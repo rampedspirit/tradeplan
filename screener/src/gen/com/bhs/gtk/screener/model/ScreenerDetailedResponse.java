@@ -17,7 +17,7 @@ import javax.validation.constraints.*;
  * ScreenerDetailedResponse
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-12-29T07:42:30.906286300+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-12-29T22:17:30.858539100+05:30[Asia/Calcutta]")
 
 public class ScreenerDetailedResponse   {
   @JsonProperty("screenerId")
@@ -35,9 +35,9 @@ public class ScreenerDetailedResponse   {
   @JsonProperty("conditionId")
   private UUID conditionId = null;
 
-  @JsonProperty("executable")
+  @JsonProperty("executables")
   @Valid
-  private List<ExecutableResponse> executable = null;
+  private List<ExecutableResponse> executables = null;
 
   public ScreenerDetailedResponse screenerId(UUID screenerId) {
     this.screenerId = screenerId;
@@ -66,10 +66,10 @@ public class ScreenerDetailedResponse   {
   }
 
   /**
-   * name of condition
+   * name of screener
    * @return name
   **/
-  @ApiModelProperty(required = true, value = "name of condition")
+  @ApiModelProperty(required = true, value = "name of screener")
   @NotNull
 
 
@@ -87,10 +87,10 @@ public class ScreenerDetailedResponse   {
   }
 
   /**
-   * description of condition
+   * description of screener
    * @return description
   **/
-  @ApiModelProperty(value = "description of condition")
+  @ApiModelProperty(value = "description of screener")
 
 
   public String getDescription() {
@@ -143,33 +143,33 @@ public class ScreenerDetailedResponse   {
     this.conditionId = conditionId;
   }
 
-  public ScreenerDetailedResponse executable(List<ExecutableResponse> executable) {
-    this.executable = executable;
+  public ScreenerDetailedResponse executables(List<ExecutableResponse> executables) {
+    this.executables = executables;
     return this;
   }
 
-  public ScreenerDetailedResponse addExecutableItem(ExecutableResponse executableItem) {
-    if (this.executable == null) {
-      this.executable = new ArrayList<ExecutableResponse>();
+  public ScreenerDetailedResponse addExecutablesItem(ExecutableResponse executablesItem) {
+    if (this.executables == null) {
+      this.executables = new ArrayList<ExecutableResponse>();
     }
-    this.executable.add(executableItem);
+    this.executables.add(executablesItem);
     return this;
   }
 
   /**
-   * all execuatbles which are attached to the screener with given watchlist and condition
-   * @return executable
+   * all executables which are attached to the screener with given watchlist and condition
+   * @return executables
   **/
-  @ApiModelProperty(value = "all execuatbles which are attached to the screener with given watchlist and condition")
+  @ApiModelProperty(value = "all executables which are attached to the screener with given watchlist and condition")
 
   @Valid
 
-  public List<ExecutableResponse> getExecutable() {
-    return executable;
+  public List<ExecutableResponse> getExecutables() {
+    return executables;
   }
 
-  public void setExecutable(List<ExecutableResponse> executable) {
-    this.executable = executable;
+  public void setExecutables(List<ExecutableResponse> executables) {
+    this.executables = executables;
   }
 
 
@@ -187,12 +187,12 @@ public class ScreenerDetailedResponse   {
         Objects.equals(this.description, screenerDetailedResponse.description) &&
         Objects.equals(this.watchListId, screenerDetailedResponse.watchListId) &&
         Objects.equals(this.conditionId, screenerDetailedResponse.conditionId) &&
-        Objects.equals(this.executable, screenerDetailedResponse.executable);
+        Objects.equals(this.executables, screenerDetailedResponse.executables);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(screenerId, name, description, watchListId, conditionId, executable);
+    return Objects.hash(screenerId, name, description, watchListId, conditionId, executables);
   }
 
   @Override
@@ -205,7 +205,7 @@ public class ScreenerDetailedResponse   {
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    watchListId: ").append(toIndentedString(watchListId)).append("\n");
     sb.append("    conditionId: ").append(toIndentedString(conditionId)).append("\n");
-    sb.append("    executable: ").append(toIndentedString(executable)).append("\n");
+    sb.append("    executables: ").append(toIndentedString(executables)).append("\n");
     sb.append("}");
     return sb.toString();
   }

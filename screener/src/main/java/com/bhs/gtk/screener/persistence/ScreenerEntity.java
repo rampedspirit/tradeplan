@@ -36,7 +36,7 @@ public class ScreenerEntity {
 	private UUID conditionId;
 	
 	@OneToMany (cascade = CascadeType.ALL)
-	private List<ExecutableEntity> executables;
+	private List<ExecutableEntity> executableEntities;
 
 	protected ScreenerEntity() {}
 	
@@ -45,7 +45,7 @@ public class ScreenerEntity {
 		this.setDescription(description);
 		this.watchlistId = watchlistId;
 		this.conditionId = conditionId;
-		this.executables = new ArrayList<>();
+		this.setExecutableEntities(new ArrayList<>());
 	}
 	
 	public UUID getScreenerId() {
@@ -88,13 +88,21 @@ public class ScreenerEntity {
 		this.conditionId = conditionId;
 	}
 
-	public List<ExecutableEntity> getExecutables() {
-		return executables;
+	public List<ExecutableEntity> getExecutableEntities() {
+		return executableEntities;
 	}
 
-	public void setExecutables(List<ExecutableEntity> executables) {
-		this.executables = executables;
+	public void setExecutableEntities(List<ExecutableEntity> executableEntities) {
+		this.executableEntities = executableEntities;
 	}
+
+//	public List<ExecutableEntity> getExecutables() {
+//		return executables;
+//	}
+//
+//	public void setExecutables(List<ExecutableEntity> executables) {
+//		this.executables = executables;
+//	}
 
 
 }

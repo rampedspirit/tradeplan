@@ -147,7 +147,7 @@ paths:
           required: true
       responses:
         '204':
-          description: screener with give id is deleted successfully.
+          description: screener with give id and all associated exectables of screener are deleted successfully.
           content:
             application/json:
               schema:
@@ -314,10 +314,10 @@ components:
       properties:
         name:
           type: string
-          description: name of condition
+          description: name of screener
         description:
           type: string
-          description: description of condition
+          description: description of screener
         watchListId:
           type: string
           format: uuid
@@ -342,10 +342,10 @@ components:
             screener identifier
         name:
           type: string
-          description: name of condition
+          description: name of screener
         description:
           type: string
-          description: description of condition
+          description: description of screener
         watchListId:
           type: string
           format: uuid
@@ -370,10 +370,10 @@ components:
             screener identifier
         name:
           type: string
-          description: name of condition
+          description: name of screener
         description:
           type: string
-          description: description of condition
+          description: description of screener
         watchListId:
           type: string
           format: uuid
@@ -384,11 +384,11 @@ components:
           format: uuid
           description: >-
             condition identifier.
-        executable:
+        executables:
           type: array
           items:
             $ref: '#/components/schemas/ExecutableResponse'
-          description: all execuatbles which are attached to the screener with given watchlist and condition
+          description: all executables which are attached to the screener with given watchlist and condition
 
     ScreenerPatchData:
       type: object

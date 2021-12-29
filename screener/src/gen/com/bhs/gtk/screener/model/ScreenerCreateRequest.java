@@ -14,7 +14,7 @@ import javax.validation.constraints.*;
  * ScreenerCreateRequest
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-12-29T07:42:30.906286300+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-12-29T22:17:30.858539100+05:30[Asia/Calcutta]")
 
 public class ScreenerCreateRequest   {
   @JsonProperty("name")
@@ -35,10 +35,10 @@ public class ScreenerCreateRequest   {
   }
 
   /**
-   * name of condition
+   * name of screener
    * @return name
   **/
-  @ApiModelProperty(required = true, value = "name of condition")
+  @ApiModelProperty(required = true, value = "name of screener")
   @NotNull
 
 
@@ -56,10 +56,10 @@ public class ScreenerCreateRequest   {
   }
 
   /**
-   * description of condition
+   * description of screener
    * @return description
   **/
-  @ApiModelProperty(value = "description of condition")
+  @ApiModelProperty(value = "description of screener")
 
 
   public String getDescription() {
