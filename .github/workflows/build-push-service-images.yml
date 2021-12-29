@@ -3,9 +3,7 @@ name: Build and Push Service Docker Images
 on:
   workflow_dispatch:
     inputs:
-     RepoName:
-      required: true
-      description: Name of the ECR Repository
+ 
      ImageVersion:
         required: true
         description: Version of Image
@@ -41,32 +39,7 @@ jobs:
     - name: Push filter-service Image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: ${{ github.event.inputs.RepoName }}
         IMAGE_TAG: gtk-filter-service-${{ github.event.inputs.ImageVersion }}
       run: |
-        docker build filter/ -f filter/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg DB_USER_NAME=${{ secrets.DB_USER_NAME }} --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-    
-    - name: Build condition-service
-      run: mvn -B package --file condition/pom.xml
-
-    - name: Push condition-service Image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: ${{ github.event.inputs.RepoName }}
-        IMAGE_TAG: gtk-condition-service-${{ github.event.inputs.ImageVersion }}
-      run: |
-        docker build condition/ -f condition/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg DB_USER_NAME=${{ secrets.DB_USER_NAME }} --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-    - name: Build screener-service
-      run: mvn -B package --file screener/pom.xml
-
-    - name: Push screener-service Image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: ${{ github.event.inputs.RepoName }}
-        IMAGE_TAG: gtk-screener-service-${{ github.event.inputs.ImageVersion }}
-      run: |
-        docker build screener/ -f screener/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg DB_USER_NAME=${{ secrets.DB_USER_NAME }} --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker build filter/ -f filter/Dockerfile -t $ECR_REGISTRY/gtk-filter-service:$IMAGE_TAG
+        docker push $ECR_REGISTRY/gtk-filter-service:$IMAGE_TAG
