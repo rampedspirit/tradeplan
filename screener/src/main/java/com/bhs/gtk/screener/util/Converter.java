@@ -32,15 +32,6 @@ import com.bhs.gtk.screener.persistence.ScreenerEntity;
 public class Converter {
 
 	
-	@Autowired
-	private ConditionResultRepository  conditionResultRepository;
-	
-	public ExecutableEntity getExecutableEntity(ExecutableCreateRequest executableCreateRequest, UUID watchlistId,UUID conditionId) {
-		String note = executableCreateRequest.getNote();
-		Date marketTime = DateTimeUtils.toDate(executableCreateRequest.getMarketTime().toInstant());
-		return  new ExecutableEntity(note, marketTime, watchlistId, conditionId);
-	}
-	
 	public ExecutableResponse convertToExecutableResponse(ExecutableEntity executable) {
 		ExecutableResponse response = new ExecutableResponse();
 		response.setExecutableId(executable.getExecutableId());
@@ -61,11 +52,11 @@ public class Converter {
 		response.setStatus(executable.getStatus());
 		response.setNumberOfScripForExecution(new BigDecimal(executable.getNumberOfScripForExecution()));
 		response.setNumberOfScripWithResultAvailable(new BigDecimal(executable.getNumberOfScripWithResultAvailable()));
-		response.setResult(getScripResult(executable.getConditionResultEntities()));
+		response.setResult(convertToScripResults(executable.getConditionResultEntities()));
 		return response;
 	}
 	
-	private List<ScripResult> getScripResult(List<ConditionResultEntity> conditionResultEntities) {
+	private List<ScripResult> convertToScripResults(List<ConditionResultEntity> conditionResultEntities) {
 		List<ScripResult> scripResults = new ArrayList<>();
 		for(ConditionResultEntity resultEntity : conditionResultEntities) {
 			ScripResult result = new ScripResult();
@@ -76,33 +67,6 @@ public class Converter {
 		return scripResults;
 	}
 
-	public List<ConditionResultEntity> getConditionResultEntities(ExecutableCreateRequest executableCreateRequest, UUID conditionId) {
-		List<ConditionResultEntity> resultEntities = new ArrayList<>();
-		List<ConditionResultEntity> savedResultEntities = new ArrayList<>();
-		Date marketTime = DateTimeUtils.toDate(executableCreateRequest.getMarketTime().toInstant());
-		for(String scripName: executableCreateRequest.getScripNames()) {
-			ConditionResultId resultId = new ConditionResultId(conditionId, marketTime, scripName);
-			Optional<ConditionResultEntity> entityInContainer = conditionResultRepository.findById(resultId);
-			if(entityInContainer.isPresent()) {
-				savedResultEntities.add(entityInContainer.get());
-			}else {
-				resultEntities.add(new ConditionResultEntity(conditionId, marketTime, scripName,
-						ScripResult.StatusEnum.SCHEDULED.name()));
-			}
-		}
-		if(!resultEntities.isEmpty()) {
-			Iterable<ConditionResultEntity> iterableSavedEntities = conditionResultRepository.saveAll(resultEntities);
-			iterableSavedEntities.forEach(e -> savedResultEntities.add(e));
-		}
-		return  savedResultEntities;
-	}
-	
-	public ScreenerEntity getScreenerEntity(ScreenerCreateRequest screenerRequest) {
-		ScreenerEntity entity = new ScreenerEntity(screenerRequest.getName(), screenerRequest.getDescription(),
-				screenerRequest.getWatchListId(), screenerRequest.getConditionId());
-		return entity;
-	}
-	
 	
 	public ScreenerResponse convertToScreenerResponse(ScreenerEntity screenerEntity) {
 		ScreenerResponse response = new ScreenerResponse();

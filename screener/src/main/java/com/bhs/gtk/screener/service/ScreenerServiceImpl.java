@@ -16,6 +16,7 @@ import com.bhs.gtk.screener.model.ScreenerPatchData;
 import com.bhs.gtk.screener.model.ScreenerPatchData.PropertyEnum;
 import com.bhs.gtk.screener.model.ScreenerResponse;
 import com.bhs.gtk.screener.persistence.ConditionResultEntity;
+import com.bhs.gtk.screener.persistence.EntityCreator;
 import com.bhs.gtk.screener.persistence.ExecutableEntity;
 import com.bhs.gtk.screener.persistence.ScreenerEntity;
 import com.bhs.gtk.screener.persistence.ScreenerRepository;
@@ -25,14 +26,17 @@ import com.bhs.gtk.screener.util.Converter;
 public class ScreenerServiceImpl implements ScreernerService {
 	
 	@Autowired
-	Converter converter;
+	private Converter converter;
+	
+	@Autowired
+	private EntityCreator entityCreator;
 	
 	@Autowired
 	private ScreenerRepository screenerRepository;
 	
 	@Override
 	public ScreenerResponse createScreener(ScreenerCreateRequest screenerCreateRequest) {
-		ScreenerEntity entity = screenerRepository.save(converter.getScreenerEntity(screenerCreateRequest));
+		ScreenerEntity entity = screenerRepository.save(entityCreator.createScreenerEntity(screenerCreateRequest));
 		return converter.convertToScreenerResponse(entity);
 	}
 
@@ -84,9 +88,9 @@ public class ScreenerServiceImpl implements ScreernerService {
 	public ScreenerDetailedResponse runScreener(ExecutableCreateRequest executableCreateRequest, UUID screenerId) {
 		ScreenerEntity screenerEntity = getScreenerEntity(screenerId);
 		if(screenerEntity != null) {
-			ExecutableEntity executable = converter.getExecutableEntity(executableCreateRequest,
+			ExecutableEntity executable = entityCreator.createExecutableEntity(executableCreateRequest,
 					screenerEntity.getWatchlistId(), screenerEntity.getConditionId());
-			List<ConditionResultEntity> resultEntities = converter.getConditionResultEntities(executableCreateRequest, screenerEntity.getConditionId());
+			List<ConditionResultEntity> resultEntities = entityCreator.createConditionResultEntities(executableCreateRequest, screenerEntity.getConditionId());
 			executable.setConditionResultEntities(resultEntities);
 			
 			screenerEntity.getExecutableEntities().add(executable);
