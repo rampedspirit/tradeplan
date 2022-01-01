@@ -39,7 +39,29 @@ jobs:
     - name: Push filter-service Image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: gtk-filter-service-${{ github.event.inputs.ImageVersion }}
+        IMAGE_TAG: ${{ github.event.inputs.ImageVersion }}
       run: |
         docker build filter/ -f filter/Dockerfile -t $ECR_REGISTRY/gtk-filter-service:$IMAGE_TAG
         docker push $ECR_REGISTRY/gtk-filter-service:$IMAGE_TAG
+      
+    - name: Build condition-service
+      run: mvn -B package --file condition/pom.xml
+
+    - name: Push condition-service Image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.event.inputs.ImageVersion }}
+      run: |
+        docker build condition/ -f condition/Dockerfile -t $ECR_REGISTRY/gtk-condition-service:$IMAGE_TAG
+        docker push $ECR_REGISTRY/gtk-condition-service:$IMAGE_TAG
+
+    - name: Build screener-service
+      run: mvn -B package --file screener/pom.xml
+
+    - name: Push screener-service Image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.event.inputs.ImageVersion }}
+      run: |
+        docker build screener/ -f screener/Dockerfile -t $ECR_REGISTRY/gtk-screener-service:$IMAGE_TAG
+        docker push $ECR_REGISTRY/gtk-screener-service:$IMAGE_TAG
