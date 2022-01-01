@@ -1,4 +1,5 @@
 import { Stack, StackProps } from "aws-cdk-lib";
+import { LogGroup } from "aws-cdk-lib/aws-logs";
 import { Construct } from "constructs";
 import { AppInfraStack } from "./app/app-infra-stack";
 import { BaseInfraStack } from "./base/base-infra-stack";

@@ -14,8 +14,7 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
  * `cdk synth`       emits the synthesized CloudFormation template
 
 ## Local run commands
- * cdk synth -v --ca-bundle-path U:\CERT\BOSCH-CA-DE.pem --context stackPrefix=GTK-Prod --context action=start
- * cdk synth -v --ca-bundle-path U:\CERT\BOSCH-CA-DE.pem --context stackPrefix=GTK-Prod --context action=stop
- * cdk deploy -v --ca-bundle-path U:\CERT\BOSCH-CA-DE.pem --context stackPrefix=GTK-Prod --context action=start
- * cdk deploy -v --ca-bundle-path U:\CERT\BOSCH-CA-DE.pem --context stackPrefix=GTK-Prod --context action=stop
+ * cdk deploy GTK-Prod-ECR-Stack --ca-bundle-path U:\CERT\BOSCH-CA-DE.pem --context stackPrefix=GTK-Prod
+ * cdk deploy GTK-Prod-VPC-Stack --ca-bundle-path U:\CERT\BOSCH-CA-DE.pem --context stackPrefix=GTK-Prod
+ * cdk deploy GTK-Prod-ECS-DB-Stack --ca-bundle-path U:\CERT\BOSCH-CA-DE.pem --context stackPrefix=GTK-Prod
 

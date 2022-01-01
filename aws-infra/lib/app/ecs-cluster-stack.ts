@@ -1,5 +1,4 @@
 import { NestedStack, NestedStackProps } from "aws-cdk-lib";
-import { AutoScalingGroup } from "aws-cdk-lib/aws-autoscaling";
 import { InstanceType, Peer, Port, SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2";
 import { Cluster, EcsOptimizedImage } from "aws-cdk-lib/aws-ecs";
 import { Construct } from "constructs";
@@ -10,16 +9,16 @@ export interface EcsClusterStackProps extends NestedStackProps {
 
 export class EcsClusterStack extends NestedStack {
     dbCluster: Cluster;
-    appCluster: Cluster;
 
-    applicationLoadBalancerSecurityGroup: SecurityGroup;
+    appCluster: Cluster;
+    appClusterSecurityGroup: SecurityGroup;
 
     constructor(scope: Construct, id: string, props: EcsClusterStackProps) {
         super(scope, id, props);
 
         const stackPrefix = this.node.tryGetContext('stackPrefix');
 
-        this.dbCluster = new Cluster(this, "DatabaseCluster", {
+        this.dbCluster = new Cluster(this, stackPrefix + "-DatabaseCluster", {
             clusterName: stackPrefix + "-DatabaseCluster",
             vpc: props.vpc,
             capacity: {
@@ -34,10 +33,10 @@ export class EcsClusterStack extends NestedStack {
             }
         });
 
-        this.applicationLoadBalancerSecurityGroup = new SecurityGroup(this, stackPrefix + "-ApplicationLoadBalancer-SecurityGroup", {
+        this.appClusterSecurityGroup = new SecurityGroup(this, stackPrefix + "-ApplicationLoadBalancer-SecurityGroup", {
             vpc: props.vpc
         });
-        this.applicationLoadBalancerSecurityGroup.addIngressRule(Peer.anyIpv4(), Port.tcpRange(5000, 5010), "Incoming HTTP traffic for Application LoadBalancer");
+        this.appClusterSecurityGroup.addIngressRule(Peer.anyIpv4(), Port.tcpRange(5000, 5010), "Incoming HTTP traffic for Application LoadBalancer");
 
         this.appCluster = new Cluster(this, stackPrefix + "-ApplicationCluster", {
             clusterName: stackPrefix + "-ApplicationCluster",

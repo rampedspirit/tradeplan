@@ -1,16 +1,17 @@
 import { NestedStack, NestedStackProps } from "aws-cdk-lib";
-import { Protocol, Vpc } from "aws-cdk-lib/aws-ec2";
+import { Protocol, SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2";
 import { Cluster, ContainerImage, Ec2Service, Ec2TaskDefinition, LogDriver } from "aws-cdk-lib/aws-ecs";
-import { ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, NetworkLoadBalancer } from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import { ApplicationListener, ApplicationListenerRule, ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, ListenerAction, ListenerCondition, NetworkLoadBalancer } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { Construct } from "constructs";
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
-import { LogGroup } from "aws-cdk-lib/aws-logs";
+import { ILogGroup, LogGroup } from "aws-cdk-lib/aws-logs";
 import { Repository } from "aws-cdk-lib/aws-ecr";
 
 export interface EcsAppStackProps extends NestedStackProps {
     vpc: Vpc
     cluster: Cluster
     dbNetworkLoadBalancer: NetworkLoadBalancer
+    appClusterSecurityGroup: SecurityGroup
 }
 
 export class EcsAppStack extends NestedStack {
@@ -25,14 +26,24 @@ export class EcsAppStack extends NestedStack {
 
         //Log Group
         const logGroup = new LogGroup(this, stackPrefix + "-app-loggroup", {
-            logGroupName: stackPrefix + "-db-loggroup"
+            logGroupName: stackPrefix + "-app-loggroup"
         });
 
         //Application Load Balancer
         const appLoadbalancer = this.createApplicationLoadBalancer(stackPrefix, props.vpc);
+        appLoadbalancer.addSecurityGroup(props.appClusterSecurityGroup);
+
+        const applicationListener = appLoadbalancer.addListener(stackPrefix + "application-listener", {
+            protocol: ApplicationProtocol.HTTP,
+            port: 80,
+            defaultAction: ListenerAction.fixedResponse(200, {
+                contentType: "text/plain",
+                messageBody: "Hello There! Looks like you have hit a wrong end point."
+            })
+        });
 
         //Filter Service
-        this.createFilterService(stackPrefix, props.cluster, props.vpc, appLoadbalancer,
+        this.createFilterService(stackPrefix, props.cluster, props.vpc, applicationListener,
             props.dbNetworkLoadBalancer, dbCredentials, logGroup);
 
     }
@@ -49,19 +60,22 @@ export class EcsAppStack extends NestedStack {
         return loadBalancer;
     }
 
-    private createFilterService(stackPrefix: string, cluster: Cluster, vpc: Vpc, applicationLoadBalancer: ApplicationLoadBalancer,
-        dbNetworkLoadBalancer: NetworkLoadBalancer, dbCredentials: secretsmanager.ISecret, logGroup: LogGroup,) {
-        let filterServiceTargetGroup = new ApplicationTargetGroup(this, stackPrefix + "-filterservice-target-group", {
+    private createFilterService(stackPrefix: string, cluster: Cluster, vpc: Vpc, applicationListener: ApplicationListener,
+        dbNetworkLoadBalancer: NetworkLoadBalancer, dbCredentials: secretsmanager.ISecret, logGroup: ILogGroup) {
+
+        const filterServiceTargetGroup = new ApplicationTargetGroup(this, stackPrefix + "-filterservice-target-group", {
             vpc: vpc,
             port: 5000,
             protocol: ApplicationProtocol.HTTP
         });
-        let filterServiceListener = applicationLoadBalancer.addListener("filterservice-listener", {
-            protocol: ApplicationProtocol.HTTP,
-            port: 5000
-        });
-        filterServiceListener.addTargetGroups("filterservice-listener", {
-            targetGroups: [filterServiceTargetGroup]
+
+        new ApplicationListenerRule(this, "filterservice-listener-rule", {
+            listener: applicationListener,
+            priority: 1,
+            conditions: [
+                ListenerCondition.pathPatterns(["/v1/filter", "/v1/filter/*"])
+            ],
+            action: ListenerAction.forward([filterServiceTargetGroup])
         });
 
         //Service
@@ -76,13 +90,13 @@ export class EcsAppStack extends NestedStack {
             environment: {
                 "SERVER_PORT": "5000",
                 "DB_HOST": dbNetworkLoadBalancer.loadBalancerDnsName,
-                "DB_PORT": dbCredentials.secretValueFromJson("Password").toString(),
+                "DB_PORT": "5000",
                 "DB_NAME": "appdb",
                 "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
                 "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
             },
             portMappings: [{
-                containerPort: 5432
+                containerPort: 5000
             }],
             logging: LogDriver.awsLogs({
                 logGroup: logGroup,

@@ -28,6 +28,7 @@ export class AppInfraStack extends NestedStack {
     const ecsAppStack = new EcsAppStack(this, "EcsAppStack", {
       vpc: vpcStack.vpc,
       cluster: ecsClusterStack.appCluster,
+      appClusterSecurityGroup: ecsClusterStack.appClusterSecurityGroup,
       dbNetworkLoadBalancer: ecsDbStack.dbNetworkLoadbalancer
     });
     ecsAppStack.addDependency(ecsDbStack);

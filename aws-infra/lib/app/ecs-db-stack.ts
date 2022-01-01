@@ -2,7 +2,7 @@ import { NestedStack, NestedStackProps } from "aws-cdk-lib";
 import { Vpc } from "aws-cdk-lib/aws-ec2";
 import { Cluster, ContainerImage, Ec2Service, Ec2TaskDefinition, LogDriver } from "aws-cdk-lib/aws-ecs";
 import { NetworkTargetGroup, NetworkLoadBalancer, Protocol } from "aws-cdk-lib/aws-elasticloadbalancingv2";
-import { LogGroup } from "aws-cdk-lib/aws-logs";
+import { ILogGroup, LogGroup } from "aws-cdk-lib/aws-logs";
 import { Construct } from "constructs";
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 
@@ -43,15 +43,15 @@ export class EcsDbStack extends NestedStack {
         appDbService.attachToNetworkTargetGroup(appDbTargetGroup);
 
         // Stock Database
-        // let stockDbTargetGroup = this.createStockDbTargetGroup(stackName, props.vpc);
-        // let stockdbListener = loadbalancer.addListener("stockdb-listener", {
-        //     protocol: Protocol.TCP,
-        //     port: 5001
-        // });
-        // stockdbListener.addTargetGroups("stockdb-listener-target-group", stockDbTargetGroup);
+        let stockDbTargetGroup = this.createStockDbTargetGroup(stackPrefix, props.vpc);
+        let stockdbListener = this.dbNetworkLoadbalancer.addListener("stockdb-listener", {
+            protocol: Protocol.TCP,
+            port: 5001
+        });
+        stockdbListener.addTargetGroups("stockdb-listener-target-group", stockDbTargetGroup);
 
-        // let stockDbService = this.createStockDbService(stackName, props.cluster);
-        // stockDbService.attachToNetworkTargetGroup(stockDbTargetGroup);
+        let stockDbService = this.createStockDbService(stackPrefix, props.cluster, logGroup, dbCredentials);
+        stockDbService.attachToNetworkTargetGroup(stockDbTargetGroup);
     }
 
     private createNetworkLoadBalancer(stackName: string, vpc: Vpc): NetworkLoadBalancer {
@@ -75,7 +75,7 @@ export class EcsDbStack extends NestedStack {
         return targetGroup;
     }
 
-    private createAppDbService(stackName: string, cluster: Cluster, logGroup: LogGroup, dbCredentials: secretsmanager.ISecret): Ec2Service {
+    private createAppDbService(stackName: string, cluster: Cluster, logGroup: ILogGroup, dbCredentials: secretsmanager.ISecret): Ec2Service {
         let taskDefinition = new Ec2TaskDefinition(this, stackName + '-appdb-taskdef', {
         });
 
@@ -116,7 +116,7 @@ export class EcsDbStack extends NestedStack {
         return targetGroup;
     }
 
-    private createStockDbService(stackName: string, cluster: Cluster): Ec2Service {
+    private createStockDbService(stackName: string, cluster: Cluster, logGroup: ILogGroup, dbCredentials: secretsmanager.ISecret): Ec2Service {
         let taskDefinition = new Ec2TaskDefinition(this, stackName + '-stockdb-taskdef', {
         });
 
@@ -125,9 +125,18 @@ export class EcsDbStack extends NestedStack {
             cpu: 50,
             memoryLimitMiB: 1024,
             essential: true,
+            environment: {
+                "POSTGRES_USER": dbCredentials.secretValueFromJson("UserName").toString(),
+                "POSTGRES_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
+                "POSTGRES_DB": "stockdb"
+            },
             portMappings: [{
                 containerPort: 5432
-            }]
+            }],
+            logging: LogDriver.awsLogs({
+                logGroup: logGroup,
+                streamPrefix: logGroup.logGroupName
+            }),
         });
 
         let service = new Ec2Service(this, stackName + "-stockdb-service", {
