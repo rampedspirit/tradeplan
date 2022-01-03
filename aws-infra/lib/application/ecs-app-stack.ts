@@ -105,8 +105,8 @@ export class EcsAppStack extends Stack {
         });
 
         //Security group for ingress form ALB
-        const securityGroup = new SecurityGroup(this, stackName + "-SecurityGroup", {
-            securityGroupName: stackName + "-SecurityGroup",
+        const securityGroup = new SecurityGroup(this, stackName + "-ALB-SecurityGroup", {
+            securityGroupName: stackName + "-ALB-SecurityGroup",
             vpc: vpc
         });
         securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(5000));
