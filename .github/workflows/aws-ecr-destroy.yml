@@ -1,4 +1,4 @@
-name: Deploy ECR Repositories
+name: Destroy ECR Repositories
 
 on:
   workflow_dispatch:
