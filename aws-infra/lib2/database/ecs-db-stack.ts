@@ -52,7 +52,7 @@ export class EcsDbStack extends Stack {
         });
 
         //Auto scaling group (EC2 Instance)
-        const autoScalingGroup = cluster.addCapacity(stackName + "-DatabaseCluster-AutoSclaingGroup", {
+        const autoScalingGroup = cluster.addCapacity(stackName + "-DatabaseCluster-AutoScalingGroup", {
             instanceType: new InstanceType('t3a.medium'),
             machineImage: EcsOptimizedImage.amazonLinux(),
             desiredCapacity: 1,

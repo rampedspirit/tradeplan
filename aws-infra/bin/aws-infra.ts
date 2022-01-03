@@ -25,3 +25,12 @@ new EcsDbStack(app, stackPrefix + "-ECS-DB-Stack", {
         region: process.env.CDK_DEFAULT_REGION
     }
 });
+
+new EcsDbStack(app, stackPrefix + "-ECS-APP-Stack", {
+    stackName: stackPrefix + "-ECS-APP-Stack",
+    vpcName: stackPrefix + "-VPC-Stack",
+    env: {
+        account: process.env.CDK_DEFAULT_ACCOUNT,
+        region: process.env.CDK_DEFAULT_REGION
+    }
+});
