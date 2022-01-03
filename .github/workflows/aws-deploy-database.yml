@@ -1,4 +1,4 @@
-name: Deploy ECR Repositories
+name: Deploy Database Services
 
 on:
   workflow_dispatch:
@@ -13,11 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      - name: Deploy ECR Repositories
+      - name: Deploy Database Services
         uses: youyo/aws-cdk-github-actions@v2
         with:
           cdk_subcommand: 'deploy'
-          cdk_stack: ${{ github.event.inputs.StackNamePrefix }}-ECR-Stack
+          cdk_stack: ${{ github.event.inputs.StackNamePrefix }}-ECS-DB-Stack
           cdk_args: '--context stackPrefix=${{ github.event.inputs.StackNamePrefix }}'
           working_dir: 'aws-infra'
         env:
