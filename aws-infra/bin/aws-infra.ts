@@ -4,6 +4,7 @@ import * as cdk from 'aws-cdk-lib';
 import { EcrStack } from '../lib/repository/ecr-stack';
 import { VpcStack } from '../lib/network/vpc-stack';
 import { EcsDbStack } from '../lib/database/ecs-db-stack';
+import { EcsAppStack } from '../lib/application/ecs-app-stack';
 
 const app = new cdk.App();
 
@@ -26,9 +27,10 @@ new EcsDbStack(app, stackPrefix + "-ECS-DB-Stack", {
     }
 });
 
-new EcsDbStack(app, stackPrefix + "-ECS-APP-Stack", {
+new EcsAppStack(app, stackPrefix + "-ECS-APP-Stack", {
     stackName: stackPrefix + "-ECS-APP-Stack",
     vpcName: stackPrefix + "-VPC-Stack",
+    dbLoadBalancerTag: { "info": stackPrefix + "-ECS-DB-Stack" + "-nlb" },
     env: {
         account: process.env.CDK_DEFAULT_ACCOUNT,
         region: process.env.CDK_DEFAULT_REGION

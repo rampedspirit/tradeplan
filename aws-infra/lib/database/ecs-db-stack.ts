@@ -1,4 +1,4 @@
-import { RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
+import { RemovalPolicy, Stack, StackProps, Tag, Tags } from "aws-cdk-lib";
 import { InstanceType, IVpc, Peer, Port, SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2";
 import { Cluster, ContainerImage, Ec2Service, Ec2TaskDefinition, EcsOptimizedImage, LogDriver } from "aws-cdk-lib/aws-ecs";
 import { NetworkLoadBalancer, NetworkTargetGroup, Protocol } from "aws-cdk-lib/aws-elasticloadbalancingv2";
@@ -89,6 +89,7 @@ export class EcsDbStack extends Stack {
                 subnets: vpc.privateSubnets
             }
         });
+        Tags.of(loadBalancer).add("info", stackName + "-nlb");
         return loadBalancer;
     }
 

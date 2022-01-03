@@ -2,13 +2,14 @@ import { RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
 import { InstanceType, IVpc, Peer, Port, SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2";
 import { Repository } from "aws-cdk-lib/aws-ecr";
 import { Cluster, ContainerImage, Ec2Service, Ec2TaskDefinition, EcsOptimizedImage, LogDriver } from "aws-cdk-lib/aws-ecs";
-import { ApplicationListener, ApplicationListenerRule, ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, ListenerAction, ListenerCondition } from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import { ApplicationListener, ApplicationListenerRule, ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, ListenerAction, ListenerCondition, NetworkLoadBalancer } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
 import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
 
 export interface EcsAppStackProps extends StackProps {
     vpcName: string
+    dbLoadBalancerTag: Record<string, string>
 }
 export class EcsAppStack extends Stack {
 
@@ -20,6 +21,12 @@ export class EcsAppStack extends Stack {
             isDefault: false,
             vpcName: props.vpcName
         });
+
+        //Find DB Load Balancer
+        const dbLoadBalancer = NetworkLoadBalancer.fromLookup(this, props.stackName + "-nlb", {
+            loadBalancerTags: props.dbLoadBalancerTag
+        });
+        const dbLoadBalancerUrl = dbLoadBalancer.loadBalancerDnsName;
 
         // Secrets
         const dbCredentials = Secret.fromSecretCompleteArn(this, 'DbCredentials', 'arn:aws:secretsmanager:ap-south-1:838293343811:secret:prod/db/credentials-vquhXO');
@@ -45,7 +52,7 @@ export class EcsAppStack extends Stack {
         });
 
         //Services
-        this.createFilterService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials);
+        this.createFilterService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
     }
 
     /**
@@ -118,9 +125,10 @@ export class EcsAppStack extends Stack {
      * @param applicationLoadbalancer 
      * @param cluster 
      * @param dbCredentials 
+     * @param dbLoadBalancerUrl
      */
     private createFilterService(stackName: string, vpc: IVpc, logGroup: LogGroup,
-        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret) {
+        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string) {
 
         //Load Balancer Config
         let targetGroup = new ApplicationTargetGroup(this, stackName + "-filter-service-target-group", {
@@ -148,7 +156,7 @@ export class EcsAppStack extends Stack {
             essential: true,
             environment: {
                 "SERVER_PORT": "5000",
-                "DB_HOST": "5000",
+                "DB_HOST": dbLoadBalancerUrl,
                 "DB_PORT": "5000",
                 "DB_NAME": "appdb",
                 "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
