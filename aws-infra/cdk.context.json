@@ -1,1 +1,45 @@
-{}
+{
+  "vpc-provider:account=838293343811:filter.isDefault=false:filter.tag:Name=GTK-Prod-VPC-Stack:region=ap-south-1:returnAsymmetricSubnets=true": {
+    "vpcId": "vpc-0b2d9e812bd372a14",
+    "vpcCidrBlock": "10.0.0.0/16",
+    "availabilityZones": [],
+    "subnetGroups": [
+      {
+        "name": "publicSubnet",
+        "type": "Public",
+        "subnets": [
+          {
+            "subnetId": "subnet-0cc760e54f93e3e0f",
+            "cidr": "10.0.2.0/24",
+            "availabilityZone": "ap-south-1a",
+            "routeTableId": "rtb-076c6d237e30aaadf"
+          },
+          {
+            "subnetId": "subnet-0477336883886e07a",
+            "cidr": "10.0.3.0/24",
+            "availabilityZone": "ap-south-1b",
+            "routeTableId": "rtb-0ce5235957bc41f78"
+          }
+        ]
+      },
+      {
+        "name": "privateSubnet",
+        "type": "Private",
+        "subnets": [
+          {
+            "subnetId": "subnet-0b5c5e95b8ebc4787",
+            "cidr": "10.0.0.0/24",
+            "availabilityZone": "ap-south-1a",
+            "routeTableId": "rtb-086a8310d61dea02a"
+          },
+          {
+            "subnetId": "subnet-0a9f8ac1e0886332c",
+            "cidr": "10.0.1.0/24",
+            "availabilityZone": "ap-south-1b",
+            "routeTableId": "rtb-0fb138a20f3e6ca2f"
+          }
+        ]
+      }
+    ]
+  }
+}

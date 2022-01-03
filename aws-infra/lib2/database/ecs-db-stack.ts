@@ -1,5 +1,5 @@
-import { Stack, StackProps } from "aws-cdk-lib";
-import { InstanceType, IVpc, Vpc } from "aws-cdk-lib/aws-ec2";
+import { RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
+import { InstanceType, IVpc, Peer, Port, SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2";
 import { Cluster, ContainerImage, Ec2Service, Ec2TaskDefinition, EcsOptimizedImage, LogDriver } from "aws-cdk-lib/aws-ecs";
 import { NetworkLoadBalancer, NetworkTargetGroup, Protocol } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
@@ -16,7 +16,7 @@ export class EcsDbStack extends Stack {
         super(scope, id, props);
 
         //Find VPC
-        const vpc: IVpc = Vpc.fromLookup(scope, props.vpcName, {
+        const vpc: IVpc = Vpc.fromLookup(this, props.vpcName, {
             isDefault: false,
             vpcName: props.vpcName
         });
@@ -26,7 +26,8 @@ export class EcsDbStack extends Stack {
 
         //Log Group
         const logGroup = new LogGroup(this, props.stackName + "-db-loggroup", {
-            logGroupName: props.stackName + "-db-loggroup"
+            logGroupName: props.stackName + "-db-loggroup",
+            removalPolicy: RemovalPolicy.DESTROY
         });
 
         //Cluster
@@ -45,20 +46,32 @@ export class EcsDbStack extends Stack {
      * @param stackName 
      */
     private createCluster(stackName: string, vpc: IVpc): Cluster {
-        return new Cluster(this, stackName + "-DatabaseCluster", {
+        const cluster = new Cluster(this, stackName + "-DatabaseCluster", {
             clusterName: stackName + "-DatabaseCluster",
-            vpc: vpc,
-            capacity: {
-                instanceType: new InstanceType('t3a.small'),
-                machineImage: EcsOptimizedImage.amazonLinux(),
-                desiredCapacity: 1,
-                minCapacity: 1,
-                maxCapacity: 1,
-                vpcSubnets: {
-                    subnets: vpc.privateSubnets
-                }
+            vpc: vpc
+        });
+
+        //Auto scaling group (EC2 Instance)
+        const autoScalingGroup = cluster.addCapacity(stackName + "-DatabaseCluster-AutoSclaingGroup", {
+            instanceType: new InstanceType('t3a.medium'),
+            machineImage: EcsOptimizedImage.amazonLinux(),
+            desiredCapacity: 1,
+            minCapacity: 1,
+            maxCapacity: 1,
+            vpcSubnets: {
+                subnets: vpc.privateSubnets
             }
         });
+
+        //Security group for ingress form NLB
+        const securityGroup = new SecurityGroup(this, stackName + "-SecurityGroup", {
+            securityGroupName: stackName + "-SecurityGroup",
+            vpc: vpc
+        });
+        securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcpRange(31000, 61000));
+        autoScalingGroup.addSecurityGroup(securityGroup);
+
+        return cluster;
     }
 
     /**
@@ -146,12 +159,12 @@ export class EcsDbStack extends Stack {
         //Load Balancer Config
         let stockDbTargetGroup = new NetworkTargetGroup(this, stackName + "-stockdb-target-group", {
             vpc: vpc,
-            port: 5000,
+            port: 5001,
             protocol: Protocol.TCP
         });
         let stockdbListener = dbNetworkLoadbalancer.addListener("stockdb-nlb-listener", {
             protocol: Protocol.TCP,
-            port: 5000
+            port: 5001
         });
         stockdbListener.addTargetGroups("stockdb-listener-target-group", stockDbTargetGroup);
 
@@ -166,7 +179,7 @@ export class EcsDbStack extends Stack {
             environment: {
                 "POSTGRES_USER": dbCredentials.secretValueFromJson("UserName").toString(),
                 "POSTGRES_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
-                "POSTGRES_DB": "appdb"
+                "POSTGRES_DB": "stockdb"
             },
             portMappings: [{
                 containerPort: 5432
