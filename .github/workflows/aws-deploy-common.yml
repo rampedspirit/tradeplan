@@ -1,4 +1,4 @@
-name: Deploy AWS Common Services
+name: Deploy Common Services
 
 on:
   workflow_dispatch:
