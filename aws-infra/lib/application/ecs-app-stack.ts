@@ -162,6 +162,9 @@ export class EcsAppStack extends Stack {
                 "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
                 "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString()
             },
+            portMappings: [{
+                containerPort: 5000
+            }],
             logging: LogDriver.awsLogs({
                 logGroup: logGroup,
                 streamPrefix: logGroup.logGroupName
