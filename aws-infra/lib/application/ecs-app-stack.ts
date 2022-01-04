@@ -1,4 +1,4 @@
-import { RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
+import { Fn, RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
 import { InstanceType, IVpc, Peer, Port, SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2";
 import { Repository } from "aws-cdk-lib/aws-ecr";
 import { Cluster, ContainerImage, Ec2Service, Ec2TaskDefinition, EcsOptimizedImage, LogDriver } from "aws-cdk-lib/aws-ecs";
@@ -9,7 +9,7 @@ import { Construct } from "constructs";
 
 export interface EcsAppStackProps extends StackProps {
     vpcName: string
-    dbLoadBalancerTag: Record<string, string>
+    dbLoadBalancerDnsExportName: string
 }
 export class EcsAppStack extends Stack {
 
@@ -23,10 +23,8 @@ export class EcsAppStack extends Stack {
         });
 
         //Find DB Load Balancer
-        const dbLoadBalancer = NetworkLoadBalancer.fromLookup(this, props.stackName + "-nlb", {
-            loadBalancerTags: props.dbLoadBalancerTag
-        });
-        const dbLoadBalancerUrl = dbLoadBalancer.loadBalancerDnsName;
+        const dbLoadBalancerUrl = Fn.importValue(props.dbLoadBalancerDnsExportName);
+        console.log("NLB : " + dbLoadBalancerUrl);
 
         // Secrets
         const dbCredentials = Secret.fromSecretCompleteArn(this, 'DbCredentials', 'arn:aws:secretsmanager:ap-south-1:838293343811:secret:prod/db/credentials-vquhXO');

@@ -1,4 +1,4 @@
-import { RemovalPolicy, Stack, StackProps, Tag, Tags } from "aws-cdk-lib";
+import { CfnOutput, RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
 import { InstanceType, IVpc, Peer, Port, SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2";
 import { Cluster, ContainerImage, Ec2Service, Ec2TaskDefinition, EcsOptimizedImage, LogDriver } from "aws-cdk-lib/aws-ecs";
 import { NetworkLoadBalancer, NetworkTargetGroup, Protocol } from "aws-cdk-lib/aws-elasticloadbalancingv2";
@@ -21,9 +21,6 @@ export class EcsDbStack extends Stack {
             region: 'ap-south-1'
         });
 
-        console.log("VPC ARN : " + vpc.vpcArn);
-        console.log("VPC ID : " + vpc.vpcId);
-
         // Secrets
         const dbCredentials = Secret.fromSecretCompleteArn(this, 'DbCredentials', 'arn:aws:secretsmanager:ap-south-1:838293343811:secret:prod/db/credentials-vquhXO');
 
@@ -38,6 +35,12 @@ export class EcsDbStack extends Stack {
 
         //Network Load Balancer
         const dbNetworkLoadbalancer = this.createNetworkLoadBalancer(props.stackName!, vpc);
+
+        //Export load balancer dns
+        new CfnOutput(this, "ec2RoleArn", {
+            value: dbNetworkLoadbalancer.loadBalancerDnsName,
+            exportName: props.stackName + "-nlb-dns",
+        });
 
         //Services
         this.createApplicationDatabaseService(props.stackName!, vpc, logGroup, dbNetworkLoadbalancer, cluster, dbCredentials);
@@ -92,7 +95,6 @@ export class EcsDbStack extends Stack {
                 subnets: vpc.privateSubnets
             }
         });
-        Tags.of(loadBalancer).add("info", stackName + "-nlb");
         return loadBalancer;
     }
 

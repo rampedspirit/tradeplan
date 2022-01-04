@@ -30,7 +30,7 @@ new EcsDbStack(app, stackPrefix + "-ECS-DB-Stack", {
 new EcsAppStack(app, stackPrefix + "-ECS-APP-Stack", {
     stackName: stackPrefix + "-ECS-APP-Stack",
     vpcName: stackPrefix + "-VPC-Stack",
-    dbLoadBalancerTag: { "info": stackPrefix + "-ECS-DB-Stack" + "-nlb" },
+    dbLoadBalancerDnsExportName: stackPrefix + "-ECS-DB-Stack-nlb-dns",
     env: {
         account: process.env.CDK_DEFAULT_ACCOUNT,
         region: process.env.CDK_DEFAULT_REGION
