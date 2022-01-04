@@ -1,7 +1,15 @@
 package com.bhs.gtk.screener.service;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +18,9 @@ import org.springframework.stereotype.Service;
 import com.bhs.gtk.screener.model.ExecutableDetailedResponse;
 import com.bhs.gtk.screener.model.ExecutablePatchData;
 import com.bhs.gtk.screener.model.ExecutableResponse;
+import com.bhs.gtk.screener.model.ExecutableStatus;
+import com.bhs.gtk.screener.model.ScripResult;
+import com.bhs.gtk.screener.persistence.ConditionResultEntity;
 import com.bhs.gtk.screener.persistence.ExecutableEntity;
 import com.bhs.gtk.screener.persistence.ExecutableRespository;
 import com.bhs.gtk.screener.util.Converter;
@@ -43,6 +54,11 @@ public class ExecutableServiceImpl implements ExecutableService{
 		//thow exeception
 		return null;
 	}
+	
+	@Override
+	public ExecutableEntity getExecutable(UUID conditionId, Date marketTime, UUID watchlistId) {
+		return executableRespository.findByConditionIdAndMarketTimeAndWatchlistId(conditionId, marketTime, watchlistId);
+	}
 
 	@Override
 	public ExecutableResponse updateExecutable(ExecutablePatchData executablePatchData, UUID executableId) {
@@ -57,6 +73,63 @@ public class ExecutableServiceImpl implements ExecutableService{
 		}
 		return null;
 	}
+	
+	@Override
+	public ExecutableEntity updateStatusOfExecutable(ExecutableEntity executable) {
+		executable.setStatus(deriveExecutableStatus(executable));
+		ExecutableEntity savedExecutable = executableRespository.save(executable);
+		return savedExecutable;
+	}
+	
+	private String deriveExecutableStatus(ExecutableEntity executable) {
+		List<String> conditionStatuses = new ArrayList<>();
+		executable.getConditionResultEntities().stream().forEach(e -> conditionStatuses.add(e.getStatus()));
+		if (conditionStatuses.contains(ScripResult.StatusEnum.RUNNING.name())) {
+			return ExecutableStatus.RUNNING.name();
+		} else if (conditionStatuses.contains(ScripResult.StatusEnum.QUEUED.name())) {
+			return ExecutableStatus.QUEUED.name();
+		}
+		return ExecutableStatus.COMPLETED.name();
+	}
+	
+	@Override
+	public  List<ExecutableEntity> updateStatusOfExecutablesBasedOnConditions(List<ConditionResultEntity> conditionsWithChangedStatus) {
+		Map<UUID,List<Date>> conditionWithMarketTimes = new HashMap<>();
+		for(ConditionResultEntity condition : conditionsWithChangedStatus) {
+			UUID id = condition.getConditionId();
+			if(conditionWithMarketTimes.containsKey(id)) {
+				conditionWithMarketTimes.get(id).add(condition.getMarketTime());
+			}else {
+				List<Date> marketTimes = new ArrayList<>();
+				marketTimes.add(condition.getMarketTime());
+				conditionWithMarketTimes.put(id, marketTimes);
+			}
+		}
+		List<ExecutableEntity> executables = new ArrayList<>();
+		for( Entry<UUID, List<Date>> dd : conditionWithMarketTimes.entrySet()) {
+			 UUID conditionId = dd.getKey();
+			 for( Date marketTime : dd.getValue()) {
+				executables.addAll(executableRespository.findByConditionIdAndMarketTime(conditionId, marketTime));
+			 }
+		}
+		return updateStatusOfExecutables(executables);
+	}
+	
+	private List<ExecutableEntity> updateStatusOfExecutables(List<ExecutableEntity> executableEntites) {
+		Set<ExecutableEntity> executables = new HashSet<>();
+		executableEntites.stream().forEach(e -> executables.add(e));
+		for( ExecutableEntity entity : executables ) {
+			String newStatus = deriveExecutableStatus(entity);
+			entity.setStatus(newStatus);
+		} 
+		Iterable<ExecutableEntity> savedEntitites = executableRespository.saveAll(executables);
+		List<ExecutableEntity> savedExectables = new ArrayList<>();
+		for(ExecutableEntity entity : savedEntitites) {
+			savedExectables.add(entity);
+		}
+		return savedExectables;
+	}
+	
 	
 	private ExecutableEntity getExecutableEntity(UUID executableId) {
 		if (executableId != null) {

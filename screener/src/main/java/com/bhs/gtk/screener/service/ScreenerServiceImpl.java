@@ -1,13 +1,17 @@
 package com.bhs.gtk.screener.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.threeten.bp.DateTimeUtils;
 
 import com.bhs.gtk.screener.model.ExecutableCreateRequest;
 import com.bhs.gtk.screener.model.ScreenerCreateRequest;
@@ -15,6 +19,7 @@ import com.bhs.gtk.screener.model.ScreenerDetailedResponse;
 import com.bhs.gtk.screener.model.ScreenerPatchData;
 import com.bhs.gtk.screener.model.ScreenerPatchData.PropertyEnum;
 import com.bhs.gtk.screener.model.ScreenerResponse;
+import com.bhs.gtk.screener.model.ScripResult.StatusEnum;
 import com.bhs.gtk.screener.persistence.ConditionResultEntity;
 import com.bhs.gtk.screener.persistence.EntityCreator;
 import com.bhs.gtk.screener.persistence.ExecutableEntity;
@@ -33,6 +38,14 @@ public class ScreenerServiceImpl implements ScreernerService {
 	
 	@Autowired
 	private ScreenerRepository screenerRepository;
+	
+	@Autowired
+	private ExecutableServiceImpl executableServiceImpl;
+	
+	@Autowired
+	private ConditionResultServiceImpl conditionResultServiceImpl;
+	
+	
 	
 	@Override
 	public ScreenerResponse createScreener(ScreenerCreateRequest screenerCreateRequest) {
@@ -88,23 +101,64 @@ public class ScreenerServiceImpl implements ScreernerService {
 	public ScreenerDetailedResponse runScreener(ExecutableCreateRequest executableCreateRequest, UUID screenerId) {
 		ScreenerEntity screenerEntity = getScreenerEntity(screenerId);
 		if(screenerEntity != null) {
-			ExecutableEntity executable = entityCreator.createExecutableEntity(executableCreateRequest,
-					screenerEntity.getWatchlistId(), screenerEntity.getConditionId());
-			List<ConditionResultEntity> resultEntities = entityCreator.createConditionResultEntities(executableCreateRequest, screenerEntity.getConditionId());
-			executable.setConditionResultEntities(resultEntities);
-			
-			screenerEntity.getExecutableEntities().add(executable);
-			
-			ScreenerEntity savedScreenerEntity = screenerRepository.save(screenerEntity);
-			
-			//TODO: send async message to output topic of screener service and change status to EVALUATING and save in DB.
-			
-			return converter.convertToScreenerDetailedResponse(savedScreenerEntity);
+			Date marketTime = DateTimeUtils.toDate(executableCreateRequest.getMarketTime().toInstant());
+			UUID conditionId = screenerEntity.getConditionId();
+			UUID watchlistId = screenerEntity.getWatchlistId();
+			String note = executableCreateRequest.getNote();
+			List<String> scripNames = executableCreateRequest.getScripNames();
+			addExecutableToScreener(screenerEntity, marketTime, conditionId,watchlistId, note, scripNames);
+			runExecutable(conditionId,marketTime,watchlistId);
+			//ScreenerEntity screenerEntityWithConditionsSaved = runScreener(screenerEntityWithExecutableSaved, savedExecutable);
+			return converter.convertToScreenerDetailedResponse(getScreenerEntity(screenerId));
 		}
 		//throw exception
 		return null;
 	}
+
+	private ExecutableEntity runExecutable(UUID conditionId, Date marketTime, UUID watchlistId) {
+		ExecutableEntity executable = executableServiceImpl.getExecutable(conditionId, marketTime, watchlistId);
+		List<ConditionResultEntity> queuedConditions = executable.getConditionResultEntities().stream()
+				.filter(e -> StringUtils.equals(e.getStatus(), StatusEnum.QUEUED.name())).collect(Collectors.toList());
+		conditionResultServiceImpl.runConditions(queuedConditions);
+		return executableServiceImpl.updateStatusOfExecutable(executable);
+	}
+
+	private ScreenerEntity addExecutableToScreener(ScreenerEntity screenerEntity, Date marketTime, UUID conditionId, UUID watchlistId,
+			String note, List<String> scripNames) {
+		ExecutableEntity executable = entityCreator.createExecutableEntity(marketTime,note,	watchlistId, conditionId);
+		List<ConditionResultEntity> resultEntities = entityCreator.createConditionResultEntities(scripNames,marketTime, conditionId);
+		executable.setConditionResultEntities(resultEntities);
+		screenerEntity.getExecutableEntities().add(executable);
+		return screenerRepository.save(screenerEntity);
+	}
+
+//	public ScreenerEntity runScreener(ScreenerEntity screenerEntity, ExecutableEntity executable) {
+//		List<ConditionResultEntity> queuedConditions = executable.getConditionResultEntities().stream()
+//				.filter(e -> StringUtils.equals(e.getStatus(), StatusEnum.QUEUED.name()))
+//				.collect(Collectors.toList());
+//		conditionResultServiceImpl.runConditions(queuedConditions);
+//		executable.setStatus(executableServiceImpl.deriveExecutableStatus(executable));
+//		ScreenerEntity savedScreenerEntity = screenerRepository.save(screenerEntity);
+//		return savedScreenerEntity;
+//	}
 	
+
+//	public List<ConditionResultEntity> requestExecutionOfConditions(List<ConditionResultEntity> conditions) {
+//		List<ConditionResultEntity> requestedConditions = new ArrayList<>();
+//		for(ConditionResultEntity entity : conditions) {
+//			JSONObject entityAsJson = new JSONObject(entity);
+//			if(screenerMessageProducer.sendMessage(entityAsJson.toString())) {
+//				entity.setScripName(ScripResult.StatusEnum.RUNNING.name());
+//				requestedConditions.add(entity);
+//			}else {
+//				System.err.println(" failed to request "+ entityAsJson);
+//			}
+//		}
+//		List<ConditionResultEntity> savedRequestedConditions = new ArrayList<>();
+//		Iterable<ConditionResultEntity> savedEntities = conditionResultRepository.saveAll(requestedConditions);
+//		savedEntities.forEach(e -> savedRequestedConditions.add(e));
+//		return savedRequestedConditions;
+//	}
 
 	private boolean update(ScreenerEntity screenerEntity, PropertyEnum propertyName, String value) {
 		switch (propertyName) {

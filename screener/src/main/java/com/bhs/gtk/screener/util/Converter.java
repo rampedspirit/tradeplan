@@ -17,6 +17,7 @@ import org.threeten.bp.ZoneId;
 import com.bhs.gtk.screener.model.ExecutableCreateRequest;
 import com.bhs.gtk.screener.model.ExecutableDetailedResponse;
 import com.bhs.gtk.screener.model.ExecutableResponse;
+import com.bhs.gtk.screener.model.ExecutableStatus;
 import com.bhs.gtk.screener.model.ScreenerCreateRequest;
 import com.bhs.gtk.screener.model.ScreenerDetailedResponse;
 import com.bhs.gtk.screener.model.ScreenerResponse;
@@ -37,7 +38,7 @@ public class Converter {
 		response.setExecutableId(executable.getExecutableId());
 		response.setMarketTime(convertToOffSetDateTime(executable.getMarketTime()));
 		response.setNote(executable.getNote());
-		response.setStatus(executable.getStatus());
+		response.setStatus(ExecutableStatus.valueOf(executable.getStatus()));
 		response.setNumberOfScripForExecution(new BigDecimal(executable.getNumberOfScripForExecution()));
 		response.setNumberOfScripWithResultAvailable(new BigDecimal(executable.getNumberOfScripWithResultAvailable()));
 		return response;
@@ -49,7 +50,7 @@ public class Converter {
 		response.setExecutableId(executable.getExecutableId());
 		response.setMarketTime(convertToOffSetDateTime(executable.getMarketTime()));
 		response.setNote(executable.getNote());
-		response.setStatus(executable.getStatus());
+		response.setStatus(ExecutableStatus.valueOf(executable.getStatus()));
 		response.setNumberOfScripForExecution(new BigDecimal(executable.getNumberOfScripForExecution()));
 		response.setNumberOfScripWithResultAvailable(new BigDecimal(executable.getNumberOfScripWithResultAvailable()));
 		response.setResult(convertToScripResults(executable.getConditionResultEntities()));
@@ -98,7 +99,7 @@ public class Converter {
 			response.setNote(entity.getNote());
 			response.setNumberOfScripForExecution(new BigDecimal(entity.getNumberOfScripForExecution()));
 			response.setNumberOfScripWithResultAvailable(new BigDecimal(entity.getNumberOfScripWithResultAvailable()));
-			response.setStatus(entity.getStatus());
+			response.setStatus(ExecutableStatus.valueOf(entity.getStatus()));
 			executableResponses.add(response);
 		}
 		return executableResponses;

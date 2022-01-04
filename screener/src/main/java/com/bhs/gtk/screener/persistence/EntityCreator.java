@@ -20,24 +20,21 @@ public class EntityCreator {
 	@Autowired
 	private ConditionResultRepository  conditionResultRepository;
 	
-	public ExecutableEntity createExecutableEntity(ExecutableCreateRequest executableCreateRequest, UUID watchlistId,UUID conditionId) {
-		String note = executableCreateRequest.getNote();
-		Date marketTime = DateTimeUtils.toDate(executableCreateRequest.getMarketTime().toInstant());
+	public ExecutableEntity createExecutableEntity(Date marketTime,String note, UUID watchlistId,UUID conditionId) {
 		return  new ExecutableEntity(note, marketTime, watchlistId, conditionId);
 	}
 	
-	public List<ConditionResultEntity> createConditionResultEntities(ExecutableCreateRequest executableCreateRequest, UUID conditionId) {
+	public List<ConditionResultEntity> createConditionResultEntities(List<String> scripNames,Date marketTime, UUID conditionId) {
 		List<ConditionResultEntity> resultEntities = new ArrayList<>();
 		List<ConditionResultEntity> savedResultEntities = new ArrayList<>();
-		Date marketTime = DateTimeUtils.toDate(executableCreateRequest.getMarketTime().toInstant());
-		for(String scripName: executableCreateRequest.getScripNames()) {
-			ConditionResultId resultId = new ConditionResultId(conditionId, marketTime, scripName);
+		for(String scrip: scripNames) {
+			ConditionResultId resultId = new ConditionResultId(conditionId, marketTime, scrip);
 			Optional<ConditionResultEntity> entityInContainer = conditionResultRepository.findById(resultId);
 			if(entityInContainer.isPresent()) {
 				savedResultEntities.add(entityInContainer.get());
 			}else {
-				resultEntities.add(new ConditionResultEntity(conditionId, marketTime, scripName,
-						ScripResult.StatusEnum.SCHEDULED.name()));
+				resultEntities.add(new ConditionResultEntity(conditionId, marketTime, scrip,
+						ScripResult.StatusEnum.QUEUED.name()));
 			}
 		}
 		if(!resultEntities.isEmpty()) {

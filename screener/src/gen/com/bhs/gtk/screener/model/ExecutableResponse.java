@@ -1,6 +1,7 @@
 package com.bhs.gtk.screener.model;
 
 import java.util.Objects;
+import com.bhs.gtk.screener.model.ExecutableStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
@@ -16,7 +17,7 @@ import javax.validation.constraints.*;
  * ExecutableResponse
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-12-29T22:17:30.858539100+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-12-30T13:01:58.305533+05:30[Asia/Calcutta]")
 
 public class ExecutableResponse   {
   @JsonProperty("executableId")
@@ -29,7 +30,7 @@ public class ExecutableResponse   {
   private String note = null;
 
   @JsonProperty("status")
-  private String status = null;
+  private ExecutableStatus status = null;
 
   @JsonProperty("numberOfScripForExecution")
   private BigDecimal numberOfScripForExecution = null;
@@ -100,23 +101,24 @@ public class ExecutableResponse   {
     this.note = note;
   }
 
-  public ExecutableResponse status(String status) {
+  public ExecutableResponse status(ExecutableStatus status) {
     this.status = status;
     return this;
   }
 
   /**
-   * status of execution
+   * Get status
    * @return status
   **/
-  @ApiModelProperty(value = "status of execution")
+  @ApiModelProperty(value = "")
 
+  @Valid
 
-  public String getStatus() {
+  public ExecutableStatus getStatus() {
     return status;
   }
 
-  public void setStatus(String status) {
+  public void setStatus(ExecutableStatus status) {
     this.status = status;
   }
 

@@ -9,6 +9,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -16,6 +17,8 @@ import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.GenericGenerator;
+
+import com.bhs.gtk.screener.model.ExecutableStatus;
 
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "marketTime", "watchlistId","conditionId" }) })
@@ -48,15 +51,14 @@ public class ExecutableEntity {
 	@Column
 	private int numberOfScripWithResultAvailable;  
 	
-	
-	@OneToMany
+	@OneToMany()
 	private List<ConditionResultEntity> conditionResultEntities;
 	
 	protected ExecutableEntity() {}
 
 	public ExecutableEntity(String note,Date marketTime, UUID watchlistId, UUID conditionId) {
 		this.note = note;
-		this.status = "READY";
+		this.status = ExecutableStatus.QUEUED.name();
 		this.marketTime = marketTime;
 		this.conditionResultEntities = new ArrayList<>();
 		this.watchlistId = watchlistId;

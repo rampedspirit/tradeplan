@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ConditionResultRepository extends CrudRepository<ConditionResultEntity, ConditionResultId> {
 	List<ConditionResultEntity> findByConditionId(UUID conditionId);
-	List<ConditionResultEntity> findByConditionIdAndMarketTime(UUID conditionId, Date marketTime);
+	List<ConditionResultEntity> findByStatus(String status);
 }

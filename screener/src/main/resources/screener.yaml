@@ -454,8 +454,7 @@ components:
           type: string
           description: note related to execution   
         status:
-          type: string
-          description: status of execution
+          $ref: '#/components/schemas/executableStatus'            
         numberOfScripForExecution:
           type: number
           description: total number of scrip attached to this executable for execution
@@ -481,8 +480,7 @@ components:
           type: string
           description: note related to execution   
         status:
-          type: string
-          description: status of execution
+          $ref: '#/components/schemas/executableStatus'   
         numberOfScripForExecution:
           type: number
           description: total number of scrip attached to this executable for execution
@@ -493,6 +491,10 @@ components:
          type: array
          items:
            $ref: '#/components/schemas/ScripResult'   
+           
+    executableStatus:
+       type: string
+       enum: [QUEUED,RUNNING,COMPLETED]
 
     ScripResult:
       type: object
@@ -501,7 +503,7 @@ components:
          type: string
        status:
          type: string
-         enum: [PASS, FAIL,SCHEDULED,RUNNING,INVALID]            
+         enum: [QUEUED,RUNNING,PASS,FAIL,ERROR]            
 
     ExecutablePatchData:
       title: executable patch data
