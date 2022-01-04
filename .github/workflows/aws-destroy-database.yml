@@ -16,7 +16,7 @@ jobs:
       - name: Destroy Database Services
         uses: youyo/aws-cdk-github-actions@v2
         with:
-          cdk_subcommand: 'deploy'
+          cdk_subcommand: 'destroy'
           cdk_stack: ${{ github.event.inputs.StackNamePrefix }}-ECS-DB-Stack
           cdk_args: '--context stackPrefix=${{ github.event.inputs.StackNamePrefix }} --force'
           working_dir: 'aws-infra'
