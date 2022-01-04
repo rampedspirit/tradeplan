@@ -17,9 +17,12 @@ export class EcsDbStack extends Stack {
 
         //Find VPC
         const vpc: IVpc = Vpc.fromLookup(this, props.vpcName, {
-            isDefault: false,
-            vpcName: props.vpcName
+            vpcName: props.vpcName,
+            region: 'ap-south-1'
         });
+
+        console.log("VPC ARN : " + vpc.vpcArn);
+        console.log("VPC ID : " + vpc.vpcId);
 
         // Secrets
         const dbCredentials = Secret.fromSecretCompleteArn(this, 'DbCredentials', 'arn:aws:secretsmanager:ap-south-1:838293343811:secret:prod/db/credentials-vquhXO');
