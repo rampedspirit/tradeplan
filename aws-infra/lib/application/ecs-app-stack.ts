@@ -18,8 +18,8 @@ export class EcsAppStack extends Stack {
 
         //Find VPC
         const vpc: IVpc = Vpc.fromLookup(this, props.vpcName, {
-            isDefault: false,
-            vpcName: props.vpcName
+            vpcName: props.vpcName,
+            region: 'ap-south-1'
         });
 
         //Find DB Load Balancer
