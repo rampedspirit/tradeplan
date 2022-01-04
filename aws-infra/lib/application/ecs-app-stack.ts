@@ -200,7 +200,7 @@ export class EcsAppStack extends Stack {
 
         new ApplicationListenerRule(this, "conditionservice-listener-rule", {
             listener: applicationListener,
-            priority: 1,
+            priority: 2,
             conditions: [
                 ListenerCondition.pathPatterns(["/v1/condition", "/v1/condition/*"])
             ],
@@ -262,7 +262,7 @@ export class EcsAppStack extends Stack {
 
         new ApplicationListenerRule(this, "screenerservice-listener-rule", {
             listener: applicationListener,
-            priority: 1,
+            priority: 3,
             conditions: [
                 ListenerCondition.pathPatterns(["/v1/screener", "/v1/screener/*"])
             ],
