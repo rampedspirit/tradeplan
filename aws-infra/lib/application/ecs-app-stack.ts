@@ -24,7 +24,6 @@ export class EcsAppStack extends Stack {
 
         //Find DB Load Balancer
         const dbLoadBalancerUrl = Fn.importValue(props.dbLoadBalancerDnsExportName);
-        console.log("NLB : " + dbLoadBalancerUrl);
 
         // Secrets
         const dbCredentials = Secret.fromSecretCompleteArn(this, 'DbCredentials', 'arn:aws:secretsmanager:ap-south-1:838293343811:secret:prod/db/credentials-vquhXO');
@@ -51,6 +50,8 @@ export class EcsAppStack extends Stack {
 
         //Services
         this.createFilterService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
+        this.createConditionService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
+        this.createScreenerService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
     }
 
     /**
@@ -170,6 +171,130 @@ export class EcsAppStack extends Stack {
         });
 
         let service = new Ec2Service(this, stackName + "-filter-service", {
+            cluster: cluster,
+            desiredCount: 1,
+            taskDefinition: taskDefinition
+        });
+        service.attachToApplicationTargetGroup(targetGroup);
+    }
+
+    /**
+     * Creates the condition service
+     * @param stackName 
+     * @param vpc 
+     * @param logGroup 
+     * @param applicationLoadbalancer 
+     * @param cluster 
+     * @param dbCredentials 
+     * @param dbLoadBalancerUrl
+     */
+     private createConditionService(stackName: string, vpc: IVpc, logGroup: LogGroup,
+        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string) {
+
+        //Load Balancer Config
+        let targetGroup = new ApplicationTargetGroup(this, stackName + "-condition-service-target-group", {
+            vpc: vpc,
+            port: 5001,
+            protocol: ApplicationProtocol.HTTP
+        });
+
+        new ApplicationListenerRule(this, "conditionservice-listener-rule", {
+            listener: applicationListener,
+            priority: 1,
+            conditions: [
+                ListenerCondition.pathPatterns(["/v1/condition", "/v1/condition/*"])
+            ],
+            action: ListenerAction.forward([targetGroup])
+        });
+
+        //Service Config
+        let taskDefinition = new Ec2TaskDefinition(this, stackName + '-condition-service-taskdef');
+
+        taskDefinition.addContainer(stackName + "-condition-service-container", {
+            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-condition-service", "gtk-condition-service")),
+            cpu: 50,
+            memoryLimitMiB: 256,
+            essential: true,
+            environment: {
+                "SERVER_PORT": "5001",
+                "DB_HOST": dbLoadBalancerUrl,
+                "DB_PORT": "5000",
+                "DB_NAME": "appdb",
+                "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
+                "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString()
+            },
+            portMappings: [{
+                containerPort: 5001
+            }],
+            logging: LogDriver.awsLogs({
+                logGroup: logGroup,
+                streamPrefix: logGroup.logGroupName
+            }),
+        });
+
+        let service = new Ec2Service(this, stackName + "-condition-service", {
+            cluster: cluster,
+            desiredCount: 1,
+            taskDefinition: taskDefinition
+        });
+        service.attachToApplicationTargetGroup(targetGroup);
+    }
+
+    /**
+     * Creates the screener service
+     * @param stackName 
+     * @param vpc 
+     * @param logGroup 
+     * @param applicationLoadbalancer 
+     * @param cluster 
+     * @param dbCredentials 
+     * @param dbLoadBalancerUrl
+     */
+     private createScreenerService(stackName: string, vpc: IVpc, logGroup: LogGroup,
+        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string) {
+
+        //Load Balancer Config
+        let targetGroup = new ApplicationTargetGroup(this, stackName + "-screener-service-target-group", {
+            vpc: vpc,
+            port: 5002,
+            protocol: ApplicationProtocol.HTTP
+        });
+
+        new ApplicationListenerRule(this, "screenerservice-listener-rule", {
+            listener: applicationListener,
+            priority: 1,
+            conditions: [
+                ListenerCondition.pathPatterns(["/v1/screener", "/v1/screener/*"])
+            ],
+            action: ListenerAction.forward([targetGroup])
+        });
+
+        //Service Config
+        let taskDefinition = new Ec2TaskDefinition(this, stackName + '-screener-service-taskdef');
+
+        taskDefinition.addContainer(stackName + "-screener-service-container", {
+            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-screener-service", "gtk-screener-service")),
+            cpu: 50,
+            memoryLimitMiB: 256,
+            essential: true,
+            environment: {
+                "SERVER_PORT": "5002",
+                "DB_HOST": dbLoadBalancerUrl,
+                "DB_PORT": "5000",
+                "DB_NAME": "appdb",
+                "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
+                "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString()
+            },
+            portMappings: [{
+                containerPort: 5002
+            }],
+            logging: LogDriver.awsLogs({
+                logGroup: logGroup,
+                streamPrefix: logGroup.logGroupName
+            }),
+        });
+
+        let service = new Ec2Service(this, stackName + "-screener-service", {
             cluster: cluster,
             desiredCount: 1,
             taskDefinition: taskDefinition
