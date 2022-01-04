@@ -19,6 +19,7 @@ import com.bhs.gtk.screener.service.ExecutableServiceImpl;
 @SpringBootApplication
 public class ScreenerApplication {
 
+	
 	public static void main(String[] args) {
 		SpringApplication.run(ScreenerApplication.class, args);
 	}
