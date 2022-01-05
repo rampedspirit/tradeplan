@@ -1,7 +1,7 @@
 import { Fn, RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
 import { InstanceType, IVpc, Peer, Port, SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2";
 import { Repository } from "aws-cdk-lib/aws-ecr";
-import { Cluster, ContainerImage, Ec2Service, Ec2TaskDefinition, EcsOptimizedImage, LogDriver } from "aws-cdk-lib/aws-ecs";
+import { Cluster, ContainerImage, Ec2Service, Ec2TaskDefinition, EcsOptimizedImage, LogDriver, NetworkMode } from "aws-cdk-lib/aws-ecs";
 import { ApplicationListener, ApplicationListenerRule, ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, ListenerAction, ListenerCondition, NetworkLoadBalancer } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
 import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
@@ -144,7 +144,9 @@ export class EcsAppStack extends Stack {
         });
 
         //Service Config
-        let taskDefinition = new Ec2TaskDefinition(this, stackName + '-kafka-taskdef');
+        let taskDefinition = new Ec2TaskDefinition(this, stackName + '-kafka-taskdef', {
+            networkMode: NetworkMode.AWS_VPC
+        });
 
 
         taskDefinition.addContainer(stackName + "-zookeeper-container", {
