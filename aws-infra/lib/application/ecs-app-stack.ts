@@ -146,6 +146,25 @@ export class EcsAppStack extends Stack {
         //Service Config
         let taskDefinition = new Ec2TaskDefinition(this, stackName + '-kafka-taskdef');
 
+
+        taskDefinition.addContainer(stackName + "-zookeeper-container", {
+            image: ContainerImage.fromRegistry("zookeeper:latest"),
+            cpu: 50,
+            memoryLimitMiB: 500,
+            essential: true,
+            environment: {
+                "ZOOKEEPER_CLIENT_PORT": "2181"
+            },
+            portMappings: [{
+                hostPort: 2181,
+                containerPort: 2181
+            }],
+            logging: LogDriver.awsLogs({
+                logGroup: logGroup,
+                streamPrefix: logGroup.logGroupName
+            }),
+        });
+
         taskDefinition.addContainer(stackName + "-kafka-container", {
             image: ContainerImage.fromRegistry("confluentinc/cp-kafka:7.0.1"),
             cpu: 50,
@@ -153,11 +172,8 @@ export class EcsAppStack extends Stack {
             essential: true,
             environment: {
                 "KAFKA_BROKER_ID": "1",
-                "KAFKA_ADVERTISED_LISTENERS": "INSIDE://kafka:9093,OUTSIDE://localhost:9092",
-                "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP": "INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT",
-                "KAFKA_LISTENERS": "INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092",
-                "KAFKA_INTER_BROKER_LISTENER_NAME": "INSIDE",
-                "KAFKA_PROCESS_ROLES": "broker,controller"
+                "KAFKA_ZOOKEEPER_CONNECT": "localhost:2181",
+                "KAFKA_ADVERTISED_LISTENERS": "PLAINTEXT://localhost:9092"
             },
             portMappings: [{
                 containerPort: 9092
