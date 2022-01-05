@@ -39,6 +39,11 @@ export class EcsAppStack extends Stack {
 
         //Network Load Balancer
         const applicationLoadbalancer = this.createApplicationLoadBalancer(props.stackName!, vpc);
+
+        //Kafka
+
+
+        //Services
         const applicationListener = applicationLoadbalancer.addListener(props.stackName + "application-listener", {
             protocol: ApplicationProtocol.HTTP,
             port: 80,
@@ -47,8 +52,6 @@ export class EcsAppStack extends Stack {
                 messageBody: "Hello There! Looks like you have hit a wrong end point."
             })
         });
-
-        //Services
         this.createFilterService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
         this.createConditionService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
         this.createScreenerService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
@@ -108,12 +111,69 @@ export class EcsAppStack extends Stack {
             securityGroupName: stackName + "-ALB-SecurityGroup",
             vpc: vpc
         });
-        securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(5000));
-        securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(5001));
-        securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(5002));
+        securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(9092));
         loadBalancer.addSecurityGroup(securityGroup);
 
         return loadBalancer;
+    }
+
+    /**
+     * Creates the Kafka service
+     * @param stackName 
+     * @param vpc 
+     * @param logGroup 
+     * @param applicationLoadbalancer 
+     * @param cluster 
+     * @param dbCredentials 
+     * @param dbLoadBalancerUrl
+     */
+    private createKafkaService(stackName: string, vpc: IVpc, logGroup: LogGroup,
+        applicationLoadbalancer: ApplicationLoadBalancer, cluster: Cluster) {
+
+        //Load Balancer Config
+        let targetGroup = new ApplicationTargetGroup(this, stackName + "-kafka-target-group", {
+            vpc: vpc,
+            port: 9092,
+            protocol: ApplicationProtocol.HTTP
+        });
+
+        const applicationListener = applicationLoadbalancer.addListener(stackName + "kafka-listener", {
+            protocol: ApplicationProtocol.HTTP,
+            port: 9092,
+            defaultAction: ListenerAction.forward([targetGroup])
+        });
+
+        //Service Config
+        let taskDefinition = new Ec2TaskDefinition(this, stackName + '-kafka-taskdef');
+
+        taskDefinition.addContainer(stackName + "-kafka-container", {
+            image: ContainerImage.fromRegistry("confluentinc/cp-kafka:7.0.1"),
+            cpu: 50,
+            memoryLimitMiB: 1024,
+            essential: true,
+            environment: {
+                "KAFKA_BROKER_ID": "1",
+                "KAFKA_ADVERTISED_LISTENERS": "INSIDE://kafka:9093,OUTSIDE://localhost:9092",
+                "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP": "INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT",
+                "KAFKA_LISTENERS": "INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092",
+                "KAFKA_INTER_BROKER_LISTENER_NAME": "INSIDE",
+                "KAFKA_PROCESS_ROLES": "broker,controller"
+            },
+            portMappings: [{
+                containerPort: 9092
+            }],
+            logging: LogDriver.awsLogs({
+                logGroup: logGroup,
+                streamPrefix: logGroup.logGroupName
+            }),
+        });
+
+        let service = new Ec2Service(this, stackName + "-kafka-service", {
+            cluster: cluster,
+            desiredCount: 1,
+            taskDefinition: taskDefinition
+        });
+        service.attachToApplicationTargetGroup(targetGroup);
     }
 
     /**
@@ -188,7 +248,7 @@ export class EcsAppStack extends Stack {
      * @param dbCredentials 
      * @param dbLoadBalancerUrl
      */
-     private createConditionService(stackName: string, vpc: IVpc, logGroup: LogGroup,
+    private createConditionService(stackName: string, vpc: IVpc, logGroup: LogGroup,
         applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string) {
 
         //Load Balancer Config
@@ -250,7 +310,7 @@ export class EcsAppStack extends Stack {
      * @param dbCredentials 
      * @param dbLoadBalancerUrl
      */
-     private createScreenerService(stackName: string, vpc: IVpc, logGroup: LogGroup,
+    private createScreenerService(stackName: string, vpc: IVpc, logGroup: LogGroup,
         applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string) {
 
         //Load Balancer Config
