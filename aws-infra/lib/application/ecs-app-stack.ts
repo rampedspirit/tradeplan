@@ -69,7 +69,7 @@ export class EcsAppStack extends Stack {
 
         //Auto scaling group (EC2 Instance)
         const autoScalingGroup = cluster.addCapacity(stackName + "-ApplicationCluster-AutoScalingGroup", {
-            instanceType: new InstanceType('t3a.small'),
+            instanceType: new InstanceType('t3a.medium'),
             machineImage: EcsOptimizedImage.amazonLinux(),
             desiredCapacity: 1,
             minCapacity: 1,
