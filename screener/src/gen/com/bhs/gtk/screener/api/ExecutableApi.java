@@ -26,7 +26,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.List;
 import java.util.Map;
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-12-30T13:01:58.305533+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-01-05T19:25:05.070620300+05:30[Asia/Calcutta]")
 
 @Api(value = "Executable", description = "the Executable API")
 public interface ExecutableApi {
@@ -36,7 +36,7 @@ public interface ExecutableApi {
         @ApiResponse(code = 206, message = "Request sucessfully processed.", response = ExecutableResponse.class),
         @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class),
         @ApiResponse(code = 404, message = "Requested filter not found.", response = Error.class) })
-    @RequestMapping(value = "/v1/executable/{executableId}",
+    @RequestMapping(value = "/v1/screener/executable/{executableId}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
     ResponseEntity<ExecutableResponse> getExecutable(@ApiParam(value = "",required=true) @PathVariable("executableId") UUID executableId);
@@ -47,7 +47,7 @@ public interface ExecutableApi {
         @ApiResponse(code = 206, message = "Request sucessfully processed.", response = ExecutableDetailedResponse.class),
         @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class),
         @ApiResponse(code = 404, message = "Requested filter not found.", response = Error.class) })
-    @RequestMapping(value = "/v1/executable/{executableId}/result",
+    @RequestMapping(value = "/v1/screener/executable/{executableId}/result",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
     ResponseEntity<ExecutableDetailedResponse> getResult(@ApiParam(value = "",required=true) @PathVariable("executableId") UUID executableId);
@@ -58,7 +58,7 @@ public interface ExecutableApi {
         @ApiResponse(code = 200, message = "Executable  with give id is updated successfully.", response = ExecutableResponse.class),
         @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class),
         @ApiResponse(code = 404, message = "Requested screener not found.", response = Error.class) })
-    @RequestMapping(value = "/v1/executable/{executableId}",
+    @RequestMapping(value = "/v1/screener/executable/{executableId}",
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PATCH)

@@ -194,7 +194,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error' 
                 
-  '/v1/executable/{executableId}':                
+  '/v1/screener/executable/{executableId}':                
     get:
       tags:
         - executable
@@ -270,7 +270,7 @@ paths:
                 $ref: '#/components/schemas/Error'   
                 
 
-  '/v1/executable/{executableId}/result':
+  '/v1/screener/executable/{executableId}/result':
     get:
       tags:
         - executable
