@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -51,7 +52,7 @@ public class ExecutableEntity {
 	@Column
 	private int numberOfScripWithResultAvailable;  
 	
-	@OneToMany()
+	@OneToMany(fetch = FetchType.EAGER)
 	private List<ConditionResultEntity> conditionResultEntities;
 	
 	protected ExecutableEntity() {}

@@ -77,6 +77,11 @@ public class ExecutableServiceImpl implements ExecutableService{
 	@Override
 	public ExecutableEntity updateStatusOfExecutable(ExecutableEntity executable) {
 		executable.setStatus(deriveExecutableStatus(executable));
+		long resultAvailableCount = executable.getConditionResultEntities().stream()
+				.filter(c -> StringUtils.equals(ScripResult.StatusEnum.PASS.name(), c.getStatus())
+						|| StringUtils.equals(ScripResult.StatusEnum.FAIL.name(), c.getStatus()))
+				.count();
+		executable.setNumberOfScripWithResultAvailable((int)resultAvailableCount);
 		ExecutableEntity savedExecutable = executableRespository.save(executable);
 		return savedExecutable;
 	}
