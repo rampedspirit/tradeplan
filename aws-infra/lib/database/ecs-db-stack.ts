@@ -1,7 +1,8 @@
 import { CfnOutput, RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
 import { InstanceType, IVpc, Peer, Port, SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2";
-import { Cluster, ContainerImage, Ec2Service, Ec2TaskDefinition, EcsOptimizedImage, LogDriver } from "aws-cdk-lib/aws-ecs";
+import { Cluster, ContainerImage, Ec2Service, Ec2TaskDefinition, EcsOptimizedImage, LogDriver, Scope } from "aws-cdk-lib/aws-ecs";
 import { NetworkLoadBalancer, NetworkTargetGroup, Protocol } from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import { Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
 import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
@@ -77,7 +78,47 @@ export class EcsDbStack extends Stack {
         securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcpRange(31000, 61000));
         autoScalingGroup.addSecurityGroup(securityGroup);
 
+        //Install rexray volume driver
+        autoScalingGroup.addUserData('docker plugin install rexray/ebs REXRAY_PREEMPT=true EBS_REGION=ap-south-1 --grant-all-permissions \nstop ecs \nstart ecs');
+
+        //Add EBS Policy
+        const ebsPolicy = this.createEBSPolicy();
+        autoScalingGroup.role.attachInlinePolicy(ebsPolicy);
+
         return cluster;
+    }
+
+    private createEBSPolicy(): Policy {
+        const ec2PolicyEbs = new Policy(this, 'ec2-policy-create-ebs', {
+            policyName: 'REXRay-EBS',
+            statements: [
+                PolicyStatement.fromJson({
+                    Effect: 'Allow',
+                    Action: [
+                        'ec2:AttachVolume',
+                        'ec2:CreateVolume',
+                        'ec2:CreateSnapshot',
+                        'ec2:CreateTags',
+                        'ec2:DeleteVolume',
+                        'ec2:DeleteSnapshot',
+                        'ec2:DescribeAvailabilityZones',
+                        'ec2:DescribeInstances',
+                        'ec2:DescribeVolumes',
+                        'ec2:DescribeVolumeAttribute',
+                        'ec2:DescribeVolumeStatus',
+                        'ec2:DescribeSnapshots',
+                        'ec2:CopySnapshot',
+                        'ec2:DescribeSnapshotAttribute',
+                        'ec2:DetachVolume',
+                        'ec2:ModifySnapshotAttribute',
+                        'ec2:ModifyVolumeAttribute',
+                        'ec2:DescribeTags',
+                    ],
+                    Resource: '*',
+                }),
+            ],
+        });
+        return ec2PolicyEbs;
     }
 
     /**
@@ -124,7 +165,21 @@ export class EcsDbStack extends Stack {
         //Service Config
         let taskDefinition = new Ec2TaskDefinition(this, stackName + '-appdb-taskdef');
 
-        taskDefinition.addContainer(stackName + "-appdb-container", {
+        let volumeName = stackName + "-appdb-volume";
+        taskDefinition.addVolume({
+            name: volumeName,
+            dockerVolumeConfiguration: {
+                autoprovision: true,
+                scope: Scope.SHARED,
+                driver: 'rexray/ebs',
+                driverOpts: {
+                    volumetype: 'gp2',
+                    size: '10',
+                },
+            },
+        });
+
+        const containerDefinition = taskDefinition.addContainer(stackName + "-appdb-container", {
             image: ContainerImage.fromRegistry("enterprisedb/postgresql:12"),
             cpu: 50,
             memoryLimitMiB: 1024,
@@ -140,7 +195,13 @@ export class EcsDbStack extends Stack {
             logging: LogDriver.awsLogs({
                 logGroup: logGroup,
                 streamPrefix: logGroup.logGroupName
-            }),
+            })
+        });
+
+        containerDefinition.addMountPoints({
+            sourceVolume: volumeName,
+            containerPath: '/usr/local/pgsql/data',
+            readOnly: false
         });
 
         let service = new Ec2Service(this, stackName + "-appdb-service", {
@@ -177,7 +238,21 @@ export class EcsDbStack extends Stack {
         //Service Config
         let taskDefinition = new Ec2TaskDefinition(this, stackName + '-stockdb-taskdef');
 
-        taskDefinition.addContainer(stackName + "-stockdb-container", {
+        let volumeName = stackName + "-stockdb-volume";
+        taskDefinition.addVolume({
+            name: volumeName,
+            dockerVolumeConfiguration: {
+                autoprovision: true,
+                scope: Scope.SHARED,
+                driver: 'rexray/ebs',
+                driverOpts: {
+                    volumetype: 'gp2',
+                    size: '10',
+                },
+            },
+        });
+
+        const containerDefinition = taskDefinition.addContainer(stackName + "-stockdb-container", {
             image: ContainerImage.fromRegistry("enterprisedb/postgresql:12"),
             cpu: 50,
             memoryLimitMiB: 1024,
@@ -194,6 +269,12 @@ export class EcsDbStack extends Stack {
                 logGroup: logGroup,
                 streamPrefix: logGroup.logGroupName
             }),
+        });
+        
+        containerDefinition.addMountPoints({
+            sourceVolume: volumeName,
+            containerPath: '/usr/local/pgsql/data',
+            readOnly: false
         });
 
         let service = new Ec2Service(this, stackName + "-stockdb-service", {
