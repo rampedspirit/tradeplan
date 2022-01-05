@@ -125,7 +125,7 @@ public class ScreenerServiceImpl implements ScreernerService {
 	private ScreenerEntity addExecutableToScreener(ScreenerEntity screenerEntity, Date marketTime, UUID conditionId, UUID watchlistId,
 			String note, List<String> scripNames) {
 		ExecutableEntity executable = entityCreator.createExecutableEntity(marketTime,note,	watchlistId, conditionId);
-		List<ConditionResultEntity> resultEntities = entityCreator.createConditionResultEntities(scripNames,marketTime, conditionId);
+		List<ConditionResultEntity> resultEntities = entityCreator.queueConditionsToExecute(scripNames,marketTime, conditionId);
 		executable.setConditionResultEntities(resultEntities);
 		executable.setNumberOfScripForExecution(resultEntities.size());
 		screenerEntity.getExecutableEntities().add(executable);

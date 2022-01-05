@@ -22,9 +22,33 @@ public class ConditionResultId implements Serializable{
 	}
 	
 	public ConditionResultId(UUID conditionId, Date marketTime, String scripName) {
-		this.conditionId = conditionId;
-		this.marketTime = marketTime;
+		this.setConditionId(conditionId);
+		this.setMarketTime(marketTime);
+		this.setScripName(scripName);
+	}
+
+	public String getScripName() {
+		return scripName;
+	}
+
+	public void setScripName(String scripName) {
 		this.scripName = scripName;
+	}
+
+	public UUID getConditionId() {
+		return conditionId;
+	}
+
+	public void setConditionId(UUID conditionId) {
+		this.conditionId = conditionId;
+	}
+
+	public Date getMarketTime() {
+		return marketTime;
+	}
+
+	public void setMarketTime(Date marketTime) {
+		this.marketTime = marketTime;
 	}
 
 }
