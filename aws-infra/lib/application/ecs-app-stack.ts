@@ -41,7 +41,7 @@ export class EcsAppStack extends Stack {
         const applicationLoadbalancer = this.createApplicationLoadBalancer(props.stackName!, vpc);
 
         //Kafka
-
+        this.createKafkaService(props.stackName!, vpc, logGroup, applicationLoadbalancer, cluster);
 
         //Services
         const applicationListener = applicationLoadbalancer.addListener(props.stackName + "application-listener", {
