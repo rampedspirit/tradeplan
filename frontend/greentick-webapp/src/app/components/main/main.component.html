@@ -1,0 +1,47 @@
+<div fxLayout="row" fxLayout.sm="column" fxLayout.xs="column" fxFlexFill fxLayoutGap="2px">
+
+    <!--Main Nav-->
+    <div class="container">
+        <mat-button-toggle-group [vertical]="!isSmallScreen">
+            <mat-button-toggle class="main-nav-item" matTooltip="SCREENERS" [routerLink]="['/screener/list']"> S
+            </mat-button-toggle>
+            <mat-button-toggle class="main-nav-item"> &nbsp; </mat-button-toggle>
+            <mat-button-toggle class="main-nav-item" matTooltip="FILTERS" [routerLink]="['/filter/list']"> F
+            </mat-button-toggle>
+            <mat-button-toggle class="main-nav-item" matTooltip="CONDITIONS" [routerLink]="['/condition/list']"> C
+            </mat-button-toggle>
+        </mat-button-toggle-group>
+    </div> 
+
+    <!--List Area-->
+    <div class="container main-list-container" fxFlex="25" fxFlex.md="40" fxFlex.sm="40" fxFlex.xs="100">
+        <router-outlet></router-outlet>
+    </div>
+
+    <!--Tab Area-->
+    <div *ngIf="(tabAreaService.openedTabs | async).length > 0" class="container main-tab-container" fxFlex>
+        <mat-tab-group [selectedIndex]="tabAreaService.selectedTabIndex" animationDuration="0">
+            <mat-tab *ngFor="let tab of (tabAreaService.openedTabs | async)">
+                <ng-template mat-tab-label>
+                    <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="space-between center">
+                        <div>
+                            {{tab.title}}<span *ngIf="tab.dirtyFlag"> *</span>
+                        </div>
+                        <button mat-icon-button (click)="closeTab(tab)">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </div>
+                </ng-template>
+                <div class="tab-container" *ngIf="tab.type == 'filter'">
+                    <app-filter-edit [tab]="tab"></app-filter-edit>
+                </div>
+                <div class="tab-container" *ngIf="tab.type == 'condition'">
+                    <app-condition-edit [tab]="tab"></app-condition-edit>
+                </div>
+                <div class="tab-container" *ngIf="tab.type == 'screener'">
+                    <app-screener-edit [tab]="tab"></app-screener-edit>
+                </div>
+            </mat-tab>
+        </mat-tab-group>
+    </div>
+</div>

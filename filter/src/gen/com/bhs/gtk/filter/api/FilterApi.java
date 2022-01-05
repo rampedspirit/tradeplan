@@ -25,10 +25,18 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.List;
 import java.util.Map;
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-09-02T18:16:07.244312900+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-09-23T17:21:44.041795600+05:30[Asia/Calcutta]")
 
 @Api(value = "Filter", description = "the Filter API")
 public interface FilterApi {
+
+    @ApiOperation(value = "checks the health of service", nickname = "checkHealth", notes = "checks the health of service", tags={ "filter", })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Request sucessfully processed.") })
+    @RequestMapping(value = "/",
+        method = RequestMethod.GET)
+    ResponseEntity<Void> checkHealth();
+
 
     @ApiOperation(value = "create new filter", nickname = "createFilter", notes = "create new filter", response = Filter.class, tags={ "filter", })
     @ApiResponses(value = { 

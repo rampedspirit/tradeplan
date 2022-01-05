@@ -1,0 +1,34 @@
+<div fxLayout="row" fxLayoutAlign="space-between center" fxLayout.sm="column" fxLayoutAlign.sm="center start"
+    fxLayout.xs="column" fxLayoutAlign.xs="center start">
+    <div>
+        <h3><b>FILTERS</b></h3>
+    </div>
+    <div>
+        <button mat-flat-button color="primary" (click)="openCreateFilterDialog()">NEW FILTER</button>
+    </div>
+</div>
+
+<div fxLayout="column">
+    <mat-form-field>
+        <mat-label>
+            <mat-icon>search</mat-icon> Search
+        </mat-label>
+        <input matInput #filterSearch>
+    </mat-form-field>
+</div>
+
+<app-message *ngIf="filters!=null && filters.length==0" type="warn" message="No Filters Available."
+    [callback]="openCreateFilterDialog" callbackText="Create Filter">
+</app-message>
+
+<app-message *ngIf="fetchError" type="error" message="Failed to connect to our servers." [callback]="refresh"
+    callbackText="Refresh">
+</app-message>
+
+<mat-selection-list #filterList [multiple]="false" (selectionChange)="onSelectionChange($event)">
+    <mat-list-option *ngFor="let filter of ( filters | filterNameSearch:filterSearch.value)" [value]="filter">
+        {{filter.name}}
+    </mat-list-option>
+</mat-selection-list>
+
+<ngx-spinner type="ball-spin-clockwise"></ngx-spinner>

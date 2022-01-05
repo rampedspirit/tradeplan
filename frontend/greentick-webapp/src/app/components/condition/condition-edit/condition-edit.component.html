@@ -1,0 +1,34 @@
+<app-message *ngIf="fetchError" type="error" message="Failed to connect to our servers." [callback]="refresh"
+    callbackText="Refresh">
+</app-message>
+<form *ngIf="editConditionForm" fxLayout="column" fxLayoutGap="10px" [formGroup]="editConditionForm" fxFlexFill>
+    <div fxLayout="row" fxLayoutAlign="space-between center">
+        <mat-form-field>
+            <mat-label>Name</mat-label>
+            <input matInput [formControl]="nameControl">
+            <mat-error *ngIf="nameControl && nameControl.invalid">Please enter valid name.</mat-error>
+        </mat-form-field>
+        <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+            <button mat-flat-button color="primary" (click)="save()">SAVE</button>
+            <button mat-flat-button color="warn" (click)="delete()">DELETE</button>
+        </div>
+    </div>
+
+    <mat-form-field>
+        <mat-label>Description</mat-label>
+        <textarea matInput [formControl]="descriptionControl"></textarea>
+        <mat-error *ngIf="descriptionControl && descriptionControl.invalid">Please enter a valid description.
+        </mat-error>
+    </mat-form-field>
+
+    <app-message *ngIf="fetchError2" type="error"
+        message="Failed to connect to our servers. Content assist may not work." [callback]="refresh2"
+        callbackText="Refresh">
+    </app-message>
+    <mat-error *ngIf="codeControl && codeControl.invalid">Please enter a valid code. </mat-error>
+    <div style="border: 1px solid rgb(124, 119, 119);padding-top: 10px;height: 400px;">
+        <ngx-monaco-editor matInput [formControl]="codeControl" [options]="editorOptions"
+            (onInit)="onEditorInit($event)" style="height: 100%;">
+        </ngx-monaco-editor>
+    </div>
+</form>

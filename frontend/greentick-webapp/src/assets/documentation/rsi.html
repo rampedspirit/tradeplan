@@ -1,0 +1,40 @@
+<p>rsi : syntax : rsi(rsi_period,[OLHCV]) : Calculates the rsi value for given period. close values are used as default
+    values for calculating rsi value, but user can calculate rsi of any of OLHCV values.</p>
+
+<p>Note: All indicators should be used after "candle" function.</p>
+
+<ul>
+    2 main options are available to work with rsi indicator.
+
+    <li>
+        collect(50) : collectes rsi value for last 50 period from user specified reference.</li>
+    <li>valueAt(0) : Gives value of rsi at user specified reference</li>
+
+    Lets Assume that the current date is 24-Aug-2021, time 12:23 PM. Market started at 9:15 AM and ends at 3:30 PM
+</ul>
+
+<ol>
+    <li>candle(m,15m,0).rsi(14).collect(100).valueAt(0) > 80 : This means,
+        <ul>
+            <li>"candle(m,5m,0)" : Starting point "m" = 12:23PM, "5m" = Open 5min chart, "0" = Get the Latest OLHCV
+                values in 5min chart, i.e all OLHCV values of 12:15 PM's 5 min candle.</li>
+            <li>"rsi(14)" : calculates the value of 14 period rsi.</li>
+            <li>"collect(100)" : collects 100 values of 14 period rsi from starting point.</li>
+            <li>"valueAt(0)" : Gives the value of rsi at latest completed 15min candle, i.e at 12:15 PM candle.</li>
+        </ul>
+        This code check if the rsi value at 12:15 PM is greater than 80 or not.
+    </li>
+    <li>candle(m,15m,0).rsi(14).collect(100).sma(12).valueAt(0) > candle(m,15m,0).rsi(14).valueAt(0) : This means,
+        <ul>
+            <li>"candle(m,5m,0)" : Starting point "m" = 12:23PM, "5m" = Open 5min chart, "0" = Get the Latest OLHCV
+                values in 5min chart, i.e all OLHCV values of 12:15 PM's 5 min candle.</li>
+            <li>"rsi(14)" : calculates the value of 14 period rsi.</li>
+            <li>"collect(100)" : collects 100 values of 14 period rsi from starting point.</li>
+            <li>"sma(12)" : calculates 12 period sma of collected 100 values of 14 period rsi.</li>
+            <li>"valueAt(0)" : Gives the value of 12 period sma of 14 period rsi at latest completed 15min candle, i.e
+                at 12:15 PM candle.</li>
+        </ul>
+    </li>
+    So the left hand side of the code will check if the 12 period sma of 14 period rsi is greater than the 14 period rsi
+    at current position or not.
+</ol>

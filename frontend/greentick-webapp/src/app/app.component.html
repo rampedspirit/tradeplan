@@ -1,0 +1,38 @@
+<div fxLayout="column" fxFlexFill>
+  <mat-card fxLayout="row" fxLayoutAlign="space-between center">
+    <div>
+      <img src="assets/icons/small.png">
+      <span style="font-size: 24px;">GREENTICK</span>
+    </div>
+    <div>
+      <!--User Menu-->
+      <button mat-icon-button *ngIf="(authService.currentUser | async)" [matMenuTriggerFor]="userMenu">
+        <mat-icon>person</mat-icon>
+      </button>
+      <mat-menu #userMenu="matMenu">
+        <div fxLayout="column" fxLayoutGap="20px" style="margin: 20px;">
+          <span>{{(authService.currentUser | async)?.name}}</span>
+          <span>{{(authService.currentUser | async)?.email}}</span>
+          <button mat-flat-button color="primary" (click)="logout()">Logout</button>
+        </div>
+      </mat-menu>
+
+      <!--Help Menu-->
+      <button mat-icon-button *ngIf="(authService.currentUser | async)" [matMenuTriggerFor]="helpMenu">
+        <mat-icon>help_outline</mat-icon>
+      </button>
+      <mat-menu #helpMenu="matMenu">
+        <div fxLayout="column" fxLayoutGap="20px" style="margin: 20px;">
+          <a href="#/doc" target="_blank">Documentation</a>
+        </div>
+      </mat-menu>
+    </div>
+  </mat-card>
+  <div fxFlex>
+    <router-outlet></router-outlet>
+  </div>
+  <div fxLayout="column" fxLayoutAlign="center center">
+    <b>&copy; All rights reserved 2021</b>
+    <p>BHS - Cloudtech</p>
+  </div>
+</div>

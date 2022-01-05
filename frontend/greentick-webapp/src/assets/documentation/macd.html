@@ -1,0 +1,56 @@
+<p>macd : syntax : macd(Fast_ema_period,slow_ema_period,signa_line_ema_period,[OLHCV]) : Calculates the macd line for
+    given fast ema period and slow ema period for 'close' values (by default).
+    User can also calcuate macd for any of OLHCV values.</p>
+
+<p> Note: All indicators should be used after "candle" function.</p>
+
+<p>3 options are available to work with macd indicator.</p>
+<ul>
+    <li>collect(50) : collectes macd line for last 50 period from user specified reference</li>
+    <li>stream(50) : calculates macd signal line for last 50 period from user specified reference</li>
+    <li>valueAt(0) : Gives value of macd line at user specified reference</li>
+</ul>
+
+<ol>
+    Lets Assume that the current date is 24-Aug-2021, time 12:23 PM. Market started at 9:15 AM and ends at 3:30 PM
+    <li>candle(m,5m,0).macd(9,20,10).valueAt(0) > 100 : This means,
+        <ul>
+            <li>"candle(m,5m,0)" : Starting point "m" = 12:23PM, "5m" = Open 5min chart, "0" = Get the Latest OLHCV
+                values in 5min chart, i.e all OLHCV values of 12:15 PM's 5 min candle.</li>
+            <li>"macd(9,20,10)" : calculates the value of "macd line" for 9 ema and 20 ema period at 12:15 PM's candle.
+            </li>
+            <li>"valueAt(0) : Gives the value of "macd line" at latest completed 15min candle, i.e at 12:15 PM candle.
+            </li>
+        </ul>
+        This code check if the macd line's value at 12:15 PM is greater than 100 or not.
+    </li>
+    <li>candle(m,15m,0).macd(12,26,10).collect(100).sma(12).valueAt(0) > 100
+        <ul>
+            <li>"candle(m,5m,0)" : Starting point "m" = 12:23PM, "5m" = Open 5min chart, "0" = Get the Latest OLHCV
+                values in 5min chart, i.e all OLHCV values of 12:15 PM's 5 min candle.</li>
+            <li>"macd(9,20,10)" : calculate the value of "macd line" for 9 ema and 20 ema period at 12:15 PM's candle.
+            </li>
+            <li>"collect(100)" : collectes macd line values for last 100 period from 12:15 PM.</li>
+            <li>"sma(12)" : For collect 100 value in step "c", sma(12) will calculates the 12 period sma.</li>
+            <li>"valueAt" : Gives the value of 12 period sma of last 100 period macd line at 12:15 PM.</li>
+        </ul>
+        This code will check if the 12 period sma of last 100 collected macd line values at 12:15 PM is greater than 100
+        or not.
+    </li>
+    <li>candle(m,15m,0).macd(9,20,10).stream(100).crossover(0,BULLISH) = 1 : This means,
+        <ul>
+            <li>"candle(m,5m,0)" : Starting point "m" = 12:23PM, "5m" = Open 5min chart, "0" = Get the Latest OLHCV
+                values in 5min chart, i.e all OLHCV values of 12:15 PM's 5 min candle.</li>
+            <li>"macd(9,20,9)" : calculates the value of "macd line" for 9 ema and 20 ema period at 12:15 PM's candle.
+            </li>
+            <li>"stream(100)": using macd line, stream will calculate macd signal line for last 100 period. So, this
+                will have 100 macd signal values.</li>
+            <li>"crossover(0,BULLISH)" : For collected macd line and macd signal line, at 12:15 PM, this will check if
+                macd signal line has made "BULLISH" crossover or not. "1" means crossover has happend and "0" means its
+                not crossed. Similarly, for BEARISH crossover can also be checked.</li>
+        </ul>
+        This code will check if at latest closed candle, a BULLISH crossover of macd line and macd signal line has
+        occured or not.
+    </li>
+</ol>
+<p>For more help on stream, please check the "stream" function usage.</p>

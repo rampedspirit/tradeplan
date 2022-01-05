@@ -1,0 +1,28 @@
+<div fxLayout="column" fxLayoutGap="10px">
+    <h2>LOGIN</h2>
+    <form fxLayout="column" fxLayoutGap="10px" [formGroup]="loginForm">
+        <span style="color: rgb(7, 139, 7);" [innerHTML]="message"></span>
+        <mat-form-field>
+            <mat-label>Email</mat-label>
+            <input type="email" matInput [formControl]="emailControl">
+            <mat-error *ngIf="emailControl && emailControl.invalid">Please enter valid email id.</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Password</mat-label>
+            <input type="password" matInput [formControl]="passwordControl">
+            <mat-error *ngIf="passwordControl && passwordControl.invalid">Please enter correct password.</mat-error>
+        </mat-form-field>
+        <mat-error *ngIf="submissionError">{{submissionError}}</mat-error>
+        <button mat-flat-button color="primary" (click)="onSubmit()">LOGIN</button>
+    </form>
+    <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="10px">
+        <div>
+            <button mat-stroked-button color="primary" [routerLink]="['/auth/signup']">New User ?</button>
+        </div>
+        <div>
+            <button mat-stroked-button color="primary" [routerLink]="['/auth/reset']">Forgot Password ?</button>
+        </div>
+    </div>
+</div>
+
+<ngx-spinner type="ball-spin-clockwise"></ngx-spinner>

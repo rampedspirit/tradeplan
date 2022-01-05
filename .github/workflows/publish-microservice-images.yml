@@ -1,0 +1,67 @@
+name: Publish Microservice Images
+
+on:
+  workflow_dispatch:
+    inputs:
+ 
+     ImageVersion:
+        required: true
+        description: Version of Image
+        default: latest
+        
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up JDK 8
+      uses: actions/setup-java@v2
+      with:
+        java-version: '8'
+        distribution: 'adopt'
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.REPO_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.REPO_AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-south-1
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+      
+    - name: Build filter-service
+      run: mvn -B package --file filter/pom.xml
+
+    - name: Push filter-service Image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.event.inputs.ImageVersion }}
+      run: |
+        docker build filter/ -f filter/Dockerfile -t $ECR_REGISTRY/gtk-filter-service:$IMAGE_TAG
+        docker push $ECR_REGISTRY/gtk-filter-service:$IMAGE_TAG
+      
+    - name: Build condition-service
+      run: mvn -B package --file condition/pom.xml
+
+    - name: Push condition-service Image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.event.inputs.ImageVersion }}
+      run: |
+        docker build condition/ -f condition/Dockerfile -t $ECR_REGISTRY/gtk-condition-service:$IMAGE_TAG
+        docker push $ECR_REGISTRY/gtk-condition-service:$IMAGE_TAG
+
+    - name: Build screener-service
+      run: mvn -B package --file screener/pom.xml
+
+    - name: Push screener-service Image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.event.inputs.ImageVersion }}
+      run: |
+        docker build screener/ -f screener/Dockerfile -t $ECR_REGISTRY/gtk-screener-service:$IMAGE_TAG
+        docker push $ECR_REGISTRY/gtk-screener-service:$IMAGE_TAG

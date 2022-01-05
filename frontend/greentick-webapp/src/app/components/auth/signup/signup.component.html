@@ -1,0 +1,30 @@
+<div fxLayout="column" fxLayoutGap="10px">
+    <h2>REGISTER</h2>
+    <form fxLayout="column" fxLayoutGap="10px" [formGroup]="signupForm">
+        <mat-form-field>
+            <mat-label>Name</mat-label>
+            <input matInput [formControl]="nameControl">
+            <mat-error *ngIf="nameControl && nameControl.invalid">Please enter valid name.</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Email</mat-label>
+            <input type="email" matInput [formControl]="emailControl">
+            <mat-error *ngIf="emailControl && emailControl.invalid">Please enter valid email id.</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Password</mat-label>
+            <input type="password" matInput [formControl]="passwordControl">
+            <mat-error *ngIf="passwordControl && passwordControl.invalid">Please enter password with minimum 8
+                characters and atleast one number.</mat-error>
+        </mat-form-field>
+        <mat-error *ngIf="submissionError">{{submissionError}}</mat-error>
+        <button mat-flat-button color="primary" (click)="onSubmit()">REGISTER</button>
+    </form>
+    <div fxLayout="row" fxLayoutAlign="center center">
+        <div>
+            <button mat-stroked-button color="primary" [routerLink]="['/auth/login']">Already Registered ?</button>
+        </div>
+    </div>
+</div>
+
+<ngx-spinner type="ball-spin-clockwise"></ngx-spinner>

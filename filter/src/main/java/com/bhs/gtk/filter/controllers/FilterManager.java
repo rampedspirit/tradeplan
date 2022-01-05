@@ -1,6 +1,5 @@
 package com.bhs.gtk.filter.controllers;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -10,18 +9,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.bhs.gtk.filter.api.FilterApi;
 import com.bhs.gtk.filter.model.Filter;
 import com.bhs.gtk.filter.model.PatchModel;
 import com.bhs.gtk.filter.service.FilterServiceImpl;
 
-
 @Controller
-public class FilterManager implements FilterApi{
-	
+@CrossOrigin
+public class FilterManager implements FilterApi {
+
 	@Autowired
 	private FilterServiceImpl filterServiceImpl;
+
+	@Override
+	public ResponseEntity<Void> checkHealth() {
+		return new ResponseEntity<Void>(HttpStatus.OK);
+	}
 
 	@Override
 	public ResponseEntity<Filter> createFilter(@Valid Filter body) {
@@ -52,6 +57,4 @@ public class FilterManager implements FilterApi{
 		Filter filter = filterServiceImpl.updateFilter(body, id);
 		return new ResponseEntity<Filter>(filter, HttpStatus.OK);
 	}
-
-
 }

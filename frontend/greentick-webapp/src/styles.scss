@@ -1,0 +1,39 @@
+/* You can add global styles to this file, and also import other style files */
+
+html, body { 
+  height: 100%;
+  background-color: #f9f9f9;
+}
+
+body { 
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif; 
+}
+
+/*Scroll Bar Styling*/
+/* width */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #3f51b5;
+}
+
+/*MONACO editor related styling*/
+
+// .monaco-hover-content{
+//     font-size: 16px !important;
+//     line-height: 18px;
+// }
+
+div.hover-row.status-bar {
+  display: none !important;
+}
+

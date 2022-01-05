@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.bhs.gtk.screener.api.ScreenerApi;
 import com.bhs.gtk.screener.model.ExecutableCreateRequest;
@@ -19,6 +20,7 @@ import com.bhs.gtk.screener.model.ScreenerResponse;
 import com.bhs.gtk.screener.service.ScreenerServiceImpl;
 
 @Controller
+@CrossOrigin
 public class ScreenerApiController implements ScreenerApi {
 
 	

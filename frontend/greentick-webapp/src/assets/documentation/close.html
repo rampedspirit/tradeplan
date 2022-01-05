@@ -1,0 +1,16 @@
+<p>Lets Assume that the current date is 24-Aug-2021, time 12:23 PM. Market started at 9:15 AM and ends at 3:30 PM</p>
+<ol>
+    <li> close(m,5m,0) : Starting point "m" = 12:23PM, "5m" = Open 5min chart, "0" = Get the Latest closed in 5min
+        chart, i.e Close of 12:15 PM candle.</li>
+    <li> close(m,5m,-1) : Starting point "m" = 12:23PM, Timeframe/chart = 5m, "-1" = 2nd completly closed candle BEFORE
+        12:23PM, i.e Latest closed candle = "0" = 12:15PM candle, one before this candle = "-1" = 12:10 PM candle's
+        close</li>
+    <li>close(h,15m,-2) : close value of 11:30 AM's 15min candle</li>
+    <li>close(h,15m,0) : close value of 12:00 PM's 15min candle</li>
+    <li>close(d,m,0) : close value of 9:15 AM's 1min candle</li>
+    <li>close(W,d,-1) : close value on 20-Aug-2021 in daily chart</li>
+    <li>close(M,W,0) : close value on 2-Aug-2021 in weekly chart</li>
+    <li>close(h,W,-1) : close vlaue on 9-Aug-2021 in weekly chart</li>
+    <li>close(h,1m,5) : close value of 12:20 PM's 1min candle</li>
+    <li>close(30m,15m,-1) : close value of 11:45 AM's 15min candle)</li>
+</ol>

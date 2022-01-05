@@ -1,0 +1,30 @@
+<app-message *ngIf="fetchError" type="error" message="Failed to connect to our servers." [callback]="refresh"
+    callbackText="Refresh">
+</app-message>
+<form *ngIf="editFilterForm" fxLayout="column" fxLayoutGap="10px" [formGroup]="editFilterForm" fxFlexFill>
+    <div fxLayout="row" fxLayoutAlign="space-between center">
+        <mat-form-field>
+            <mat-label>Name</mat-label>
+            <input matInput [formControl]="nameControl">
+            <mat-error *ngIf="nameControl.errors?.required">Filter name should not be blank.</mat-error>
+            <mat-error *ngIf="nameControl.errors?.hasSpace">Filter name should not have spaces.</mat-error>
+            <mat-error *ngIf="nameControl.errors?.notUnique">Filter name should be unique.</mat-error>
+        </mat-form-field>
+        <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+            <button mat-flat-button color="primary" (click)="save()">SAVE</button>
+            <button mat-flat-button color="warn" (click)="delete()">DELETE</button>
+        </div>
+    </div>
+    <mat-form-field>
+        <mat-label>Description</mat-label>
+        <textarea matInput [formControl]="descriptionControl"></textarea>
+        <mat-error *ngIf="descriptionControl && descriptionControl.invalid">Please enter a valid description.
+        </mat-error>
+    </mat-form-field>
+    <mat-error *ngIf="codeControl && codeControl.invalid">Please enter a valid code. </mat-error>
+    <div style="border: 1px solid rgb(124, 119, 119);padding-top: 10px;height: 400px;">
+        <ngx-monaco-editor matInput [formControl]="codeControl" [options]="editorOptions"
+            (onInit)="onEditorInit($event)" style="height: 100%;">
+        </ngx-monaco-editor>
+    </div>
+</form>
