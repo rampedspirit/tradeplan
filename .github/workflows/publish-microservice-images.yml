@@ -65,3 +65,14 @@ jobs:
       run: |
         docker build screener/ -f screener/Dockerfile -t $ECR_REGISTRY/gtk-screener-service:$IMAGE_TAG
         docker push $ECR_REGISTRY/gtk-screener-service:$IMAGE_TAG
+        
+    - name: Build kafka-monitor-service
+      run: mvn -B package --file kafka-monitor/pom.xml
+
+    - name: Push kafka-monitor-service Image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.event.inputs.ImageVersion }}
+      run: |
+        docker build kafka-monitor/ -f kafka-monitor/Dockerfile -t $ECR_REGISTRY/gtk-kafka-monitor-service:$IMAGE_TAG
+        docker push $ECR_REGISTRY/gtk-kafka-monitor-service:$IMAGE_TAG
