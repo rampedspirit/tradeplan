@@ -1,11 +1,15 @@
 package com.bhs.gtk.screener.persistence;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -30,6 +34,9 @@ public class ScreenerEntity {
 	
 	@Column
 	private UUID conditionId;
+	
+	@OneToMany (cascade = CascadeType.ALL)
+	private List<ExecutableEntity> executableEntities;
 
 	protected ScreenerEntity() {}
 	
@@ -38,6 +45,7 @@ public class ScreenerEntity {
 		this.setDescription(description);
 		this.watchlistId = watchlistId;
 		this.conditionId = conditionId;
+		this.setExecutableEntities(new ArrayList<>());
 	}
 	
 	public UUID getScreenerId() {
@@ -79,5 +87,22 @@ public class ScreenerEntity {
 	public void setConditionId(UUID conditionId) {
 		this.conditionId = conditionId;
 	}
+
+	public List<ExecutableEntity> getExecutableEntities() {
+		return executableEntities;
+	}
+
+	public void setExecutableEntities(List<ExecutableEntity> executableEntities) {
+		this.executableEntities = executableEntities;
+	}
+
+//	public List<ExecutableEntity> getExecutables() {
+//		return executables;
+//	}
+//
+//	public void setExecutables(List<ExecutableEntity> executables) {
+//		this.executables = executables;
+//	}
+
 
 }

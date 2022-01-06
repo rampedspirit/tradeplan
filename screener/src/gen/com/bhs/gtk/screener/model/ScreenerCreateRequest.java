@@ -11,15 +11,12 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * ScreenerResponse
+ * ScreenerCreateRequest
  */
 @Validated
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-01-05T19:25:05.070620300+05:30[Asia/Calcutta]")
 
-public class ScreenerResponse   {
-  @JsonProperty("screenerId")
-  private UUID screenerId = null;
-
+public class ScreenerCreateRequest   {
   @JsonProperty("name")
   private String name = null;
 
@@ -32,28 +29,7 @@ public class ScreenerResponse   {
   @JsonProperty("conditionId")
   private UUID conditionId = null;
 
-  public ScreenerResponse screenerId(UUID screenerId) {
-    this.screenerId = screenerId;
-    return this;
-  }
-
-  /**
-   * screener identifier
-   * @return screenerId
-  **/
-  @ApiModelProperty(value = "screener identifier")
-
-  @Valid
-
-  public UUID getScreenerId() {
-    return screenerId;
-  }
-
-  public void setScreenerId(UUID screenerId) {
-    this.screenerId = screenerId;
-  }
-
-  public ScreenerResponse name(String name) {
+  public ScreenerCreateRequest name(String name) {
     this.name = name;
     return this;
   }
@@ -74,7 +50,7 @@ public class ScreenerResponse   {
     this.name = name;
   }
 
-  public ScreenerResponse description(String description) {
+  public ScreenerCreateRequest description(String description) {
     this.description = description;
     return this;
   }
@@ -94,7 +70,7 @@ public class ScreenerResponse   {
     this.description = description;
   }
 
-  public ScreenerResponse watchListId(UUID watchListId) {
+  public ScreenerCreateRequest watchListId(UUID watchListId) {
     this.watchListId = watchListId;
     return this;
   }
@@ -115,7 +91,7 @@ public class ScreenerResponse   {
     this.watchListId = watchListId;
   }
 
-  public ScreenerResponse conditionId(UUID conditionId) {
+  public ScreenerCreateRequest conditionId(UUID conditionId) {
     this.conditionId = conditionId;
     return this;
   }
@@ -145,25 +121,23 @@ public class ScreenerResponse   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ScreenerResponse screenerResponse = (ScreenerResponse) o;
-    return Objects.equals(this.screenerId, screenerResponse.screenerId) &&
-        Objects.equals(this.name, screenerResponse.name) &&
-        Objects.equals(this.description, screenerResponse.description) &&
-        Objects.equals(this.watchListId, screenerResponse.watchListId) &&
-        Objects.equals(this.conditionId, screenerResponse.conditionId);
+    ScreenerCreateRequest screenerCreateRequest = (ScreenerCreateRequest) o;
+    return Objects.equals(this.name, screenerCreateRequest.name) &&
+        Objects.equals(this.description, screenerCreateRequest.description) &&
+        Objects.equals(this.watchListId, screenerCreateRequest.watchListId) &&
+        Objects.equals(this.conditionId, screenerCreateRequest.conditionId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(screenerId, name, description, watchListId, conditionId);
+    return Objects.hash(name, description, watchListId, conditionId);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ScreenerResponse {\n");
+    sb.append("class ScreenerCreateRequest {\n");
     
-    sb.append("    screenerId: ").append(toIndentedString(screenerId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    watchListId: ").append(toIndentedString(watchListId)).append("\n");
