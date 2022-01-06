@@ -199,7 +199,7 @@ export class EcsAppStack extends Stack {
 
         kafkaContainerDefinition.addContainerDependencies({
             container: zookeeperContainerDefinition,
-            condition: ContainerDependencyCondition.HEALTHY
+            condition: ContainerDependencyCondition.START
         });
 
         const kafkaMonitorContainerDefinition = taskDefinition.addContainer(stackName + "-kafka-monitor-service-container", {
@@ -222,7 +222,7 @@ export class EcsAppStack extends Stack {
 
         kafkaMonitorContainerDefinition.addContainerDependencies({
             container: kafkaContainerDefinition,
-            condition: ContainerDependencyCondition.HEALTHY
+            condition: ContainerDependencyCondition.START
         });
 
         let service = new Ec2Service(this, stackName + "-kafka-service", {
