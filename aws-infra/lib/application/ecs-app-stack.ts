@@ -144,7 +144,8 @@ export class EcsAppStack extends Stack {
             targetType: TargetType.IP,
             protocol: ApplicationProtocol.HTTP,
             healthCheck: {
-                port: "80"
+                port: "80",
+                path: "/actuator/health"
             }
         });
 
@@ -374,7 +375,10 @@ export class EcsAppStack extends Stack {
         let targetGroup = new ApplicationTargetGroup(this, stackName + "-screener-service-target-group", {
             vpc: vpc,
             port: 5002,
-            protocol: ApplicationProtocol.HTTP
+            protocol: ApplicationProtocol.HTTP,
+            healthCheck: {
+                path: "/actuator/health"
+            }
         });
 
         new ApplicationListenerRule(this, "screenerservice-listener-rule", {
