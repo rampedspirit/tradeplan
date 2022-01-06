@@ -1,8 +1,8 @@
-import { Fn, RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
+import { CfnOutput, Fn, RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
 import { InstanceType, IVpc, Peer, Port, SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2";
 import { Repository } from "aws-cdk-lib/aws-ecr";
-import { Cluster, ContainerImage, Ec2Service, Ec2TaskDefinition, EcsOptimizedImage, LogDriver, NetworkMode } from "aws-cdk-lib/aws-ecs";
-import { ApplicationListener, ApplicationListenerRule, ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, ListenerAction, ListenerCondition, NetworkLoadBalancer, TargetType } from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import { Cluster, ContainerDependencyCondition, ContainerImage, Ec2Service, Ec2TaskDefinition, EcsOptimizedImage, LogDriver, NetworkMode } from "aws-cdk-lib/aws-ecs";
+import { ApplicationListener, ApplicationListenerRule, ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, ListenerAction, ListenerCondition, NetworkLoadBalancer, Protocol, TargetType } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
 import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
@@ -39,6 +39,13 @@ export class EcsAppStack extends Stack {
 
         //Network Load Balancer
         const applicationLoadbalancer = this.createApplicationLoadBalancer(props.stackName!, vpc);
+        const appLoadBalancerUrl = applicationLoadbalancer.loadBalancerDnsName + ":" + 9092;
+
+        //Export load balancer dns
+        new CfnOutput(this, "dbLoadBalancerDnsName", {
+            value: applicationLoadbalancer.loadBalancerDnsName,
+            exportName: props.stackName + "-alb-dns",
+        });
 
         //Kafka
         this.createKafkaService(props.stackName!, vpc, logGroup, applicationLoadbalancer, cluster);
@@ -54,7 +61,7 @@ export class EcsAppStack extends Stack {
         });
         this.createFilterService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
         this.createConditionService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
-        this.createScreenerService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
+        this.createScreenerService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, appLoadBalancerUrl);
     }
 
     /**
@@ -134,8 +141,11 @@ export class EcsAppStack extends Stack {
         let targetGroup = new ApplicationTargetGroup(this, stackName + "-kafka-target-group", {
             vpc: vpc,
             port: 9092,
-            targetType:TargetType.IP,
-            protocol: ApplicationProtocol.HTTP
+            targetType: TargetType.IP,
+            protocol: ApplicationProtocol.HTTP,
+            healthCheck: {
+                port: "80"
+            }
         });
 
         const applicationListener = applicationLoadbalancer.addListener(stackName + "kafka-listener", {
@@ -149,8 +159,7 @@ export class EcsAppStack extends Stack {
             networkMode: NetworkMode.AWS_VPC
         });
 
-
-        taskDefinition.addContainer(stackName + "-zookeeper-container", {
+        const zookeeperContainerDefinition = taskDefinition.addContainer(stackName + "-zookeeper-container", {
             image: ContainerImage.fromRegistry("zookeeper:latest"),
             cpu: 50,
             memoryLimitMiB: 500,
@@ -168,7 +177,7 @@ export class EcsAppStack extends Stack {
             }),
         });
 
-        taskDefinition.addContainer(stackName + "-kafka-container", {
+        const kafkaContainerDefinition = taskDefinition.addContainer(stackName + "-kafka-container", {
             image: ContainerImage.fromRegistry("confluentinc/cp-kafka:7.0.1"),
             cpu: 50,
             memoryLimitMiB: 1024,
@@ -184,7 +193,35 @@ export class EcsAppStack extends Stack {
             logging: LogDriver.awsLogs({
                 logGroup: logGroup,
                 streamPrefix: logGroup.logGroupName
-            }),
+            })
+        });
+
+        kafkaContainerDefinition.addContainerDependencies({
+            container: zookeeperContainerDefinition,
+            condition: ContainerDependencyCondition.HEALTHY
+        });
+
+        const kafkaMonitorContainerDefinition = taskDefinition.addContainer(stackName + "-kafka-monitor-service-container", {
+            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-kafka-monitor-service", "gtk-kafka-monitor-service")),
+            cpu: 50,
+            memoryLimitMiB: 256,
+            essential: true,
+            environment: {
+                "SERVER_PORT": "80",
+                "KAFKA_BOOTSTRAP_ADDRESS": "localhost:9092"
+            },
+            portMappings: [{
+                containerPort: 80
+            }],
+            logging: LogDriver.awsLogs({
+                logGroup: logGroup,
+                streamPrefix: logGroup.logGroupName
+            })
+        });
+
+        kafkaMonitorContainerDefinition.addContainerDependencies({
+            container: kafkaContainerDefinition,
+            condition: ContainerDependencyCondition.HEALTHY
         });
 
         let service = new Ec2Service(this, stackName + "-kafka-service", {
@@ -328,9 +365,10 @@ export class EcsAppStack extends Stack {
      * @param cluster 
      * @param dbCredentials 
      * @param dbLoadBalancerUrl
+     * @param appLoadBalancerUrl
      */
-    private createScreenerService(stackName: string, vpc: IVpc, logGroup: LogGroup,
-        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string) {
+    private createScreenerService(stackName: string, vpc: IVpc, logGroup: LogGroup, applicationListener: ApplicationListener,
+        cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string, appLoadBalancerUrl: string) {
 
         //Load Balancer Config
         let targetGroup = new ApplicationTargetGroup(this, stackName + "-screener-service-target-group", {
@@ -362,7 +400,8 @@ export class EcsAppStack extends Stack {
                 "DB_PORT": "5000",
                 "DB_NAME": "appdb",
                 "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
-                "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString()
+                "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
+                "KAFKA_BOOTSTRAP_ADDRESS": appLoadBalancerUrl
             },
             portMappings: [{
                 containerPort: 5002
