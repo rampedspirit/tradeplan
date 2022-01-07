@@ -16,10 +16,9 @@ import com.bhs.gtk.condition.model.Condition;
 import com.bhs.gtk.condition.model.PatchModel;
 import com.bhs.gtk.condition.service.ConditionServiceImpl;
 
-
 @Controller
 @CrossOrigin
-public class ConditionManager implements ConditionApi {
+public class ConditionApiController implements ConditionApi {
 	
 	@Autowired
 	private ConditionServiceImpl conditionServiceImpl;
