@@ -143,7 +143,7 @@ export class EcsAppStack extends Stack {
             port: 9092,
             protocol: ApplicationProtocol.HTTP,
             healthCheck: {
-                port: "80",
+                port: "9093",
                 path: "/actuator/health"
             }
         });
@@ -155,7 +155,7 @@ export class EcsAppStack extends Stack {
         });
 
         //Service Config
-        let taskDefinition = new Ec2TaskDefinition(this, stackName + '-kafka-taskdef',{
+        let taskDefinition = new Ec2TaskDefinition(this, stackName + '-kafka-taskdef', {
             networkMode: NetworkMode.BRIDGE
         });
 
@@ -201,7 +201,7 @@ export class EcsAppStack extends Stack {
             condition: ContainerDependencyCondition.START
         });
 
-        kafkaContainerDefinition.addLink(zookeeperContainerDefinition,"zookeeper");
+        kafkaContainerDefinition.addLink(zookeeperContainerDefinition, "zookeeper");
 
         const kafkaMonitorContainerDefinition = taskDefinition.addContainer(stackName + "-kafka-monitor-service-container", {
             image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-kafka-monitor-service", "gtk-kafka-monitor-service")),
@@ -209,11 +209,12 @@ export class EcsAppStack extends Stack {
             memoryLimitMiB: 256,
             essential: true,
             environment: {
-                "SERVER_PORT": "80",
+                "SERVER_PORT": "9093",
                 "KAFKA_BOOTSTRAP_ADDRESS": "localhost:9092"
             },
             portMappings: [{
-                containerPort: 80
+                hostPort: 9093,
+                containerPort: 9093
             }],
             logging: LogDriver.awsLogs({
                 logGroup: logGroup,
@@ -226,7 +227,7 @@ export class EcsAppStack extends Stack {
             condition: ContainerDependencyCondition.START
         });
 
-        kafkaMonitorContainerDefinition.addLink(kafkaContainerDefinition,"kafka");
+        kafkaMonitorContainerDefinition.addLink(kafkaContainerDefinition, "kafka");
 
         taskDefinition.defaultContainer = kafkaContainerDefinition;
 
