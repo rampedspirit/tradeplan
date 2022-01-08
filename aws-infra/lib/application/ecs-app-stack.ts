@@ -189,6 +189,7 @@ export class EcsAppStack extends Stack {
                 "KAFKA_ADVERTISED_LISTENERS": "PLAINTEXT://localhost:9092"
             },
             portMappings: [{
+                hostPort: 9092,
                 containerPort: 9092
             }],
             logging: LogDriver.awsLogs({
