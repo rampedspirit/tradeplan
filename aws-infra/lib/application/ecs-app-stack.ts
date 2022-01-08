@@ -186,6 +186,7 @@ export class EcsAppStack extends Stack {
             environment: {
                 "KAFKA_BROKER_ID": "1",
                 "KAFKA_ZOOKEEPER_CONNECT": "localhost:2181",
+                "KAFKA_LISTENERS": "PLAINTEXT://localhost:9092",
                 "KAFKA_ADVERTISED_LISTENERS": "PLAINTEXT://localhost:9092"
             },
             portMappings: [{
