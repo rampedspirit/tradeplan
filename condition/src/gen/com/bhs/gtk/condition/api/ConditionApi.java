@@ -5,9 +5,11 @@
  */
 package com.bhs.gtk.condition.api;
 
-import com.bhs.gtk.condition.model.Condition;
+import com.bhs.gtk.condition.model.ConditionDetailedResponse;
+import com.bhs.gtk.condition.model.ConditionRequest;
+import com.bhs.gtk.condition.model.ConditionResponse;
 import com.bhs.gtk.condition.model.Error;
-import com.bhs.gtk.condition.model.PatchModel;
+import com.bhs.gtk.condition.model.PatchData;
 import java.util.UUID;
 import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
@@ -25,70 +27,62 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.List;
 import java.util.Map;
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-09-24T15:34:38.557240300+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-01-08T12:39:36.275234600+05:30[Asia/Calcutta]")
 
 @Api(value = "Condition", description = "the Condition API")
 public interface ConditionApi {
 
-    @ApiOperation(value = "checks the health of service", nickname = "checkHealth", notes = "checks the health of service", tags={ "condition", })
+    @ApiOperation(value = "create new condition", nickname = "createCondition", notes = "create new condition", response = ConditionDetailedResponse.class, tags={ "condition", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Request sucessfully processed.") })
-    @RequestMapping(value = "/",
-        method = RequestMethod.GET)
-    ResponseEntity<Void> checkHealth();
-
-
-    @ApiOperation(value = "create new condition", nickname = "createCondition", notes = "create new condition", response = Condition.class, tags={ "condition", })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 201, message = "Condition created successfully.", response = Condition.class),
+        @ApiResponse(code = 201, message = "Condition created successfully.", response = ConditionDetailedResponse.class),
         @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class) })
     @RequestMapping(value = "/v1/condition",
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    ResponseEntity<Condition> createCondition(@ApiParam(value = "payload to create condition" ,required=true )  @Valid @RequestBody Condition body);
+    ResponseEntity<ConditionDetailedResponse> createCondition(@ApiParam(value = "payload to create condition" ,required=true )  @Valid @RequestBody ConditionRequest body);
 
 
-    @ApiOperation(value = "delete", nickname = "deleteCondition", notes = "delete condition of given id", response = Condition.class, tags={ "condition", })
+    @ApiOperation(value = "delete", nickname = "deleteCondition", notes = "delete condition of given id", response = ConditionDetailedResponse.class, tags={ "condition", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 204, message = "condition with give id is deleted successfully.", response = Condition.class),
+        @ApiResponse(code = 204, message = "condition with give id is deleted successfully.", response = ConditionDetailedResponse.class),
         @ApiResponse(code = 404, message = "Requested condition not found.", response = Error.class) })
     @RequestMapping(value = "/v1/condition/{id}",
         produces = { "application/json" }, 
         method = RequestMethod.DELETE)
-    ResponseEntity<Condition> deleteCondition(@ApiParam(value = "",required=true) @PathVariable("id") UUID id);
+    ResponseEntity<ConditionDetailedResponse> deleteCondition(@ApiParam(value = "",required=true) @PathVariable("id") UUID id);
 
 
-    @ApiOperation(value = "get all conditions", nickname = "getAllConditions", notes = "get conditions", response = Condition.class, responseContainer = "List", tags={ "condition", })
+    @ApiOperation(value = "get all conditions", nickname = "getAllConditions", notes = "get conditions", response = ConditionResponse.class, responseContainer = "List", tags={ "condition", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Request sucessfully processed.", response = Condition.class, responseContainer = "List"),
+        @ApiResponse(code = 200, message = "Request sucessfully processed.", response = ConditionResponse.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class) })
     @RequestMapping(value = "/v1/condition",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    ResponseEntity<List<Condition>> getAllConditions();
+    ResponseEntity<List<ConditionResponse>> getAllConditions();
 
 
-    @ApiOperation(value = "get condition of given id", nickname = "getCondition", notes = "get condition", response = Condition.class, tags={ "condition", })
+    @ApiOperation(value = "get condition of given id", nickname = "getCondition", notes = "get condition", response = ConditionDetailedResponse.class, tags={ "condition", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 206, message = "Request sucessfully processed.", response = Condition.class),
+        @ApiResponse(code = 206, message = "Request sucessfully processed.", response = ConditionDetailedResponse.class),
         @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class),
         @ApiResponse(code = 404, message = "Requested condition not found.", response = Error.class) })
     @RequestMapping(value = "/v1/condition/{id}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    ResponseEntity<Condition> getCondition(@ApiParam(value = "",required=true) @PathVariable("id") UUID id);
+    ResponseEntity<ConditionDetailedResponse> getCondition(@ApiParam(value = "",required=true) @PathVariable("id") UUID id);
 
 
-    @ApiOperation(value = "update condition", nickname = "updateCondition", notes = "update condition of given id", response = Condition.class, tags={ "condition", })
+    @ApiOperation(value = "update condition", nickname = "updateCondition", notes = "update condition of given id", response = ConditionDetailedResponse.class, tags={ "condition", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "condition with give id is updated successfully.", response = Condition.class),
+        @ApiResponse(code = 200, message = "condition with give id is updated successfully.", response = ConditionDetailedResponse.class),
         @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class),
         @ApiResponse(code = 404, message = "Requested screener not found.", response = Error.class) })
     @RequestMapping(value = "/v1/condition/{id}",
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PATCH)
-    ResponseEntity<Condition> updateCondition(@ApiParam(value = "payload to create Condition" ,required=true )  @Valid @RequestBody PatchModel body,@ApiParam(value = "",required=true) @PathVariable("id") UUID id);
+    ResponseEntity<ConditionDetailedResponse> updateCondition(@ApiParam(value = "payload to create Condition" ,required=true )  @Valid @RequestBody PatchData body,@ApiParam(value = "",required=true) @PathVariable("id") UUID id);
 
 }

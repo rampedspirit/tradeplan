@@ -14,7 +14,7 @@ import javax.validation.constraints.*;
  * PatchData
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-09-24T15:34:38.557240300+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-01-08T12:39:36.275234600+05:30[Asia/Calcutta]")
 
 public class PatchData   {
   /**
