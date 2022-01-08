@@ -212,7 +212,6 @@ export class EcsAppStack extends Stack {
                 "KAFKA_BOOTSTRAP_ADDRESS": "localhost:9092"
             },
             portMappings: [{
-                hostPort: 9092,
                 containerPort: 80
             }],
             logging: LogDriver.awsLogs({
