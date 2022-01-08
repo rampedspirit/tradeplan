@@ -140,6 +140,7 @@ export class EcsAppStack extends Stack {
         //Load Balancer Config
         let targetGroup = new ApplicationTargetGroup(this, stackName + "-kafka-target-group", {
             vpc: vpc,
+            targetType: TargetType.IP,
             port: 9092,
             protocol: ApplicationProtocol.HTTP,
             healthCheck: {
@@ -156,7 +157,7 @@ export class EcsAppStack extends Stack {
 
         //Service Config
         let taskDefinition = new Ec2TaskDefinition(this, stackName + '-kafka-taskdef', {
-            networkMode: NetworkMode.BRIDGE
+            networkMode: NetworkMode.AWS_VPC
         });
 
         const zookeeperContainerDefinition = taskDefinition.addContainer(stackName + "-zookeeper-container", {
@@ -168,6 +169,7 @@ export class EcsAppStack extends Stack {
                 "ZOOKEEPER_CLIENT_PORT": "2181"
             },
             portMappings: [{
+                hostPort: 2181,
                 containerPort: 2181
             }],
             logging: LogDriver.awsLogs({
@@ -183,11 +185,12 @@ export class EcsAppStack extends Stack {
             essential: true,
             environment: {
                 "KAFKA_BROKER_ID": "1",
-                "KAFKA_ZOOKEEPER_CONNECT": "zookeeper:2181",
-                "KAFKA_LISTENERS": "PLAINTEXT://kafka:9092",
-                "KAFKA_ADVERTISED_LISTENERS": "PLAINTEXT://kafka:9092"
+                "KAFKA_ZOOKEEPER_CONNECT": "localhost:2181",
+                "KAFKA_LISTENERS": "PLAINTEXT://localhost:9092",
+                "KAFKA_ADVERTISED_LISTENERS": "PLAINTEXT://localhost:9092"
             },
             portMappings: [{
+                hostPort: 9092,
                 containerPort: 9092
             }],
             logging: LogDriver.awsLogs({
