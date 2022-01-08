@@ -156,8 +156,8 @@ export class EcsAppStack extends Stack {
         });
 
         //Service Config
-        let taskDefinition = new Ec2TaskDefinition(this, stackName + '-kafka-taskdef', {
-            networkMode: NetworkMode.AWS_VPC
+        let taskDefinition = new Ec2TaskDefinition(this, stackName + '-kafka-taskdef',{
+            networkMode: NetworkMode.BRIDGE
         });
 
         const zookeeperContainerDefinition = taskDefinition.addContainer(stackName + "-zookeeper-container", {
@@ -169,7 +169,6 @@ export class EcsAppStack extends Stack {
                 "ZOOKEEPER_CLIENT_PORT": "2181"
             },
             portMappings: [{
-                hostPort: 2181,
                 containerPort: 2181
             }],
             logging: LogDriver.awsLogs({
@@ -185,12 +184,11 @@ export class EcsAppStack extends Stack {
             essential: true,
             environment: {
                 "KAFKA_BROKER_ID": "1",
-                "KAFKA_ZOOKEEPER_CONNECT": "localhost:2181",
-                "KAFKA_LISTENERS": "PLAINTEXT://localhost:9092",
-                "KAFKA_ADVERTISED_LISTENERS": "PLAINTEXT://localhost:9092"
+                "KAFKA_ZOOKEEPER_CONNECT": "zookeeper:2181",
+                "KAFKA_LISTENERS": "PLAINTEXT://kafka:9092",
+                "KAFKA_ADVERTISED_LISTENERS": "PLAINTEXT://kafka:9092"
             },
             portMappings: [{
-                hostPort: 9092,
                 containerPort: 9092
             }],
             logging: LogDriver.awsLogs({
@@ -203,6 +201,8 @@ export class EcsAppStack extends Stack {
             container: zookeeperContainerDefinition,
             condition: ContainerDependencyCondition.START
         });
+
+        kafkaContainerDefinition.addLink(zookeeperContainerDefinition,"zookeeper");
 
         const kafkaMonitorContainerDefinition = taskDefinition.addContainer(stackName + "-kafka-monitor-service-container", {
             image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-kafka-monitor-service", "gtk-kafka-monitor-service")),
@@ -226,6 +226,8 @@ export class EcsAppStack extends Stack {
             container: kafkaContainerDefinition,
             condition: ContainerDependencyCondition.START
         });
+
+        kafkaMonitorContainerDefinition.addLink(kafkaContainerDefinition,"kafka");
 
         taskDefinition.defaultContainer = kafkaContainerDefinition;
 
