@@ -204,8 +204,6 @@ export class EcsAppStack extends Stack {
             condition: ContainerDependencyCondition.START
         });
 
-        kafkaContainerDefinition.addLink(zookeeperContainerDefinition, "zookeeper");
-
         const kafkaMonitorContainerDefinition = taskDefinition.addContainer(stackName + "-kafka-monitor-service-container", {
             image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-kafka-monitor-service", "gtk-kafka-monitor-service")),
             cpu: 50,
@@ -229,8 +227,6 @@ export class EcsAppStack extends Stack {
             container: kafkaContainerDefinition,
             condition: ContainerDependencyCondition.START
         });
-
-        kafkaMonitorContainerDefinition.addLink(kafkaContainerDefinition, "kafka");
 
         taskDefinition.defaultContainer = kafkaContainerDefinition;
 
