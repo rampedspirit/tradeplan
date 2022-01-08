@@ -225,7 +225,7 @@ export class EcsAppStack extends Stack {
             condition: ContainerDependencyCondition.START
         });
 
-        let service = new Ec2Service(this, stackName + "-kafka-service", {
+        let service = new Ec2Service(this, stackName + "-kafka-monitor-service", {
             cluster: cluster,
             desiredCount: 1,
             taskDefinition: taskDefinition
