@@ -160,47 +160,47 @@ export class EcsAppStack extends Stack {
             networkMode: NetworkMode.AWS_VPC
         });
 
-        // const zookeeperContainerDefinition = taskDefinition.addContainer(stackName + "-zookeeper-container", {
-        //     image: ContainerImage.fromRegistry("zookeeper:latest"),
-        //     cpu: 50,
-        //     memoryLimitMiB: 500,
-        //     essential: true,
-        //     environment: {
-        //         "ZOOKEEPER_CLIENT_PORT": "2181"
-        //     },
-        //     portMappings: [{
-        //         hostPort: 2181,
-        //         containerPort: 2181
-        //     }],
-        //     logging: LogDriver.awsLogs({
-        //         logGroup: logGroup,
-        //         streamPrefix: logGroup.logGroupName
-        //     }),
-        // });
+        const zookeeperContainerDefinition = taskDefinition.addContainer(stackName + "-zookeeper-container", {
+            image: ContainerImage.fromRegistry("zookeeper:latest"),
+            cpu: 50,
+            memoryLimitMiB: 500,
+            essential: true,
+            environment: {
+                "ZOOKEEPER_CLIENT_PORT": "2181"
+            },
+            portMappings: [{
+                hostPort: 2181,
+                containerPort: 2181
+            }],
+            logging: LogDriver.awsLogs({
+                logGroup: logGroup,
+                streamPrefix: logGroup.logGroupName
+            }),
+        });
 
-        // const kafkaContainerDefinition = taskDefinition.addContainer(stackName + "-kafka-container", {
-        //     image: ContainerImage.fromRegistry("confluentinc/cp-kafka:7.0.1"),
-        //     cpu: 50,
-        //     memoryLimitMiB: 1024,
-        //     essential: true,
-        //     environment: {
-        //         "KAFKA_BROKER_ID": "1",
-        //         "KAFKA_ZOOKEEPER_CONNECT": "localhost:2181",
-        //         "KAFKA_ADVERTISED_LISTENERS": "PLAINTEXT://localhost:9092"
-        //     },
-        //     portMappings: [{
-        //         containerPort: 9092
-        //     }],
-        //     logging: LogDriver.awsLogs({
-        //         logGroup: logGroup,
-        //         streamPrefix: logGroup.logGroupName
-        //     })
-        // });
+        const kafkaContainerDefinition = taskDefinition.addContainer(stackName + "-kafka-container", {
+            image: ContainerImage.fromRegistry("confluentinc/cp-kafka:7.0.1"),
+            cpu: 50,
+            memoryLimitMiB: 1024,
+            essential: true,
+            environment: {
+                "KAFKA_BROKER_ID": "1",
+                "KAFKA_ZOOKEEPER_CONNECT": "localhost:2181",
+                "KAFKA_ADVERTISED_LISTENERS": "PLAINTEXT://localhost:9092"
+            },
+            portMappings: [{
+                containerPort: 9092
+            }],
+            logging: LogDriver.awsLogs({
+                logGroup: logGroup,
+                streamPrefix: logGroup.logGroupName
+            })
+        });
 
-        // kafkaContainerDefinition.addContainerDependencies({
-        //     container: zookeeperContainerDefinition,
-        //     condition: ContainerDependencyCondition.START
-        // });
+        kafkaContainerDefinition.addContainerDependencies({
+            container: zookeeperContainerDefinition,
+            condition: ContainerDependencyCondition.START
+        });
 
         const kafkaMonitorContainerDefinition = taskDefinition.addContainer(stackName + "-kafka-monitor-service-container", {
             image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-kafka-monitor-service", "gtk-kafka-monitor-service")),
@@ -220,12 +220,12 @@ export class EcsAppStack extends Stack {
             })
         });
 
-        // kafkaMonitorContainerDefinition.addContainerDependencies({
-        //     container: kafkaContainerDefinition,
-        //     condition: ContainerDependencyCondition.START
-        // });
+        kafkaMonitorContainerDefinition.addContainerDependencies({
+            container: kafkaContainerDefinition,
+            condition: ContainerDependencyCondition.START
+        });
 
-        // taskDefinition.defaultContainer = kafkaContainerDefinition;
+        taskDefinition.defaultContainer = kafkaContainerDefinition;
 
         let service = new Ec2Service(this, stackName + "-kafka-service", {
             cluster: cluster,
