@@ -402,7 +402,7 @@ export class EcsAppStack extends Stack {
         taskDefinition.addContainer(stackName + "-screener-service-container", {
             image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-screener-service", "gtk-screener-service")),
             cpu: 50,
-            memoryLimitMiB: 256,
+            memoryLimitMiB: 512,
             essential: true,
             environment: {
                 "SERVER_PORT": "5002",
