@@ -141,7 +141,7 @@ export class EcsAppStack extends Stack {
         let targetGroup = new ApplicationTargetGroup(this, stackName + "-kafka-target-group", {
             vpc: vpc,
             targetType: TargetType.IP,
-            port: 9092,
+            port: 19092,
             protocol: ApplicationProtocol.HTTP,
             healthCheck: {
                 port: "9093",
