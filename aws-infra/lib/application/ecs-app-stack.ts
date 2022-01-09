@@ -188,7 +188,8 @@ export class EcsAppStack extends Stack {
                 "KAFKA_ZOOKEEPER_CONNECT": "localhost:2181",
                 "KAFKA_LISTENERS": "INTERNAL://:9092,EXTERNAL://:19092",
                 "KAFKA_ADVERTISED_LISTENERS": "INTERNAL://localhost:9092,EXTERNAL://" + kafkaBootstrapUrl,
-                "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP": "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
+                "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP": "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT",
+                "KAFKA_INTER_BROKER_LISTENER_NAME":"INTERNAL"
             },
             portMappings: [{
                 containerPort: 19092
