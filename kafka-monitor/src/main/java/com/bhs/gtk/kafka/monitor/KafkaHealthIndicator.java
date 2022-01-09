@@ -29,7 +29,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
 				return Health.up().build();
 			}
 		} catch (Exception ex) {
-			System.out.println("Kafka rboker is unreachable");
+			System.out.println("Kafka broker is unreachable");
 			return Health.down(ex).build();
 		}
 		System.out.println("Kafka broker is missing the startup topic");
