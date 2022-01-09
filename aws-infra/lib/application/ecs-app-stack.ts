@@ -140,7 +140,6 @@ export class EcsAppStack extends Stack {
         //Load Balancer Config
         let targetGroup = new ApplicationTargetGroup(this, stackName + "-kafka-target-group", {
             vpc: vpc,
-            targetType: TargetType.IP,
             port: 19092,
             protocol: ApplicationProtocol.HTTP,
             healthCheck: {
