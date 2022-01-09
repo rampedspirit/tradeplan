@@ -140,7 +140,7 @@ export class EcsAppStack extends Stack {
         //Load Balancer Config
         let targetGroup = new ApplicationTargetGroup(this, stackName + "-kafka-target-group", {
             vpc: vpc,
-            port: 19092,
+            port: 9093,
             protocol: ApplicationProtocol.HTTP,
             healthCheck: {
                 port: "9093",
@@ -150,7 +150,7 @@ export class EcsAppStack extends Stack {
 
         applicationLoadbalancer.addListener(stackName + "kafka-listener", {
             protocol: ApplicationProtocol.HTTP,
-            port: 19092,
+            port: 9093,
             defaultAction: ListenerAction.forward([targetGroup])
         });
 
@@ -159,51 +159,51 @@ export class EcsAppStack extends Stack {
             networkMode: NetworkMode.HOST
         });
 
-        const zookeeperContainerDefinition = taskDefinition.addContainer(stackName + "-zookeeper-container", {
-            image: ContainerImage.fromRegistry("zookeeper:latest"),
-            cpu: 50,
-            memoryLimitMiB: 500,
-            essential: true,
-            environment: {
-                "ZOOKEEPER_CLIENT_PORT": "2181"
-            },
-            portMappings: [{
-                hostPort: 2181,
-                containerPort: 2181
-            }],
-            logging: LogDriver.awsLogs({
-                logGroup: logGroup,
-                streamPrefix: logGroup.logGroupName
-            }),
-        });
+        // const zookeeperContainerDefinition = taskDefinition.addContainer(stackName + "-zookeeper-container", {
+        //     image: ContainerImage.fromRegistry("zookeeper:latest"),
+        //     cpu: 50,
+        //     memoryLimitMiB: 500,
+        //     essential: true,
+        //     environment: {
+        //         "ZOOKEEPER_CLIENT_PORT": "2181"
+        //     },
+        //     portMappings: [{
+        //         hostPort: 2181,
+        //         containerPort: 2181
+        //     }],
+        //     logging: LogDriver.awsLogs({
+        //         logGroup: logGroup,
+        //         streamPrefix: logGroup.logGroupName
+        //     }),
+        // });
 
-        const kafkaContainerDefinition = taskDefinition.addContainer(stackName + "-kafka-container", {
-            image: ContainerImage.fromRegistry("confluentinc/cp-kafka:7.0.1"),
-            cpu: 50,
-            memoryLimitMiB: 1024,
-            essential: true,
-            environment: {
-                "KAFKA_BROKER_ID": "1",
-                "KAFKA_ZOOKEEPER_CONNECT": "localhost:2181",
-                "KAFKA_LISTENERS": "INTERNAL://:9092,EXTERNAL://:19092",
-                "KAFKA_ADVERTISED_LISTENERS": "INTERNAL://localhost:9092,EXTERNAL://" + kafkaBootstrapUrl,
-                "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP": "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT",
-                "KAFKA_INTER_BROKER_LISTENER_NAME":"INTERNAL"
-            },
-            portMappings: [{
-                hostPort: 19092,
-                containerPort: 19092
-            }],
-            logging: LogDriver.awsLogs({
-                logGroup: logGroup,
-                streamPrefix: logGroup.logGroupName
-            })
-        });
+        // const kafkaContainerDefinition = taskDefinition.addContainer(stackName + "-kafka-container", {
+        //     image: ContainerImage.fromRegistry("confluentinc/cp-kafka:7.0.1"),
+        //     cpu: 50,
+        //     memoryLimitMiB: 1024,
+        //     essential: true,
+        //     environment: {
+        //         "KAFKA_BROKER_ID": "1",
+        //         "KAFKA_ZOOKEEPER_CONNECT": "localhost:2181",
+        //         "KAFKA_LISTENERS": "INTERNAL://:9092,EXTERNAL://:19092",
+        //         "KAFKA_ADVERTISED_LISTENERS": "INTERNAL://localhost:9092,EXTERNAL://" + kafkaBootstrapUrl,
+        //         "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP": "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT",
+        //         "KAFKA_INTER_BROKER_LISTENER_NAME":"INTERNAL"
+        //     },
+        //     portMappings: [{
+        //         hostPort: 19092,
+        //         containerPort: 19092
+        //     }],
+        //     logging: LogDriver.awsLogs({
+        //         logGroup: logGroup,
+        //         streamPrefix: logGroup.logGroupName
+        //     })
+        // });
 
-        kafkaContainerDefinition.addContainerDependencies({
-            container: zookeeperContainerDefinition,
-            condition: ContainerDependencyCondition.START
-        });
+        // kafkaContainerDefinition.addContainerDependencies({
+        //     container: zookeeperContainerDefinition,
+        //     condition: ContainerDependencyCondition.START
+        // });
 
         const kafkaMonitorContainerDefinition = taskDefinition.addContainer(stackName + "-kafka-monitor-service-container", {
             image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-kafka-monitor-service", "gtk-kafka-monitor-service")),
@@ -224,12 +224,12 @@ export class EcsAppStack extends Stack {
             })
         });
 
-        kafkaMonitorContainerDefinition.addContainerDependencies({
-            container: kafkaContainerDefinition,
-            condition: ContainerDependencyCondition.START
-        });
+        // kafkaMonitorContainerDefinition.addContainerDependencies({
+        //     container: kafkaContainerDefinition,
+        //     condition: ContainerDependencyCondition.START
+        // });
 
-        taskDefinition.defaultContainer = kafkaContainerDefinition;
+        // taskDefinition.defaultContainer = kafkaContainerDefinition;
 
         let service = new Ec2Service(this, stackName + "-kafka-service", {
             cluster: cluster,
