@@ -118,7 +118,7 @@ export class EcsAppStack extends Stack {
             securityGroupName: stackName + "-ALB-SecurityGroup",
             vpc: vpc
         });
-        securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(19092));
+        securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(9093));
         loadBalancer.addSecurityGroup(securityGroup);
 
         return loadBalancer;
