@@ -157,7 +157,7 @@ export class EcsAppStack extends Stack {
 
         //Service Config
         let taskDefinition = new Ec2TaskDefinition(this, stackName + '-kafka-taskdef', {
-            networkMode: NetworkMode.AWS_VPC
+            networkMode: NetworkMode.HOST
         });
 
         const zookeeperContainerDefinition = taskDefinition.addContainer(stackName + "-zookeeper-container", {
@@ -192,6 +192,7 @@ export class EcsAppStack extends Stack {
                 "KAFKA_INTER_BROKER_LISTENER_NAME":"INTERNAL"
             },
             portMappings: [{
+                hostPort: 19092,
                 containerPort: 19092
             }],
             logging: LogDriver.awsLogs({
