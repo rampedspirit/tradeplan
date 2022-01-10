@@ -141,10 +141,10 @@ export class EcsAppStack extends Stack {
         let targetGroup = new ApplicationTargetGroup(this, stackName + "-kafka-target-group", {
             vpc: vpc,
             protocol: ApplicationProtocol.HTTP,
-            // healthCheck: {
-            //     port: "9093",
-            //     path: "/actuator/health"
-            // }
+            healthCheck: {
+                port: "9093",
+                path: "/actuator/health"
+            }
         });
 
         applicationLoadbalancer.addListener(stackName + "kafka-listener", {
@@ -203,30 +203,30 @@ export class EcsAppStack extends Stack {
             condition: ContainerDependencyCondition.START
         });
 
-        // const kafkaMonitorContainerDefinition = taskDefinition.addContainer(stackName + "-kafka-monitor-service-container", {
-        //     image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-kafka-monitor-service", "gtk-kafka-monitor-service")),
-        //     cpu: 50,
-        //     memoryLimitMiB: 256,
-        //     essential: true,
-        //     environment: {
-        //         "SERVER_PORT": "9093",
-        //         "KAFKA_BOOTSTRAP_ADDRESS": "localhost:9092"
-        //     },
-        //     portMappings: [{
-        //         containerPort: 9093
-        //     }],
-        //     logging: LogDriver.awsLogs({
-        //         logGroup: logGroup,
-        //         streamPrefix: logGroup.logGroupName
-        //     })
-        // });
+        const kafkaMonitorContainerDefinition = taskDefinition.addContainer(stackName + "-kafka-monitor-service-container", {
+            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-kafka-monitor-service", "gtk-kafka-monitor-service")),
+            cpu: 50,
+            memoryLimitMiB: 256,
+            essential: true,
+            environment: {
+                "SERVER_PORT": "9093",
+                "KAFKA_BOOTSTRAP_ADDRESS": "localhost:9092"
+            },
+            portMappings: [{
+                containerPort: 9093
+            }],
+            logging: LogDriver.awsLogs({
+                logGroup: logGroup,
+                streamPrefix: logGroup.logGroupName
+            })
+        });
 
-        // kafkaMonitorContainerDefinition.addContainerDependencies({
-        //     container: kafkaContainerDefinition,
-        //     condition: ContainerDependencyCondition.START
-        // });
+        kafkaMonitorContainerDefinition.addContainerDependencies({
+            container: kafkaContainerDefinition,
+            condition: ContainerDependencyCondition.START
+        });
 
-        taskDefinition.defaultContainer = kafkaContainerDefinition;
+        taskDefinition.defaultContainer = kafkaMonitorContainerDefinition;
 
         let service = new Ec2Service(this, stackName + "-kafka-service", {
             cluster: cluster,
