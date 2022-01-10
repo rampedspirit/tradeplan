@@ -142,7 +142,6 @@ export class EcsAppStack extends Stack {
             vpc: vpc,
             protocol: ApplicationProtocol.HTTP,
             healthCheck: {
-                enabled: false,
                 port: "9093",
                 path: "/actuator/health"
             }
