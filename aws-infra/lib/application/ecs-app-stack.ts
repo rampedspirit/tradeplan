@@ -118,7 +118,7 @@ export class EcsAppStack extends Stack {
             securityGroupName: stackName + "-ALB-SecurityGroup",
             vpc: vpc
         });
-        securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(19092));
+        securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(9092));
         loadBalancer.addSecurityGroup(securityGroup);
 
         return loadBalancer;
@@ -149,7 +149,7 @@ export class EcsAppStack extends Stack {
 
         applicationLoadbalancer.addListener(stackName + "kafka-listener", {
             protocol: ApplicationProtocol.HTTP,
-            port: 19092,
+            port: 9092,
             defaultAction: ListenerAction.forward([targetGroup])
         });
 
@@ -184,14 +184,12 @@ export class EcsAppStack extends Stack {
             environment: {
                 "KAFKA_BROKER_ID": "1",
                 "KAFKA_ZOOKEEPER_CONNECT": "localhost:2181",
-                "KAFKA_LISTENERS": "INTERNAL://:9092,EXTERNAL://:19092",
-                "KAFKA_ADVERTISED_LISTENERS": "INTERNAL://localhost:9092,EXTERNAL://" + kafkaBootstrapUrl,
-                "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP": "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT",
-                "KAFKA_INTER_BROKER_LISTENER_NAME": "INTERNAL"
+                "KAFKA_LISTENERS": "PLAINTEXT://0.0.0.0:9092",
+                "KAFKA_ADVERTISED_LISTENERS": "PLAINTEXT://" + kafkaBootstrapUrl
             },
             portMappings: [{
-                hostPort: 19092,
-                containerPort: 19092
+                hostPort: 9092,
+                containerPort: 9092
             }],
             logging: LogDriver.awsLogs({
                 logGroup: logGroup,
