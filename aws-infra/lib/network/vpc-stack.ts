@@ -16,7 +16,7 @@ export class VpcStack extends Stack {
             subnetConfiguration: [
                 {
                     name: "privateSubnet",
-                    subnetType: SubnetType.PRIVATE_ISOLATED,
+                    subnetType: SubnetType.PRIVATE_WITH_NAT,
                     cidrMask: 24
                 },
                 {
