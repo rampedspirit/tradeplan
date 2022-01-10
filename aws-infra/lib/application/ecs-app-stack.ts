@@ -118,7 +118,7 @@ export class EcsAppStack extends Stack {
             securityGroupName: stackName + "-ALB-SecurityGroup",
             vpc: vpc
         });
-        securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(9093));
+        securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(19092));
         loadBalancer.addSecurityGroup(securityGroup);
 
         return loadBalancer;
@@ -140,9 +140,9 @@ export class EcsAppStack extends Stack {
         //Load Balancer Config
         let targetGroup = new ApplicationTargetGroup(this, stackName + "-kafka-target-group", {
             vpc: vpc,
-            port: 9093,
             protocol: ApplicationProtocol.HTTP,
             healthCheck: {
+                enabled: false,
                 port: "9093",
                 path: "/actuator/health"
             }
@@ -150,7 +150,7 @@ export class EcsAppStack extends Stack {
 
         applicationLoadbalancer.addListener(stackName + "kafka-listener", {
             protocol: ApplicationProtocol.HTTP,
-            port: 9093,
+            port: 19092,
             defaultAction: ListenerAction.forward([targetGroup])
         });
 
