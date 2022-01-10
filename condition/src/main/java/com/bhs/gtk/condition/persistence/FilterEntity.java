@@ -1,13 +1,12 @@
 package com.bhs.gtk.condition.persistence;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-
-import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.ManyToMany;
 
 @Entity
 public class FilterEntity {
@@ -18,6 +17,9 @@ public class FilterEntity {
 	@Column(length = PersistenceConstants.SMALL_TEXT_LIMIT)
 	private String status;
 
+	@ManyToMany(mappedBy = "filters")
+	private List<ConditionEntity> conditions;
+	
 	protected FilterEntity() {}
 	
 	public FilterEntity(UUID id, String status) {
@@ -39,6 +41,14 @@ public class FilterEntity {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public List<ConditionEntity> getConditions() {
+		return conditions;
+	}
+
+	public void setConditions(List<ConditionEntity> conditions) {
+		this.conditions = conditions;
 	}
 
 }
