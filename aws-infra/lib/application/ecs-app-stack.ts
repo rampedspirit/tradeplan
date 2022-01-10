@@ -118,7 +118,7 @@ export class EcsAppStack extends Stack {
             securityGroupName: stackName + "-ALB-SecurityGroup",
             vpc: vpc
         });
-        securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(9092));
+        securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(19092));
         loadBalancer.addSecurityGroup(securityGroup);
 
         return loadBalancer;
@@ -149,7 +149,7 @@ export class EcsAppStack extends Stack {
 
         applicationLoadbalancer.addListener(stackName + "kafka-listener", {
             protocol: ApplicationProtocol.HTTP,
-            port: 9092,
+            port: 19092,
             defaultAction: ListenerAction.forward([targetGroup])
         });
 
@@ -184,12 +184,14 @@ export class EcsAppStack extends Stack {
             environment: {
                 "KAFKA_BROKER_ID": "1",
                 "KAFKA_ZOOKEEPER_CONNECT": "localhost:2181",
-                "KAFKA_LISTENERS": "PLAINTEXT://0.0.0.0:9092",
-                "KAFKA_ADVERTISED_LISTENERS": "PLAINTEXT://" + kafkaBootstrapUrl
+                "KAFKA_LISTENERS": "INTERNAL://:9092,EXTERNAL://:19092",
+                "KAFKA_ADVERTISED_LISTENERS": "INTERNAL://localhost:9092,EXTERNAL://" + kafkaBootstrapUrl,
+                "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP": "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT",
+                "KAFKA_INTER_BROKER_LISTENER_NAME": "INTERNAL"
             },
             portMappings: [{
-                hostPort: 9092,
-                containerPort: 9092
+                hostPort: 19092,
+                containerPort: 19092
             }],
             logging: LogDriver.awsLogs({
                 logGroup: logGroup,
@@ -226,7 +228,7 @@ export class EcsAppStack extends Stack {
             condition: ContainerDependencyCondition.START
         });
 
-        taskDefinition.defaultContainer = kafkaMonitorContainerDefinition;
+        taskDefinition.defaultContainer = kafkaContainerDefinition;
 
         let service = new Ec2Service(this, stackName + "-kafka-service", {
             cluster: cluster,
