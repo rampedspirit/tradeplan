@@ -190,7 +190,6 @@ export class EcsAppStack extends Stack {
                 "KAFKA_INTER_BROKER_LISTENER_NAME": "INTERNAL"
             },
             portMappings: [{
-                hostPort: 19092,
                 containerPort: 19092
             }],
             logging: LogDriver.awsLogs({
@@ -214,7 +213,6 @@ export class EcsAppStack extends Stack {
                 "KAFKA_BOOTSTRAP_ADDRESS": "localhost:9092"
             },
             portMappings: [{
-                hostPort: 9093,
                 containerPort: 9093
             }],
             logging: LogDriver.awsLogs({
