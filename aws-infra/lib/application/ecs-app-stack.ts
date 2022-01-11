@@ -5,6 +5,7 @@ import { Cluster, ContainerDependencyCondition, ContainerImage, Ec2Service, Ec2T
 import { ApplicationListener, ApplicationListenerRule, ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, ListenerAction, ListenerCondition, NetworkLoadBalancer, Protocol, TargetType } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
 import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
+import { DnsRecordType, NamespaceType } from "aws-cdk-lib/aws-servicediscovery";
 import { Construct } from "constructs";
 
 export interface EcsAppStackProps extends StackProps {
@@ -39,16 +40,15 @@ export class EcsAppStack extends Stack {
 
         //Application Load Balancer
         const applicationLoadbalancer = this.createApplicationLoadBalancer(props.stackName!, vpc);
-        //const kafkaBootstrapUrl = applicationLoadbalancer.loadBalancerDnsName + ":" + 19092;
 
         //Export load balancer dns
-        new CfnOutput(this, "dbLoadBalancerDnsName", {
+        new CfnOutput(this, "appLoadBalancerDnsName", {
             value: applicationLoadbalancer.loadBalancerDnsName,
             exportName: props.stackName + "-alb-dns",
         });
 
         //Kafka
-       // this.createKafkaService(props.stackName!, vpc, logGroup, applicationLoadbalancer, cluster, kafkaBootstrapUrl);
+        this.createKafkaService(props.stackName!, vpc, logGroup, cluster);
 
         //Services
         const applicationListener = applicationLoadbalancer.addListener(props.stackName + "application-listener", {
@@ -61,7 +61,7 @@ export class EcsAppStack extends Stack {
         });
         // this.createFilterService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
         // this.createConditionService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
-        this.createScreenerService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
+        // this.createScreenerService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, kafkaBootstrapUrl);
     }
 
     /**
@@ -114,12 +114,12 @@ export class EcsAppStack extends Stack {
         });
 
         //Security group for ingress form ALB
-        const securityGroup = new SecurityGroup(this, stackName + "-ALB-SecurityGroup", {
-            securityGroupName: stackName + "-ALB-SecurityGroup",
-            vpc: vpc
-        });
-        securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(19092));
-        loadBalancer.addSecurityGroup(securityGroup);
+        // const securityGroup = new SecurityGroup(this, stackName + "-ALB-SecurityGroup", {
+        //     securityGroupName: stackName + "-ALB-SecurityGroup",
+        //     vpc: vpc
+        // });
+        // securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(19092));
+        // loadBalancer.addSecurityGroup(securityGroup);
 
         return loadBalancer;
     }
@@ -134,35 +134,34 @@ export class EcsAppStack extends Stack {
      * @param dbCredentials 
      * @param dbLoadBalancerUrl
      */
-    private createKafkaService(stackName: string, vpc: IVpc, logGroup: LogGroup,
-        applicationLoadbalancer: ApplicationLoadBalancer, cluster: Cluster, kafkaBootstrapUrl: string) {
+    private createKafkaService(stackName: string, vpc: IVpc, logGroup: LogGroup, cluster: Cluster) {
 
         //Load Balancer Config
-        let targetGroup = new ApplicationTargetGroup(this, stackName + "-kafka-target-group", {
-            vpc: vpc,
-            protocol: ApplicationProtocol.HTTP,
-            healthCheck: {
-                port: "9093",
-                path: "/actuator/health"
-            }
-        });
+        // let targetGroup = new ApplicationTargetGroup(this, stackName + "-kafka-target-group", {
+        //     vpc: vpc,
+        //     protocol: ApplicationProtocol.HTTP,
+        //     healthCheck: {
+        //         port: "9093",
+        //         path: "/actuator/health"
+        //     }
+        // });
 
-        applicationLoadbalancer.addListener(stackName + "kafka-listener", {
-            protocol: ApplicationProtocol.HTTP,
-            port: 19092,
-            defaultAction: ListenerAction.forward([targetGroup])
-        });
+        // applicationLoadbalancer.addListener(stackName + "kafka-listener", {
+        //     protocol: ApplicationProtocol.HTTP,
+        //     port: 19092,
+        //     defaultAction: ListenerAction.forward([targetGroup])
+        // });
 
         //Service Config
         let taskDefinition = new Ec2TaskDefinition(this, stackName + '-kafka-taskdef', {
-            networkMode: NetworkMode.HOST
+            networkMode: NetworkMode.AWS_VPC
         });
 
         const zookeeperContainerDefinition = taskDefinition.addContainer(stackName + "-zookeeper-container", {
             image: ContainerImage.fromRegistry("zookeeper:latest"),
             cpu: 50,
             memoryLimitMiB: 500,
-            essential: true,
+            essential: false,
             environment: {
                 "ZOOKEEPER_CLIENT_PORT": "2181"
             },
@@ -185,11 +184,12 @@ export class EcsAppStack extends Stack {
                 "KAFKA_BROKER_ID": "1",
                 "KAFKA_ZOOKEEPER_CONNECT": "localhost:2181",
                 "KAFKA_LISTENERS": "INTERNAL://:9092,EXTERNAL://:19092",
-                "KAFKA_ADVERTISED_LISTENERS": "INTERNAL://localhost:9092,EXTERNAL://" + kafkaBootstrapUrl,
+                "KAFKA_ADVERTISED_LISTENERS": "INTERNAL://localhost:9092,EXTERNAL://localhost:19092",
                 "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP": "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT",
                 "KAFKA_INTER_BROKER_LISTENER_NAME": "INTERNAL"
             },
             portMappings: [{
+                hostPort: 19092,
                 containerPort: 19092
             }],
             logging: LogDriver.awsLogs({
@@ -203,37 +203,55 @@ export class EcsAppStack extends Stack {
             condition: ContainerDependencyCondition.START
         });
 
-        const kafkaMonitorContainerDefinition = taskDefinition.addContainer(stackName + "-kafka-monitor-service-container", {
-            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-kafka-monitor-service", "gtk-kafka-monitor-service")),
-            cpu: 50,
-            memoryLimitMiB: 256,
-            essential: true,
-            environment: {
-                "SERVER_PORT": "9093",
-                "KAFKA_BOOTSTRAP_ADDRESS": "localhost:9092"
-            },
-            portMappings: [{
-                containerPort: 9093
-            }],
-            logging: LogDriver.awsLogs({
-                logGroup: logGroup,
-                streamPrefix: logGroup.logGroupName
-            })
-        });
+        // const kafkaMonitorContainerDefinition = taskDefinition.addContainer(stackName + "-kafka-monitor-service-container", {
+        //     image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-kafka-monitor-service", "gtk-kafka-monitor-service")),
+        //     cpu: 50,
+        //     memoryLimitMiB: 256,
+        //     essential: true,
+        //     environment: {
+        //         "SERVER_PORT": "9093",
+        //         "KAFKA_BOOTSTRAP_ADDRESS": "localhost:9092"
+        //     },
+        //     portMappings: [{
+        //         containerPort: 9093
+        //     }],
+        //     logging: LogDriver.awsLogs({
+        //         logGroup: logGroup,
+        //         streamPrefix: logGroup.logGroupName
+        //     })
+        // });
 
-        kafkaMonitorContainerDefinition.addContainerDependencies({
-            container: kafkaContainerDefinition,
-            condition: ContainerDependencyCondition.START
-        });
+        // kafkaMonitorContainerDefinition.addContainerDependencies({
+        //     container: kafkaContainerDefinition,
+        //     condition: ContainerDependencyCondition.START
+        // });
 
-        taskDefinition.defaultContainer = kafkaMonitorContainerDefinition;
+        // taskDefinition.defaultContainer = kafkaMonitorContainerDefinition;
+
+        let namespace = "gtk.com";
+        const dnsNamespace = cluster.addDefaultCloudMapNamespace({ vpc, name: namespace, type: NamespaceType.DNS_PRIVATE });
+
+        const securityGroup = new SecurityGroup(this, stackName + "-ALB-SecurityGroup", {
+            securityGroupName: stackName + "-KafkaService-SecurityGroup",
+            vpc: vpc
+        });
+        securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(19092));
 
         let service = new Ec2Service(this, stackName + "-kafka-service", {
             cluster: cluster,
             desiredCount: 1,
-            taskDefinition: taskDefinition
+            taskDefinition: taskDefinition,
+            securityGroups: [securityGroup],
+            assignPublicIp: true,
+            cloudMapOptions: {
+                name: "kafka",
+                cloudMapNamespace: dnsNamespace,
+                dnsRecordType: DnsRecordType.A,
+                container: kafkaContainerDefinition,
+                containerPort: 19092
+            }
         });
-        service.attachToApplicationTargetGroup(targetGroup);
+        // service.attachToApplicationTargetGroup(targetGroup);
     }
 
     /**
@@ -368,10 +386,11 @@ export class EcsAppStack extends Stack {
      * @param applicationLoadbalancer 
      * @param cluster 
      * @param dbCredentials 
-     * @param loadBalancerUrl
+     * @param databaseUrl
+     * @param kafkaBootstrapUrl
      */
     private createScreenerService(stackName: string, vpc: IVpc, logGroup: LogGroup, applicationListener: ApplicationListener,
-        cluster: Cluster, dbCredentials: ISecret, loadBalancerUrl: string) {
+        cluster: Cluster, dbCredentials: ISecret, databaseUrl: string, kafkaBootstrapUrl: string) {
 
         //Load Balancer Config
         let targetGroup = new ApplicationTargetGroup(this, stackName + "-screener-service-target-group", {
@@ -402,12 +421,12 @@ export class EcsAppStack extends Stack {
             essential: true,
             environment: {
                 "SERVER_PORT": "5002",
-                "DB_HOST": loadBalancerUrl,
+                "DB_HOST": databaseUrl,
                 "DB_PORT": "5000",
                 "DB_NAME": "appdb",
                 "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
                 "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
-                "KAFKA_BOOTSTRAP_ADDRESS": loadBalancerUrl+":19092"
+                "KAFKA_BOOTSTRAP_ADDRESS": kafkaBootstrapUrl
             },
             portMappings: [{
                 containerPort: 5002
