@@ -242,7 +242,6 @@ export class EcsAppStack extends Stack {
             desiredCount: 1,
             taskDefinition: taskDefinition,
             securityGroups: [securityGroup],
-            assignPublicIp: true,
             cloudMapOptions: {
                 name: "kafka",
                 cloudMapNamespace: dnsNamespace,
