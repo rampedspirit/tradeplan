@@ -105,7 +105,7 @@ public class Converter {
 		return executableResponses;
 	}
 	
-	private OffsetDateTime convertToOffSetDateTime(final Date date) {
+	public OffsetDateTime convertToOffSetDateTime(final Date date) {
 		return OffsetDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), ZoneId.systemDefault());
 	}
 	
