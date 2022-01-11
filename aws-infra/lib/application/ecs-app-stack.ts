@@ -61,7 +61,7 @@ export class EcsAppStack extends Stack {
         });
         // this.createFilterService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
         // this.createConditionService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
-        // this.createScreenerService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, kafkaBootstrapUrl);
+        this.createScreenerService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
     }
 
     /**
@@ -184,7 +184,7 @@ export class EcsAppStack extends Stack {
                 "KAFKA_BROKER_ID": "1",
                 "KAFKA_ZOOKEEPER_CONNECT": "localhost:2181",
                 "KAFKA_LISTENERS": "INTERNAL://:9092,EXTERNAL://:19092",
-                "KAFKA_ADVERTISED_LISTENERS": "INTERNAL://localhost:9092,EXTERNAL://localhost:19092",
+                "KAFKA_ADVERTISED_LISTENERS": "INTERNAL://localhost:9092,EXTERNAL://kafka.gtk.com:19092",
                 "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP": "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT",
                 "KAFKA_INTER_BROKER_LISTENER_NAME": "INTERNAL"
             },
@@ -386,10 +386,9 @@ export class EcsAppStack extends Stack {
      * @param cluster 
      * @param dbCredentials 
      * @param databaseUrl
-     * @param kafkaBootstrapUrl
      */
     private createScreenerService(stackName: string, vpc: IVpc, logGroup: LogGroup, applicationListener: ApplicationListener,
-        cluster: Cluster, dbCredentials: ISecret, databaseUrl: string, kafkaBootstrapUrl: string) {
+        cluster: Cluster, dbCredentials: ISecret, databaseUrl: string) {
 
         //Load Balancer Config
         let targetGroup = new ApplicationTargetGroup(this, stackName + "-screener-service-target-group", {
@@ -425,7 +424,7 @@ export class EcsAppStack extends Stack {
                 "DB_NAME": "appdb",
                 "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
                 "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
-                "KAFKA_BOOTSTRAP_ADDRESS": kafkaBootstrapUrl
+                "KAFKA_BOOTSTRAP_ADDRESS": "kafka.gtk.com:19092"
             },
             portMappings: [{
                 containerPort: 5002
