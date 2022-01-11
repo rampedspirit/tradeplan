@@ -36,7 +36,6 @@ export class EcsDbStack extends Stack {
 
         //Network Load Balancer
         const dbNetworkLoadbalancer = this.createNetworkLoadBalancer(props.stackName!, vpc);
-        const loadBalancerUrl = dbNetworkLoadbalancer.loadBalancerDnsName;
 
         //Export load balancer dns
         new CfnOutput(this, "dbLoadBalancerDnsName", {
@@ -47,7 +46,6 @@ export class EcsDbStack extends Stack {
         //Services
         this.createApplicationDatabaseService(props.stackName!, vpc, logGroup, dbNetworkLoadbalancer, cluster, dbCredentials);
         this.createStockDatabaseService(props.stackName!, vpc, logGroup, dbNetworkLoadbalancer, cluster, dbCredentials);
-        this.createKafkaService(props.stackName!, vpc, logGroup, dbNetworkLoadbalancer, cluster, loadBalancerUrl + ":19092");
     }
 
     /**
@@ -285,91 +283,5 @@ export class EcsDbStack extends Stack {
             taskDefinition: taskDefinition
         });
         service.attachToNetworkTargetGroup(stockDbTargetGroup);
-    }
-
-    /**
-    * Creates the Kafka service
-    * @param stackName 
-    * @param vpc 
-    * @param logGroup 
-    * @param loadbalancer 
-    * @param cluster 
-    * @param dbCredentials 
-    * @param dbLoadBalancerUrl
-    */
-    private createKafkaService(stackName: string, vpc: IVpc, logGroup: LogGroup,
-        loadbalancer: NetworkLoadBalancer, cluster: Cluster, kafkaBootstrapUrl: string) {
-
-        //Load Balancer Config
-        let targetGroup = new NetworkTargetGroup(this, stackName + "-kafka-target-group", {
-            vpc: vpc,
-            port: 19092,
-            protocol: Protocol.TCP
-        });
-
-        const listener = loadbalancer.addListener(stackName + "kafka-listener", {
-            protocol: Protocol.TCP,
-            port: 19092
-        });
-        listener.addTargetGroups(stackName + "kafka-listener-targetgroup", targetGroup);
-
-        //Service Config
-        let taskDefinition = new Ec2TaskDefinition(this, stackName + '-kafka-taskdef', {
-            networkMode: NetworkMode.HOST
-        });
-
-        const zookeeperContainerDefinition = taskDefinition.addContainer(stackName + "-zookeeper-container", {
-            image: ContainerImage.fromRegistry("zookeeper:latest"),
-            cpu: 50,
-            memoryLimitMiB: 500,
-            essential: true,
-            environment: {
-                "ZOOKEEPER_CLIENT_PORT": "2181"
-            },
-            portMappings: [{
-                hostPort: 2181,
-                containerPort: 2181
-            }],
-            logging: LogDriver.awsLogs({
-                logGroup: logGroup,
-                streamPrefix: logGroup.logGroupName
-            }),
-        });
-
-        const kafkaContainerDefinition = taskDefinition.addContainer(stackName + "-kafka-container", {
-            image: ContainerImage.fromRegistry("confluentinc/cp-kafka:7.0.1"),
-            cpu: 50,
-            memoryLimitMiB: 1024,
-            essential: true,
-            environment: {
-                "KAFKA_BROKER_ID": "1",
-                "KAFKA_ZOOKEEPER_CONNECT": "localhost:2181",
-                "KAFKA_LISTENERS": "INTERNAL://:9092,EXTERNAL://:19092",
-                "KAFKA_ADVERTISED_LISTENERS": "INTERNAL://localhost:9092,EXTERNAL://" + kafkaBootstrapUrl,
-                "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP": "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT",
-                "KAFKA_INTER_BROKER_LISTENER_NAME": "INTERNAL"
-            },
-            portMappings: [{
-                containerPort: 19092
-            }],
-            logging: LogDriver.awsLogs({
-                logGroup: logGroup,
-                streamPrefix: logGroup.logGroupName
-            })
-        });
-
-        kafkaContainerDefinition.addContainerDependencies({
-            container: zookeeperContainerDefinition,
-            condition: ContainerDependencyCondition.START
-        });
-
-        taskDefinition.defaultContainer = kafkaContainerDefinition;
-
-        let service = new Ec2Service(this, stackName + "-kafka-service", {
-            cluster: cluster,
-            desiredCount: 1,
-            taskDefinition: taskDefinition
-        });
-        service.attachToNetworkTargetGroup(targetGroup);
     }
 }
