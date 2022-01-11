@@ -36,7 +36,7 @@ export class EcsDbStack extends Stack {
 
         //Network Load Balancer
         const dbNetworkLoadbalancer = this.createNetworkLoadBalancer(props.stackName!, vpc);
-        const loadBalancerUrl = dbNetworkLoadbalancer.loadBalancerDnsName + ":" + 19092;
+        const loadBalancerUrl = dbNetworkLoadbalancer.loadBalancerDnsName;
 
         //Export load balancer dns
         new CfnOutput(this, "dbLoadBalancerDnsName", {
