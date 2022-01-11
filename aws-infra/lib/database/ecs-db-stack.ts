@@ -1,6 +1,6 @@
 import { CfnOutput, RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
 import { InstanceType, IVpc, Peer, Port, SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2";
-import { Cluster, ContainerImage, Ec2Service, Ec2TaskDefinition, EcsOptimizedImage, LogDriver, Scope } from "aws-cdk-lib/aws-ecs";
+import { Cluster, ContainerDependencyCondition, ContainerImage, Ec2Service, Ec2TaskDefinition, EcsOptimizedImage, LogDriver, NetworkMode, Scope } from "aws-cdk-lib/aws-ecs";
 import { NetworkLoadBalancer, NetworkTargetGroup, Protocol } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
@@ -36,6 +36,7 @@ export class EcsDbStack extends Stack {
 
         //Network Load Balancer
         const dbNetworkLoadbalancer = this.createNetworkLoadBalancer(props.stackName!, vpc);
+        const loadBalancerUrl = dbNetworkLoadbalancer.loadBalancerDnsName + ":" + 19092;
 
         //Export load balancer dns
         new CfnOutput(this, "dbLoadBalancerDnsName", {
@@ -46,6 +47,7 @@ export class EcsDbStack extends Stack {
         //Services
         this.createApplicationDatabaseService(props.stackName!, vpc, logGroup, dbNetworkLoadbalancer, cluster, dbCredentials);
         this.createStockDatabaseService(props.stackName!, vpc, logGroup, dbNetworkLoadbalancer, cluster, dbCredentials);
+        this.createKafkaService(props.stackName!, vpc, logGroup, dbNetworkLoadbalancer, cluster, loadBalancerUrl + ":19092");
     }
 
     /**
@@ -144,19 +146,19 @@ export class EcsDbStack extends Stack {
      * @param stackName 
      * @param vpc 
      * @param logGroup 
-     * @param dbNetworkLoadbalancer 
+     * @param loadbalancer 
      * @param cluster 
      * @param dbCredentials 
      */
     private createApplicationDatabaseService(stackName: string, vpc: IVpc, logGroup: LogGroup,
-        dbNetworkLoadbalancer: NetworkLoadBalancer, cluster: Cluster, dbCredentials: ISecret) {
+        loadbalancer: NetworkLoadBalancer, cluster: Cluster, dbCredentials: ISecret) {
         //Load Balancer Config
         let appDbTargetGroup = new NetworkTargetGroup(this, stackName + "-appdb-target-group", {
             vpc: vpc,
             port: 5000,
             protocol: Protocol.TCP
         });
-        let appdbListener = dbNetworkLoadbalancer.addListener("appdb-nlb-listener", {
+        let appdbListener = loadbalancer.addListener("appdb-nlb-listener", {
             protocol: Protocol.TCP,
             port: 5000
         });
@@ -217,19 +219,19 @@ export class EcsDbStack extends Stack {
      * @param stackName 
      * @param vpc 
      * @param logGroup 
-     * @param dbNetworkLoadbalancer 
+     * @param loadbalancer 
      * @param cluster 
      * @param dbCredentials 
      */
     private createStockDatabaseService(stackName: string, vpc: IVpc, logGroup: LogGroup,
-        dbNetworkLoadbalancer: NetworkLoadBalancer, cluster: Cluster, dbCredentials: ISecret) {
+        loadbalancer: NetworkLoadBalancer, cluster: Cluster, dbCredentials: ISecret) {
         //Load Balancer Config
         let stockDbTargetGroup = new NetworkTargetGroup(this, stackName + "-stockdb-target-group", {
             vpc: vpc,
             port: 5001,
             protocol: Protocol.TCP
         });
-        let stockdbListener = dbNetworkLoadbalancer.addListener("stockdb-nlb-listener", {
+        let stockdbListener = loadbalancer.addListener("stockdb-nlb-listener", {
             protocol: Protocol.TCP,
             port: 5001
         });
@@ -270,7 +272,7 @@ export class EcsDbStack extends Stack {
                 streamPrefix: logGroup.logGroupName
             }),
         });
-        
+
         containerDefinition.addMountPoints({
             sourceVolume: volumeName,
             containerPath: '/usr/local/pgsql/data',
@@ -283,5 +285,91 @@ export class EcsDbStack extends Stack {
             taskDefinition: taskDefinition
         });
         service.attachToNetworkTargetGroup(stockDbTargetGroup);
+    }
+
+    /**
+    * Creates the Kafka service
+    * @param stackName 
+    * @param vpc 
+    * @param logGroup 
+    * @param loadbalancer 
+    * @param cluster 
+    * @param dbCredentials 
+    * @param dbLoadBalancerUrl
+    */
+    private createKafkaService(stackName: string, vpc: IVpc, logGroup: LogGroup,
+        loadbalancer: NetworkLoadBalancer, cluster: Cluster, kafkaBootstrapUrl: string) {
+
+        //Load Balancer Config
+        let targetGroup = new NetworkTargetGroup(this, stackName + "-kafka-target-group", {
+            vpc: vpc,
+            port: 19092,
+            protocol: Protocol.TCP
+        });
+
+        const listener = loadbalancer.addListener(stackName + "kafka-listener", {
+            protocol: Protocol.TCP,
+            port: 19092
+        });
+        listener.addTargetGroups(stackName + "kafka-listener-targetgroup", targetGroup);
+
+        //Service Config
+        let taskDefinition = new Ec2TaskDefinition(this, stackName + '-kafka-taskdef', {
+            networkMode: NetworkMode.HOST
+        });
+
+        const zookeeperContainerDefinition = taskDefinition.addContainer(stackName + "-zookeeper-container", {
+            image: ContainerImage.fromRegistry("zookeeper:latest"),
+            cpu: 50,
+            memoryLimitMiB: 500,
+            essential: true,
+            environment: {
+                "ZOOKEEPER_CLIENT_PORT": "2181"
+            },
+            portMappings: [{
+                hostPort: 2181,
+                containerPort: 2181
+            }],
+            logging: LogDriver.awsLogs({
+                logGroup: logGroup,
+                streamPrefix: logGroup.logGroupName
+            }),
+        });
+
+        const kafkaContainerDefinition = taskDefinition.addContainer(stackName + "-kafka-container", {
+            image: ContainerImage.fromRegistry("confluentinc/cp-kafka:7.0.1"),
+            cpu: 50,
+            memoryLimitMiB: 1024,
+            essential: true,
+            environment: {
+                "KAFKA_BROKER_ID": "1",
+                "KAFKA_ZOOKEEPER_CONNECT": "localhost:2181",
+                "KAFKA_LISTENERS": "INTERNAL://:9092,EXTERNAL://:19092",
+                "KAFKA_ADVERTISED_LISTENERS": "INTERNAL://localhost:9092,EXTERNAL://" + kafkaBootstrapUrl,
+                "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP": "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT",
+                "KAFKA_INTER_BROKER_LISTENER_NAME": "INTERNAL"
+            },
+            portMappings: [{
+                containerPort: 19092
+            }],
+            logging: LogDriver.awsLogs({
+                logGroup: logGroup,
+                streamPrefix: logGroup.logGroupName
+            })
+        });
+
+        kafkaContainerDefinition.addContainerDependencies({
+            container: zookeeperContainerDefinition,
+            condition: ContainerDependencyCondition.START
+        });
+
+        taskDefinition.defaultContainer = kafkaContainerDefinition;
+
+        let service = new Ec2Service(this, stackName + "-kafka-service", {
+            cluster: cluster,
+            desiredCount: 1,
+            taskDefinition: taskDefinition
+        });
+        service.attachToNetworkTargetGroup(targetGroup);
     }
 }
