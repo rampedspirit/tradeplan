@@ -59,8 +59,8 @@ export class EcsAppStack extends Stack {
                 messageBody: "Hello There! Looks like you have hit a wrong end point."
             })
         });
-        // this.createFilterService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
-        // this.createConditionService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
+        this.createFilterService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
+        this.createConditionService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
         this.createScreenerService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
     }
 
@@ -112,15 +112,6 @@ export class EcsAppStack extends Stack {
                 subnets: vpc.publicSubnets
             }
         });
-
-        //Security group for ingress form ALB
-        // const securityGroup = new SecurityGroup(this, stackName + "-ALB-SecurityGroup", {
-        //     securityGroupName: stackName + "-ALB-SecurityGroup",
-        //     vpc: vpc
-        // });
-        // securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(19092));
-        // loadBalancer.addSecurityGroup(securityGroup);
-
         return loadBalancer;
     }
 
@@ -129,30 +120,10 @@ export class EcsAppStack extends Stack {
      * @param stackName 
      * @param vpc 
      * @param logGroup 
-     * @param applicationLoadbalancer 
      * @param cluster 
-     * @param dbCredentials 
-     * @param dbLoadBalancerUrl
      */
     private createKafkaService(stackName: string, vpc: IVpc, logGroup: LogGroup, cluster: Cluster) {
 
-        //Load Balancer Config
-        // let targetGroup = new ApplicationTargetGroup(this, stackName + "-kafka-target-group", {
-        //     vpc: vpc,
-        //     protocol: ApplicationProtocol.HTTP,
-        //     healthCheck: {
-        //         port: "9093",
-        //         path: "/actuator/health"
-        //     }
-        // });
-
-        // applicationLoadbalancer.addListener(stackName + "kafka-listener", {
-        //     protocol: ApplicationProtocol.HTTP,
-        //     port: 19092,
-        //     defaultAction: ListenerAction.forward([targetGroup])
-        // });
-
-        //Service Config
         let taskDefinition = new Ec2TaskDefinition(this, stackName + '-kafka-taskdef', {
             networkMode: NetworkMode.AWS_VPC
         });
@@ -203,31 +174,6 @@ export class EcsAppStack extends Stack {
             condition: ContainerDependencyCondition.START
         });
 
-        // const kafkaMonitorContainerDefinition = taskDefinition.addContainer(stackName + "-kafka-monitor-service-container", {
-        //     image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-kafka-monitor-service", "gtk-kafka-monitor-service")),
-        //     cpu: 50,
-        //     memoryLimitMiB: 256,
-        //     essential: true,
-        //     environment: {
-        //         "SERVER_PORT": "9093",
-        //         "KAFKA_BOOTSTRAP_ADDRESS": "localhost:9092"
-        //     },
-        //     portMappings: [{
-        //         containerPort: 9093
-        //     }],
-        //     logging: LogDriver.awsLogs({
-        //         logGroup: logGroup,
-        //         streamPrefix: logGroup.logGroupName
-        //     })
-        // });
-
-        // kafkaMonitorContainerDefinition.addContainerDependencies({
-        //     container: kafkaContainerDefinition,
-        //     condition: ContainerDependencyCondition.START
-        // });
-
-        // taskDefinition.defaultContainer = kafkaMonitorContainerDefinition;
-
         let namespace = "gtk.com";
         const dnsNamespace = cluster.addDefaultCloudMapNamespace({ vpc, name: namespace, type: NamespaceType.DNS_PRIVATE });
 
@@ -250,7 +196,6 @@ export class EcsAppStack extends Stack {
                 containerPort: 19092
             }
         });
-        // service.attachToApplicationTargetGroup(targetGroup);
     }
 
     /**
