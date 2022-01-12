@@ -82,7 +82,7 @@ export class EcsAppStack extends Stack {
             minCapacity: 1,
             maxCapacity: 1,
             vpcSubnets: {
-                subnets: vpc.privateSubnets
+                subnets: vpc.publicSubnets
             }
         });
 

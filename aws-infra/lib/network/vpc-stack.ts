@@ -15,12 +15,12 @@ export class VpcStack extends Stack {
             enableDnsHostnames: true,
             subnetConfiguration: [
                 {
-                    name: "privateSubnet",
-                    subnetType: SubnetType.PRIVATE_WITH_NAT,
+                    name: "publicSubnetOne",
+                    subnetType: SubnetType.PUBLIC,
                     cidrMask: 24
                 },
                 {
-                    name: "publicSubnet",
+                    name: "publicSubnetTwo",
                     subnetType: SubnetType.PUBLIC,
                     cidrMask: 24
                 },

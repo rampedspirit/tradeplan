@@ -66,7 +66,7 @@ export class EcsDbStack extends Stack {
             minCapacity: 1,
             maxCapacity: 1,
             vpcSubnets: {
-                subnets: vpc.privateSubnets
+                subnets: vpc.publicSubnets
             }
         });
 
@@ -133,7 +133,7 @@ export class EcsDbStack extends Stack {
             internetFacing: false,
             loadBalancerName: stackName + "-nlb",
             vpcSubnets: {
-                subnets: vpc.privateSubnets
+                subnets: vpc.publicSubnets
             }
         });
         return loadBalancer;
