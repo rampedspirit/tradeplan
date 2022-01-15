@@ -1,6 +1,8 @@
 package com.bhs.gtk.condition.persistence;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,6 +30,12 @@ public class EntityReader {
 			return entityContainer.get();
 		}
 		return null;
+	}
+	
+	public List<ConditionEntity> getAllConditions() {
+		List<ConditionEntity> conditions = new ArrayList<>();
+		conditionRepository.findAll().forEach( c -> conditions.add(c));
+		return conditions;
 	}
 	
 	public ConditionEntity getConditionInRepository(UUID id) {

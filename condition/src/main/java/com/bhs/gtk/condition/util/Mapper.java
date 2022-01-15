@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.bhs.gtk.condition.model.ConditionDetailedResponse;
+import com.bhs.gtk.condition.model.ConditionResponse;
 import com.bhs.gtk.condition.model.Filter;
 import com.bhs.gtk.condition.model.Filter.StatusEnum;
 import com.bhs.gtk.condition.persistence.ConditionEntity;
@@ -13,6 +14,23 @@ import com.bhs.gtk.condition.persistence.FilterEntity;
 
 @Component
 public class Mapper {
+
+	
+	public List<ConditionResponse> getConditionResponses(List<ConditionEntity> conditionEntities) {
+		List<ConditionResponse> responses = new ArrayList<>();
+		for(ConditionEntity entity : conditionEntities) {
+			responses.add(getConditionResponse(entity));
+		}
+		return responses;
+	}
+	
+	private ConditionResponse getConditionResponse(ConditionEntity entity) {
+		ConditionResponse response = new ConditionResponse();
+		response.setName(entity.getName());
+		response.setId(entity.getId());
+		response.setDescription(entity.getDescription());
+		return response;
+	}
 	
 	public ConditionDetailedResponse getConditionDetailedResponse(ConditionEntity conditionEntity) {
 		ConditionDetailedResponse condition = new ConditionDetailedResponse();

@@ -1,11 +1,15 @@
 package com.bhs.gtk.condition.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bhs.gtk.condition.model.ConditionDetailedResponse;
 import com.bhs.gtk.condition.model.ConditionRequest;
+import com.bhs.gtk.condition.model.ConditionResponse;
 import com.bhs.gtk.condition.persistence.ConditionEntity;
+import com.bhs.gtk.condition.persistence.EntityReader;
 import com.bhs.gtk.condition.persistence.EntityWriter;
 import com.bhs.gtk.condition.util.Mapper;
 
@@ -14,6 +18,9 @@ public class ConditionServiceImpl implements ConditionService{
 
 	@Autowired
 	private EntityWriter entityWriter;
+	
+	@Autowired
+	private EntityReader entityReader;
 	
 	@Autowired
 	private Mapper mapper;
@@ -30,15 +37,11 @@ public class ConditionServiceImpl implements ConditionService{
 //		return mapper.getCondition(conditionEntity);
 //	}
 //
-//	@Override
-//	public List<Condition> getAllConditions() {
-//		Iterator<ConditionEntity> iterator = conditionRepository.findAll().iterator();
-//		List<Condition> condition = new ArrayList<>();
-//		while(iterator.hasNext()) {
-//			condition.add(mapper.getCondition(iterator.next()));
-//		}
-//		return condition;
-//	}
+	@Override
+	public List<ConditionResponse> getAllConditions() {
+		List<ConditionEntity> conditionEntities = entityReader.getAllConditions();
+		return mapper.getConditionResponses(conditionEntities);
+	}
 //
 //	@Override
 //	public Condition getCondition(UUID id) {

@@ -39,8 +39,8 @@ public class ConditionApiController implements ConditionApi {
 
 	@Override
 	public ResponseEntity<List<ConditionResponse>> getAllConditions() {
-		// TODO Auto-generated method stub
-		return null;
+		List<ConditionResponse> conditions = conditionServiceImpl.getAllConditions();
+		return new ResponseEntity<List<ConditionResponse>>(conditions, HttpStatus.OK);
 	}
 
 	@Override
