@@ -45,8 +45,8 @@ public class ConditionApiController implements ConditionApi {
 
 	@Override
 	public ResponseEntity<ConditionDetailedResponse> getCondition(UUID id) {
-		// TODO Auto-generated method stub
-		return null;
+		ConditionDetailedResponse condition = conditionServiceImpl.getCondition(id);
+		return new ResponseEntity<ConditionDetailedResponse>(condition, HttpStatus.OK);
 	}
 
 	@Override

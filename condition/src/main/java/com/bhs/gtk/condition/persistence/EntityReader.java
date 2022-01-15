@@ -38,7 +38,7 @@ public class EntityReader {
 		return conditions;
 	}
 	
-	public ConditionEntity getConditionInRepository(UUID id) {
+	public ConditionEntity getCondition(UUID id) {
 		Optional<ConditionEntity> entityContainer = conditionRepository.findById(id);
 		if(entityContainer.isPresent()) {
 			return entityContainer.get();

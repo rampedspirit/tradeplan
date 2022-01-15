@@ -117,7 +117,7 @@ public class ExecutableServiceImpl implements ExecutableService{
 	}
 	
 	private ConditionResultEntity queueConditionExecution(UUID conditionId, Date marketTime, String scripName) {
-		ConditionEntity conditionEntity = entityReader.getConditionInRepository(conditionId);
+		ConditionEntity conditionEntity = entityReader.getCondition(conditionId);
 		if (conditionEntity == null) {
 			return null;
 		}

@@ -50,7 +50,7 @@ public class ConditionEvaluator {
 	}
 
 	private String evaluateConditionResult(UUID conditionId, Date marketTime, String scripName, List<String> filterStatuses) {
-		ConditionEntity conditionEntity = entityReader.getConditionInRepository(conditionId);
+		ConditionEntity conditionEntity = entityReader.getCondition(conditionId);
 		String parseTree = conditionEntity.getParseTree();
 		ConditionExpression expression = converter.convertToConditionExpression(parseTree);
 		return evaluateConditionExpression(marketTime, scripName, expression);

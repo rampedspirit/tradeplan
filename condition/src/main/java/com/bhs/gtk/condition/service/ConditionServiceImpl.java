@@ -1,6 +1,7 @@
 package com.bhs.gtk.condition.service;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,20 +43,11 @@ public class ConditionServiceImpl implements ConditionService{
 		List<ConditionEntity> conditionEntities = entityReader.getAllConditions();
 		return mapper.getConditionResponses(conditionEntities);
 	}
-//
-//	@Override
-//	public Condition getCondition(UUID id) {
-//		if(id == null) {
-//			//throw exception
-//			return null;
-//		}
-//		Optional<ConditionEntity> conditionEntityContainer = conditionRepository.findById(id);
-//		if(conditionEntityContainer.isPresent()) {
-//			return mapper.getCondition(conditionEntityContainer.get());
-//		}
-//		//throw exception condition not found
-//		return null;
-//	}
+
+	@Override
+	public ConditionDetailedResponse getCondition(UUID conditionId) {
+		return mapper.getConditionDetailedResponse(entityReader.getCondition(conditionId));
+	}
 //
 //	@Override
 //	public Condition deleteCondition(UUID id) {
