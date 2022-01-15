@@ -9,7 +9,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.bhs.gtk.screener.messaging.ScreenerMessageProducer;
+import com.bhs.gtk.screener.messaging.MessageProducer;
 import com.bhs.gtk.screener.model.ScripResult;
 import com.bhs.gtk.screener.persistence.ConditionResultEntity;
 import com.bhs.gtk.screener.persistence.ConditionResultRepository;
@@ -19,7 +19,7 @@ import com.bhs.gtk.screener.util.Converter;
 public class ConditionResultServiceImpl implements ConditionResultService{
 	
 	@Autowired
-	private ScreenerMessageProducer screenerMessageProducer;
+	private MessageProducer screenerMessageProducer;
 	
 	@Autowired
 	private ConditionResultRepository conditionResultRepository;

@@ -4,16 +4,14 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ScreenerMessageConsumer {
+public class MessageConsumer {
 	
-	/**
-	 * @param message : the expression string that reach the topic/s is available in this parameter 
-	 */
-//	@KafkaListener(topics = MessageConstants.INPUT_TOPIC_NAME)
-//	public boolean receiveMessageFromInputTopic(String message) {
-//		processExpression(message);
-//		return true;
-//	}
+	@KafkaListener(topics = TopicNames.INPUT_EXECUTION_RESPONSE)
+	public boolean receiveMessageFromInputTopic(String message) {
+		System.err.println("Screener received :"+message);
+		//processExpression(message);
+		return true;
+	}
 	
 //	private boolean processExpression(String evaluationRequest) {
 ////		EvaluationResponse response =  evaluationServiceImpl.evaluate(evaluationRequest);
