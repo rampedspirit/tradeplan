@@ -21,8 +21,8 @@ public class FilterResultId implements Serializable {
 	public FilterResultId() {
 	}
 	
-	public FilterResultId(UUID conditionId, Date marketTime, String scripName) {
-		this.setFilterId(conditionId);
+	public FilterResultId(UUID filterId, Date marketTime, String scripName) {
+		this.setFilterId(filterId);
 		this.setMarketTime(marketTime);
 		this.setScripName(scripName);
 	}

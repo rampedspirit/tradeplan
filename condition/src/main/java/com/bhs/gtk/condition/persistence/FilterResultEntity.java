@@ -10,6 +10,10 @@ import javax.persistence.IdClass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.threeten.bp.Instant;
+import org.threeten.bp.OffsetDateTime;
+import org.threeten.bp.ZoneId;
+
 @Entity
 @IdClass(FilterResultId.class)
 public class FilterResultEntity {
@@ -67,6 +71,10 @@ public class FilterResultEntity {
 
 	public void setFilterId(UUID filterId) {
 		this.filterId = filterId;
+	}
+	
+	public String getMarketTimeAsOffsetDateTime() {
+		return OffsetDateTime.ofInstant(Instant.ofEpochMilli(marketTime.getTime()), ZoneId.systemDefault()).toString();
 	}
 
 }

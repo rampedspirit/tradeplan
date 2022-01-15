@@ -13,6 +13,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.threeten.bp.Instant;
+import org.threeten.bp.OffsetDateTime;
+import org.threeten.bp.ZoneId;
+
 
 @Entity
 @IdClass(ConditionResultId.class)
@@ -85,4 +89,8 @@ public class ConditionResultEntity {
 		this.filterResultEntities = filterResultEntities;
 	}
 	
+	public String getMarketTimeAsOffsetDateTime() {
+		return OffsetDateTime.ofInstant(Instant.ofEpochMilli(marketTime.getTime()), ZoneId.systemDefault()).toString();
+	}
+
 }

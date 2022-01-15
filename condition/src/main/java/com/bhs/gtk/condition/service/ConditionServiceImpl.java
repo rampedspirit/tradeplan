@@ -6,21 +6,21 @@ import org.springframework.stereotype.Service;
 import com.bhs.gtk.condition.model.ConditionDetailedResponse;
 import com.bhs.gtk.condition.model.ConditionRequest;
 import com.bhs.gtk.condition.persistence.ConditionEntity;
-import com.bhs.gtk.condition.persistence.EntityCreator;
+import com.bhs.gtk.condition.persistence.EntityWriter;
 import com.bhs.gtk.condition.util.Mapper;
 
 @Service
 public class ConditionServiceImpl implements ConditionService{
 
 	@Autowired
-	private EntityCreator entityCreator;
+	private EntityWriter entityWriter;
 	
 	@Autowired
 	private Mapper mapper;
 	
 	@Override
 	public ConditionDetailedResponse createCondition(ConditionRequest condition) {
-		ConditionEntity conditionEntity = entityCreator.createConditionEntity(condition);
+		ConditionEntity conditionEntity = entityWriter.createConditionEntity(condition);
 		return mapper.getConditionDetailedResponse(conditionEntity);
 	}
 	

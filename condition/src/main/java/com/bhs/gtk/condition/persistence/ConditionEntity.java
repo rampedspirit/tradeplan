@@ -7,6 +7,7 @@ import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
@@ -32,11 +33,8 @@ public class ConditionEntity {
 	@Column(length = PersistenceConstants.LARGE_TEXT_LIMIT)
 	private String parseTree;
 	
-	@ManyToMany(cascade = CascadeType.PERSIST)
+	@ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
 	private List<FilterEntity> filters;
-	
-	@OneToMany(cascade = CascadeType.ALL)
-	private List<ConditionResultEntity> conditionResultEntities;
 	
 	protected ConditionEntity() {}
 	
@@ -46,7 +44,6 @@ public class ConditionEntity {
 		this.code = code;
 		this.parseTree = parseTree;
 		this.filters = new ArrayList<>();
-		this.conditionResultEntities = new ArrayList<>();
 	}
 	
 	public UUID getId() {
@@ -87,13 +84,4 @@ public class ConditionEntity {
 	public void setFilters(List<FilterEntity> filters) {
 		this.filters = filters;
 	}
-
-	public List<ConditionResultEntity> getConditionResultEntities() {
-		return conditionResultEntities;
-	}
-
-	public void setConditionResultEntities(List<ConditionResultEntity> conditionResultEntities) {
-		this.conditionResultEntities = conditionResultEntities;
-	}
-
 }
