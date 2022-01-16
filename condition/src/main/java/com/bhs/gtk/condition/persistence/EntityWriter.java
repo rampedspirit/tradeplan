@@ -32,11 +32,24 @@ public class EntityWriter {
 	private ConditionResultRepository conditionResultRepository;
 	
 	@Autowired
+	private FilterRespository filterRespository;
+	
+	@Autowired
 	private Converter converter;
 	
 	@Autowired
 	private EntityReader entityReader;
 	
+	
+	private boolean detachAssociatedFilters(ConditionEntity condition) {
+		List<FilterEntity> filters = filterRespository.findByConditionsId(condition.getId());
+		List<FilterEntity> filtersAssociatedOnlyToGivenCondition = filters.stream()
+				.filter(f -> f.getConditions().size() == 1).collect(Collectors.toList());
+		for(FilterEntity f : filtersAssociatedOnlyToGivenCondition) {
+			f.getConditions().remove(condition);
+		}
+		return true;
+	}
 	/**
 	 * remove all condition execution results associated with condition Id
 	 * @param conditionId
@@ -51,7 +64,9 @@ public class EntityWriter {
 	public ConditionEntity deleteCondition(UUID id) {
 		ConditionEntity conditionEntity = entityReader.getCondition(id);
 		if(conditionEntity != null) {
-			conditionRepository.delete(conditionEntity);
+			if(detachAssociatedFilters(conditionEntity)) {
+				conditionRepository.delete(conditionEntity);
+			}
 		}
 		return conditionEntity;
 	}

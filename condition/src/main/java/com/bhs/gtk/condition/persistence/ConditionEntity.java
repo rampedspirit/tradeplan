@@ -33,7 +33,7 @@ public class ConditionEntity {
 	@Column(length = PersistenceConstants.LARGE_TEXT_LIMIT)
 	private String parseTree;
 	
-	@ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private List<FilterEntity> filters;
 	
 	protected ConditionEntity() {}

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.bhs.gtk.condition.model.ConditionDetailedResponse;
@@ -33,12 +32,6 @@ public class ConditionServiceImpl implements ConditionService{
 		return mapper.getConditionDetailedResponse(conditionEntity);
 	}
 	
-//	@Override
-//	public Condition createCondition(Condition condition) {
-//		ConditionEntity conditionEntity = conditionRepository.save(mapper.getConditionEntityToPersists(condition));
-//		return mapper.getCondition(conditionEntity);
-//	}
-//
 	@Override
 	public List<ConditionResponse> getAllConditions() {
 		List<ConditionEntity> conditionEntities = entityReader.getAllConditions();
@@ -52,11 +45,10 @@ public class ConditionServiceImpl implements ConditionService{
 	
 	@Override
 	public ConditionDetailedResponse deleteCondition(UUID id) {
+		entityWriter.deleteConditionResultEntity(id);
 		ConditionEntity deletedCondition = entityWriter.deleteCondition(id);
 		if(deletedCondition != null) {
-			if(entityWriter.deleteConditionResultEntity(deletedCondition.getId())) {
-				return mapper.getConditionDetailedResponse(deletedCondition);
-			}
+			return mapper.getConditionDetailedResponse(deletedCondition);
 		}
 		return null;
 	}
