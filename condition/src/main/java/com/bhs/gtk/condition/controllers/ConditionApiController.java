@@ -33,8 +33,8 @@ public class ConditionApiController implements ConditionApi {
 
 	@Override
 	public ResponseEntity<ConditionDetailedResponse> deleteCondition(UUID id) {
-		// TODO Auto-generated method stub
-		return null;
+		ConditionDetailedResponse condition = conditionServiceImpl.deleteCondition(id);
+		return new ResponseEntity<ConditionDetailedResponse>(condition, HttpStatus.OK);
 	}
 
 	@Override

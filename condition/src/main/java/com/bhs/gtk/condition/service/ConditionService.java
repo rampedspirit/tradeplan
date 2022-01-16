@@ -11,6 +11,7 @@ public interface ConditionService {
 	public ConditionDetailedResponse createCondition(ConditionRequest condition);
 	public List<ConditionResponse> getAllConditions();
 	public ConditionDetailedResponse getCondition(UUID conditionId);
+	public ConditionDetailedResponse deleteCondition(UUID id);
 //	public List<Condition> getAllConditions();
 //	public Condition getCondition(UUID id);
 //	public Condition deleteCondition(UUID id);

@@ -37,6 +37,25 @@ public class EntityWriter {
 	@Autowired
 	private EntityReader entityReader;
 	
+	/**
+	 * remove all condition execution results associated with condition Id
+	 * @param conditionId
+	 * @return
+	 */
+	public boolean deleteConditionResultEntity(UUID conditionId) {
+		List<ConditionResultEntity> conditionResults = conditionResultRepository.findByConditionId(conditionId);
+		conditionResultRepository.deleteAll(conditionResults);
+		return true;
+	}
+	
+	public ConditionEntity deleteCondition(UUID id) {
+		ConditionEntity conditionEntity = entityReader.getCondition(id);
+		if(conditionEntity != null) {
+			conditionRepository.delete(conditionEntity);
+		}
+		return conditionEntity;
+	}
+	
 	public ConditionEntity createConditionEntity(ConditionRequest condition) {
 		@NotNull
 		String parseTree = condition.getParseTree();
