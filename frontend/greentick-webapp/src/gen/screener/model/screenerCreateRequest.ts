@@ -10,13 +10,13 @@
  * Do not edit the class manually.
  */
 
-export interface ScreenerRequest { 
+export interface ScreenerCreateRequest { 
     /**
-     * name of condition
+     * name of screener
      */
     name: string;
     /**
-     * description of condition
+     * description of screener
      */
     description?: string;
     /**

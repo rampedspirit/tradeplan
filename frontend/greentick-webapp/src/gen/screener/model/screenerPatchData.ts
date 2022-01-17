@@ -10,31 +10,30 @@
  * Do not edit the class manually.
  */
 
-export interface PatchData { 
+export interface ScreenerPatchData { 
     /**
      * Action to be performed on given resource. 
      */
-    operation: PatchData.OperationEnum;
+    operation: ScreenerPatchData.OperationEnum;
     /**
      * The property of the json attribute to be replaced.
      */
-    property: PatchData.PropertyEnum;
+    property: ScreenerPatchData.PropertyEnum;
     /**
      * The new value of the json attribute to be patched.
      */
     value: string;
 }
-export namespace PatchData {
+export namespace ScreenerPatchData {
     export type OperationEnum = 'REPLACE';
     export const OperationEnum = {
         REPLACE: 'REPLACE' as OperationEnum
     };
-    export type PropertyEnum = 'NAME' | 'DESCRIPTION' | 'WATCHLIST_ID' | 'CONDITION_ID' | 'NOTE';
+    export type PropertyEnum = 'NAME' | 'DESCRIPTION' | 'WATCHLIST_ID' | 'CONDITION_ID';
     export const PropertyEnum = {
         NAME: 'NAME' as PropertyEnum,
         DESCRIPTION: 'DESCRIPTION' as PropertyEnum,
         WATCHLISTID: 'WATCHLIST_ID' as PropertyEnum,
-        CONDITIONID: 'CONDITION_ID' as PropertyEnum,
-        NOTE: 'NOTE' as PropertyEnum
+        CONDITIONID: 'CONDITION_ID' as PropertyEnum
     };
 }

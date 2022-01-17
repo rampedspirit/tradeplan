@@ -9,8 +9,9 @@
  * https://github.com/swagger-api/swagger-codegen.git
  * Do not edit the class manually.
  */
+import { ExecutableResponse } from './executableResponse';
 
-export interface ScreenerResponse { 
+export interface ScreenerDetailedResponse { 
     /**
      * screener identifier
      */
@@ -31,4 +32,8 @@ export interface ScreenerResponse {
      * condition identifier.
      */
     conditionId?: string;
+    /**
+     * all executables which are attached to the screener with given watchlist and condition
+     */
+    executables?: Array<ExecutableResponse>;
 }

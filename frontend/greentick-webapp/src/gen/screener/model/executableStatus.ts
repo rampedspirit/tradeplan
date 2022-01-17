@@ -10,17 +10,10 @@
  * Do not edit the class manually.
  */
 
-export interface ExecutionRequest { 
-    /**
-     * market time at which screener to be executed.
-     */
-    marketTime: Date;
-    /**
-     * note related to execution
-     */
-    note?: string;
-    /**
-     * scrip names
-     */
-    scrips?: Array<string>;
-}
+export type ExecutableStatus = 'QUEUED' | 'RUNNING' | 'COMPLETED';
+
+export const ExecutableStatus = {
+    QUEUED: 'QUEUED' as ExecutableStatus,
+    RUNNING: 'RUNNING' as ExecutableStatus,
+    COMPLETED: 'COMPLETED' as ExecutableStatus
+};

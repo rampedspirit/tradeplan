@@ -9,16 +9,13 @@
  * https://github.com/swagger-api/swagger-codegen.git
  * Do not edit the class manually.
  */
+import { ExecutableStatus } from './executableStatus';
 
-export interface Executable { 
-    /**
-     * screener identifier       
-     */
-    screenerId?: string;
+export interface ExecutableResponse { 
     /**
      * unique identifier of the execution, using which result can be obtained
      */
-    executionId?: string;
+    executableId?: string;
     /**
      * market time at which screener to be executed.
      */
@@ -27,4 +24,13 @@ export interface Executable {
      * note related to execution
      */
     note?: string;
+    status?: ExecutableStatus;
+    /**
+     * total number of scrip attached to this executable for execution
+     */
+    numberOfScripForExecution?: number;
+    /**
+     * number of scrip attached this executable which are executed and have execution result.
+     */
+    numberOfScripWithResultAvailable?: number;
 }

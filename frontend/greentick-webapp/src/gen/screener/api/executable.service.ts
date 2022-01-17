@@ -17,16 +17,16 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 
 import { Observable }                                        from 'rxjs';
 
-import { ConditionResult } from '../model/conditionResult';
-import { FilterResult } from '../model/filterResult';
-import { ScreenerResult } from '../model/screenerResult';
+import { ExecutableDetailedResponse } from '../model/executableDetailedResponse';
+import { ExecutablePatchData } from '../model/executablePatchData';
+import { ExecutableResponse } from '../model/executableResponse';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 
 
 @Injectable()
-export class ResultService {
+export class ExecutableService {
 
     protected basePath = 'http://localhost:5000/';
     public defaultHeaders = new HttpHeaders();
@@ -58,19 +58,19 @@ export class ResultService {
 
 
     /**
-     * get condition result
-     * get condition result
-     * @param conditionResultId 
+     * get executable
+     * get executable
+     * @param executableId 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getConditionResult(conditionResultId: string, observe?: 'body', reportProgress?: boolean): Observable<ConditionResult>;
-    public getConditionResult(conditionResultId: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ConditionResult>>;
-    public getConditionResult(conditionResultId: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ConditionResult>>;
-    public getConditionResult(conditionResultId: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public getExecutable(executableId: string, observe?: 'body', reportProgress?: boolean): Observable<ExecutableResponse>;
+    public getExecutable(executableId: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ExecutableResponse>>;
+    public getExecutable(executableId: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ExecutableResponse>>;
+    public getExecutable(executableId: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
-        if (conditionResultId === null || conditionResultId === undefined) {
-            throw new Error('Required parameter conditionResultId was null or undefined when calling getConditionResult.');
+        if (executableId === null || executableId === undefined) {
+            throw new Error('Required parameter executableId was null or undefined when calling getExecutable.');
         }
 
         let headers = this.defaultHeaders;
@@ -88,7 +88,7 @@ export class ResultService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<ConditionResult>('get',`${this.basePath}/v1/screener/execution/result/${encodeURIComponent(String(conditionResultId))}`,
+        return this.httpClient.request<ExecutableResponse>('get',`${this.basePath}/v1/screener/executable/${encodeURIComponent(String(executableId))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -99,19 +99,19 @@ export class ResultService {
     }
 
     /**
-     * get filter result
-     * get filter result
-     * @param filterResultId 
+     * get result of executable of given screener
+     * get result of executable of given screener
+     * @param executableId 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getFilterResult(filterResultId: string, observe?: 'body', reportProgress?: boolean): Observable<FilterResult>;
-    public getFilterResult(filterResultId: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<FilterResult>>;
-    public getFilterResult(filterResultId: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<FilterResult>>;
-    public getFilterResult(filterResultId: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public getResult(executableId: string, observe?: 'body', reportProgress?: boolean): Observable<ExecutableDetailedResponse>;
+    public getResult(executableId: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ExecutableDetailedResponse>>;
+    public getResult(executableId: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ExecutableDetailedResponse>>;
+    public getResult(executableId: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
-        if (filterResultId === null || filterResultId === undefined) {
-            throw new Error('Required parameter filterResultId was null or undefined when calling getFilterResult.');
+        if (executableId === null || executableId === undefined) {
+            throw new Error('Required parameter executableId was null or undefined when calling getResult.');
         }
 
         let headers = this.defaultHeaders;
@@ -129,7 +129,7 @@ export class ResultService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<FilterResult>('get',`${this.basePath}/v1/screener/execution/result/${encodeURIComponent(String(filterResultId))}`,
+        return this.httpClient.request<ExecutableDetailedResponse>('get',`${this.basePath}/v1/screener/executable/${encodeURIComponent(String(executableId))}/result`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -140,19 +140,24 @@ export class ResultService {
     }
 
     /**
-     * get screener result
-     * get screener result
-     * @param executionId 
+     * update executable
+     * update executable of given id
+     * @param body Payload to change executable of given Id. Only Note can be changed. 
+     * @param executableId 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getScreenrResult(executionId: string, observe?: 'body', reportProgress?: boolean): Observable<ScreenerResult>;
-    public getScreenrResult(executionId: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ScreenerResult>>;
-    public getScreenrResult(executionId: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ScreenerResult>>;
-    public getScreenrResult(executionId: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public updateExecutable(body: ExecutablePatchData, executableId: string, observe?: 'body', reportProgress?: boolean): Observable<ExecutableResponse>;
+    public updateExecutable(body: ExecutablePatchData, executableId: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ExecutableResponse>>;
+    public updateExecutable(body: ExecutablePatchData, executableId: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ExecutableResponse>>;
+    public updateExecutable(body: ExecutablePatchData, executableId: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
-        if (executionId === null || executionId === undefined) {
-            throw new Error('Required parameter executionId was null or undefined when calling getScreenrResult.');
+        if (body === null || body === undefined) {
+            throw new Error('Required parameter body was null or undefined when calling updateExecutable.');
+        }
+
+        if (executableId === null || executableId === undefined) {
+            throw new Error('Required parameter executableId was null or undefined when calling updateExecutable.');
         }
 
         let headers = this.defaultHeaders;
@@ -168,10 +173,16 @@ export class ResultService {
 
         // to determine the Content-Type header
         const consumes: string[] = [
+            'application/json'
         ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers = headers.set('Content-Type', httpContentTypeSelected);
+        }
 
-        return this.httpClient.request<ScreenerResult>('get',`${this.basePath}/v1/screener/execution/result/${encodeURIComponent(String(executionId))}`,
+        return this.httpClient.request<ExecutableResponse>('patch',`${this.basePath}/v1/screener/executable/${encodeURIComponent(String(executableId))}`,
             {
+                body: body,
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
                 observe: observe,

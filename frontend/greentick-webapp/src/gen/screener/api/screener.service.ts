@@ -17,8 +17,10 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 
 import { Observable }                                        from 'rxjs';
 
-import { PatchModel } from '../model/patchModel';
-import { ScreenerRequest } from '../model/screenerRequest';
+import { ExecutableCreateRequest } from '../model/executableCreateRequest';
+import { ScreenerCreateRequest } from '../model/screenerCreateRequest';
+import { ScreenerDetailedResponse } from '../model/screenerDetailedResponse';
+import { ScreenerPatchData } from '../model/screenerPatchData';
 import { ScreenerResponse } from '../model/screenerResponse';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -64,10 +66,10 @@ export class ScreenerService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public createScreener(body: ScreenerRequest, observe?: 'body', reportProgress?: boolean): Observable<ScreenerResponse>;
-    public createScreener(body: ScreenerRequest, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ScreenerResponse>>;
-    public createScreener(body: ScreenerRequest, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ScreenerResponse>>;
-    public createScreener(body: ScreenerRequest, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public createScreener(body: ScreenerCreateRequest, observe?: 'body', reportProgress?: boolean): Observable<ScreenerResponse>;
+    public createScreener(body: ScreenerCreateRequest, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ScreenerResponse>>;
+    public createScreener(body: ScreenerCreateRequest, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ScreenerResponse>>;
+    public createScreener(body: ScreenerCreateRequest, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (body === null || body === undefined) {
             throw new Error('Required parameter body was null or undefined when calling createScreener.');
@@ -188,9 +190,9 @@ export class ScreenerService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getScreener(screenerId: string, observe?: 'body', reportProgress?: boolean): Observable<ScreenerResponse>;
-    public getScreener(screenerId: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ScreenerResponse>>;
-    public getScreener(screenerId: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ScreenerResponse>>;
+    public getScreener(screenerId: string, observe?: 'body', reportProgress?: boolean): Observable<ScreenerDetailedResponse>;
+    public getScreener(screenerId: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ScreenerDetailedResponse>>;
+    public getScreener(screenerId: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ScreenerDetailedResponse>>;
     public getScreener(screenerId: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (screenerId === null || screenerId === undefined) {
@@ -212,8 +214,60 @@ export class ScreenerService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<ScreenerResponse>('get',`${this.basePath}/v1/screener/${encodeURIComponent(String(screenerId))}`,
+        return this.httpClient.request<ScreenerDetailedResponse>('get',`${this.basePath}/v1/screener/${encodeURIComponent(String(screenerId))}`,
             {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * run screener
+     * run screener at given marketTime
+     * @param body payload to create executable
+     * @param screenerId 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public runScreener(body: ExecutableCreateRequest, screenerId: string, observe?: 'body', reportProgress?: boolean): Observable<ScreenerDetailedResponse>;
+    public runScreener(body: ExecutableCreateRequest, screenerId: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ScreenerDetailedResponse>>;
+    public runScreener(body: ExecutableCreateRequest, screenerId: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ScreenerDetailedResponse>>;
+    public runScreener(body: ExecutableCreateRequest, screenerId: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        if (body === null || body === undefined) {
+            throw new Error('Required parameter body was null or undefined when calling runScreener.');
+        }
+
+        if (screenerId === null || screenerId === undefined) {
+            throw new Error('Required parameter screenerId was null or undefined when calling runScreener.');
+        }
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers = headers.set('Content-Type', httpContentTypeSelected);
+        }
+
+        return this.httpClient.request<ScreenerDetailedResponse>('post',`${this.basePath}/v1/screener/${encodeURIComponent(String(screenerId))}/run`,
+            {
+                body: body,
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
                 observe: observe,
@@ -225,15 +279,15 @@ export class ScreenerService {
     /**
      * update screener
      * update screener of given id
-     * @param body Payload to change screener of given Id. Only Name, description, watchlist and condition of the screener can be changed. It is also important to note, change of watchlist or condition will remove associated execution result of the screener.
+     * @param body Payload to change screener of given Id.
      * @param screenerId 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public updateScreener(body: PatchModel, screenerId: string, observe?: 'body', reportProgress?: boolean): Observable<ScreenerResponse>;
-    public updateScreener(body: PatchModel, screenerId: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ScreenerResponse>>;
-    public updateScreener(body: PatchModel, screenerId: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ScreenerResponse>>;
-    public updateScreener(body: PatchModel, screenerId: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public updateScreener(body: Array<ScreenerPatchData>, screenerId: string, observe?: 'body', reportProgress?: boolean): Observable<ScreenerResponse>;
+    public updateScreener(body: Array<ScreenerPatchData>, screenerId: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ScreenerResponse>>;
+    public updateScreener(body: Array<ScreenerPatchData>, screenerId: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ScreenerResponse>>;
+    public updateScreener(body: Array<ScreenerPatchData>, screenerId: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (body === null || body === undefined) {
             throw new Error('Required parameter body was null or undefined when calling updateScreener.');

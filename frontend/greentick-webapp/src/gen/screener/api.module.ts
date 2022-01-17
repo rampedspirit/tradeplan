@@ -3,8 +3,7 @@ import { Configuration } from './configuration';
 import { HttpClient } from '@angular/common/http';
 
 
-import { ExecutionService } from './api/execution.service';
-import { ResultService } from './api/result.service';
+import { ExecutableService } from './api/executable.service';
 import { ScreenerService } from './api/screener.service';
 
 @NgModule({
@@ -12,8 +11,7 @@ import { ScreenerService } from './api/screener.service';
   declarations: [],
   exports:      [],
   providers: [
-    ExecutionService,
-    ResultService,
+    ExecutableService,
     ScreenerService ]
 })
 export class ApiModule {

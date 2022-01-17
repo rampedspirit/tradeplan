@@ -9,17 +9,8 @@
  * https://github.com/swagger-api/swagger-codegen.git
  * Do not edit the class manually.
  */
-import { ConditionScripResult } from './conditionScripResult';
 
-export interface ScreenerResult { 
-    /**
-     * screener identifier
-     */
-    screenerId?: string;
-    /**
-     * unique identifier of the execution, using which result can be obtained
-     */
-    executionId?: string;
+export interface ExecutableCreateRequest { 
     /**
      * market time at which screener to be executed.
      */
@@ -29,7 +20,7 @@ export interface ScreenerResult {
      */
     note?: string;
     /**
-     * screener result
+     * scrip names.
      */
-    result?: Array<ConditionScripResult>;
+    scripNames?: Array<string>;
 }

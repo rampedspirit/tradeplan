@@ -6,6 +6,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { Tab, TabAreaService } from 'src/app/services/tab-area.service';
 import { Condition, ConditionService } from 'src/gen/condition';
 import { ScreenerService } from 'src/gen/screener';
+import { ExecutableResponse } from 'src/gen/screener/model/executableResponse';
 import { ConfirmationComponent } from '../../common/confirmation/confirmation.component';
 import { MessageComponent } from '../../common/message/message.component';
 import { ConditionNotificationService } from '../../condition/condition-notification.service';
@@ -23,6 +24,7 @@ export class ScreenerEditComponent implements OnInit {
 
   editScreenerForm: FormGroup;
   conditions: Condition[];
+  executables: ExecutableResponse[];
 
   @Input()
   tab: Tab;
@@ -36,7 +38,7 @@ export class ScreenerEditComponent implements OnInit {
   }
 
   get conditionControl(): FormControl {
-    return this.editScreenerForm.get('condition') as FormControl;
+    return this.editScreenerForm.get('conditionId') as FormControl;
   }
 
   constructor(private screenerService: ScreenerService, private screenerNotificationService: ScreenerNotificationService,
@@ -68,12 +70,12 @@ export class ScreenerEditComponent implements OnInit {
       this.editScreenerForm = new FormGroup({
         name: new FormControl(screener.name, [Validators.required]),
         description: new FormControl(screener.description, [Validators.required]),
-        condition: new FormControl(screener.conditionId, [Validators.required])
+        conditionId: new FormControl(screener.conditionId, [Validators.required])
       });
-
       this.editScreenerForm.valueChanges.subscribe(change => {
         this.tab.dirtyFlag = true;
       });
+      this.executables = screener.executables;
       this.spinner.hide();
     }, error => {
       this.fetchError = true;
@@ -102,10 +104,11 @@ export class ScreenerEditComponent implements OnInit {
     if (this.editScreenerForm.valid) {
       let name = this.editScreenerForm.get('name')?.value;
       let description = this.editScreenerForm.get('description')?.value;
+      let conditionId = this.editScreenerForm.get('conditionId')?.value;
 
       this.spinner.show();
-      this.screenerService.updateScreener({
-        patchData: [{
+      this.screenerService.updateScreener(
+        [{
           operation: 'REPLACE',
           property: 'NAME',
           value: name
@@ -114,23 +117,28 @@ export class ScreenerEditComponent implements OnInit {
           operation: 'REPLACE',
           property: 'DESCRIPTION',
           value: description
+        },
+        {
+          operation: 'REPLACE',
+          property: 'CONDITION_ID',
+          value: conditionId
         }]
-      }, this.tab.id).subscribe(screener => {
-        this.tab.title = screener.name;
-        this.tab.dirtyFlag = false;
-        this.screenerNotificationService.triggerUpdateNotification(screener);
-        this.spinner.hide();
-      }, error => {
-        this.spinner.hide();
-        this.dialog.open(MessageComponent, {
-          data: {
-            type: "error",
-            message: "Failed to save screener.",
-            callbackText: "Retry",
-            callback: this.save
-          }
-        });
-      })
+        , this.tab.id).subscribe(screener => {
+          this.tab.title = screener.name;
+          this.tab.dirtyFlag = false;
+          this.screenerNotificationService.triggerUpdateNotification(screener);
+          this.spinner.hide();
+        }, error => {
+          this.spinner.hide();
+          this.dialog.open(MessageComponent, {
+            data: {
+              type: "error",
+              message: "Failed to save screener.",
+              callbackText: "Retry",
+              callback: this.save
+            }
+          });
+        })
     }
   }
 
