@@ -2,9 +2,7 @@ package com.bhs.gtk.screener.service;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -12,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.threeten.bp.DateTimeUtils;
-import org.threeten.bp.ZonedDateTime;
 
 import com.bhs.gtk.screener.model.ExecutableCreateRequest;
 import com.bhs.gtk.screener.model.ScreenerCreateRequest;
@@ -22,10 +19,10 @@ import com.bhs.gtk.screener.model.ScreenerPatchData.PropertyEnum;
 import com.bhs.gtk.screener.model.ScreenerResponse;
 import com.bhs.gtk.screener.model.ScripResult.StatusEnum;
 import com.bhs.gtk.screener.persistence.ConditionResultEntity;
-import com.bhs.gtk.screener.persistence.EntityCreator;
+import com.bhs.gtk.screener.persistence.EntityReader;
+import com.bhs.gtk.screener.persistence.EntityWriter;
 import com.bhs.gtk.screener.persistence.ExecutableEntity;
 import com.bhs.gtk.screener.persistence.ScreenerEntity;
-import com.bhs.gtk.screener.persistence.ScreenerRepository;
 import com.bhs.gtk.screener.util.Converter;
 
 @Service
@@ -35,10 +32,10 @@ public class ScreenerServiceImpl implements ScreernerService {
 	private Converter converter;
 	
 	@Autowired
-	private EntityCreator entityCreator;
+	private EntityWriter entityWriter;
 	
 	@Autowired
-	private ScreenerRepository screenerRepository;
+	private EntityReader entityReader;
 	
 	@Autowired
 	private ExecutableServiceImpl executableServiceImpl;
@@ -50,23 +47,23 @@ public class ScreenerServiceImpl implements ScreernerService {
 	
 	@Override
 	public ScreenerResponse createScreener(ScreenerCreateRequest screenerCreateRequest) {
-		ScreenerEntity entity = screenerRepository.save(entityCreator.createScreenerEntity(screenerCreateRequest));
+		ScreenerEntity entity = entityWriter.createScreenerEntity(screenerCreateRequest);
 		return converter.convertToScreenerResponse(entity);
 	}
 
 	@Override
 	public List<ScreenerResponse> getAllScreeners() {
-		Iterator<ScreenerEntity> iterator = screenerRepository.findAll().iterator();
+		List<ScreenerEntity> screenerEntities = entityReader.getAllScreenerEntities();
 		List<ScreenerResponse> screenerResponses = new ArrayList<>();
-		while(iterator.hasNext()) {
-			screenerResponses.add(converter.convertToScreenerResponse(iterator.next()));
+		for(ScreenerEntity entity : screenerEntities) {
+			screenerResponses.add(converter.convertToScreenerResponse(entity));
 		}
 		return screenerResponses;
 	}
 
 	@Override
 	public ScreenerDetailedResponse getScreener(UUID screenerId) {
-		ScreenerEntity screenerEntity = getScreenerEntity(screenerId);
+		ScreenerEntity screenerEntity = entityReader.getScreenerEntity(screenerId);
 		if(screenerEntity != null) {
 			return converter.convertToScreenerDetailedResponse(screenerEntity);
 		}
@@ -76,10 +73,9 @@ public class ScreenerServiceImpl implements ScreernerService {
 
 	@Override
 	public ScreenerResponse deleteScreener(UUID screenerId) {
-		ScreenerEntity screenerEntity = getScreenerEntity(screenerId);
-		if(screenerEntity != null) {
-			screenerRepository.delete(screenerEntity);
-			return converter.convertToScreenerResponse(screenerEntity);
+		ScreenerEntity deletedScreener = entityWriter.deleteScreener(screenerId);
+		if(deletedScreener != null) {
+			return converter.convertToScreenerResponse(deletedScreener);
 		}
 		//throw exception
 		return null;
@@ -87,12 +83,12 @@ public class ScreenerServiceImpl implements ScreernerService {
 
 	@Override
 	public ScreenerResponse updateScreener(List<ScreenerPatchData> patchData, UUID screenerId) {
-		ScreenerEntity screenerEntity = getScreenerEntity(screenerId);
+		ScreenerEntity screenerEntity = entityReader.getScreenerEntity(screenerId);
 		if(screenerEntity != null) {
 			for(ScreenerPatchData pData : patchData) {
 				update(screenerEntity, pData.getProperty(),pData.getValue());
 			}
-			ScreenerEntity savedEntity = screenerRepository.save(screenerEntity);
+			ScreenerEntity savedEntity = entityWriter.saveScreenerEntity(screenerEntity);
 			return converter.convertToScreenerResponse(savedEntity);
 		}
 		return null;
@@ -100,7 +96,7 @@ public class ScreenerServiceImpl implements ScreernerService {
 	
 	@Override
 	public ScreenerDetailedResponse runScreener(ExecutableCreateRequest executableCreateRequest, UUID screenerId) {
-		ScreenerEntity screenerEntity = getScreenerEntity(screenerId);
+		ScreenerEntity screenerEntity = entityReader.getScreenerEntity(screenerId);
 		if(screenerEntity != null) {
 			Date marketTime = DateTimeUtils.toDate(executableCreateRequest.getMarketTime().toInstant());
 			UUID conditionId = screenerEntity.getConditionId();
@@ -109,7 +105,7 @@ public class ScreenerServiceImpl implements ScreernerService {
 			List<String> scripNames = executableCreateRequest.getScripNames();
 			addExecutableToScreener(screenerEntity, marketTime, conditionId,watchlistId, note, scripNames);
 			runExecutable(conditionId,marketTime,watchlistId);
-			return converter.convertToScreenerDetailedResponse(getScreenerEntity(screenerId));
+			return converter.convertToScreenerDetailedResponse(entityReader.getScreenerEntity(screenerId));
 		}
 		//throw exception
 		return null; 	
@@ -125,12 +121,12 @@ public class ScreenerServiceImpl implements ScreernerService {
 
 	private ScreenerEntity addExecutableToScreener(ScreenerEntity screenerEntity, Date marketTime, UUID conditionId, UUID watchlistId,
 			String note, List<String> scripNames) {
-		ExecutableEntity executable = entityCreator.createExecutableEntity(marketTime,note,	watchlistId, conditionId);
-		List<ConditionResultEntity> resultEntities = entityCreator.queueConditionsToExecute(scripNames,marketTime, conditionId);
+		ExecutableEntity executable = entityWriter.createExecutableEntity(marketTime,note,	watchlistId, conditionId);
+		List<ConditionResultEntity> resultEntities = entityWriter.queueConditionsToExecute(scripNames,marketTime, conditionId);
 		executable.setConditionResultEntities(resultEntities);
 		executable.setNumberOfScripForExecution(resultEntities.size());
 		screenerEntity.getExecutableEntities().add(executable);
-		return screenerRepository.save(screenerEntity);
+		return entityWriter.saveScreenerEntity(screenerEntity);
 	}
 
 	private boolean update(ScreenerEntity screenerEntity, PropertyEnum propertyName, String value) {
@@ -152,17 +148,6 @@ public class ScreenerServiceImpl implements ScreernerService {
 			break;
 		}
 		return true;
-	}
-
-	
-	private ScreenerEntity getScreenerEntity(UUID screenerId) {
-		if (screenerId != null) {
-			Optional<ScreenerEntity> screenerEntityContainer = screenerRepository.findById(screenerId);
-			if (screenerEntityContainer.isPresent()) {
-				return screenerEntityContainer.get();
-			}
-		}
-		return null;
 	}
 
 }

@@ -14,10 +14,16 @@ import com.bhs.gtk.screener.model.ScreenerCreateRequest;
 import com.bhs.gtk.screener.model.ScripResult;
 
 @Component
-public class EntityCreator {
+public class EntityWriter {
+	
+	@Autowired
+	private EntityReader entityReader;
 	
 	@Autowired
 	private ConditionResultRepository  conditionResultRepository;
+	
+	@Autowired
+	private ScreenerRepository screenerRepository;
 	
 	public ExecutableEntity createExecutableEntity(Date marketTime,String note, UUID watchlistId,UUID conditionId) {
 		return  new ExecutableEntity(note, marketTime, watchlistId, conditionId);
@@ -58,7 +64,19 @@ public class EntityCreator {
 	public ScreenerEntity createScreenerEntity(ScreenerCreateRequest screenerRequest) {
 		ScreenerEntity entity = new ScreenerEntity(screenerRequest.getName(), screenerRequest.getDescription(),
 				screenerRequest.getWatchListId(), screenerRequest.getConditionId());
-		return entity;
+		return screenerRepository.save(entity);
+	}
+	
+	public ScreenerEntity deleteScreener(UUID screenerId) {
+		ScreenerEntity screenerEntity = entityReader.getScreenerEntity(screenerId);
+		if(screenerEntity != null) {
+			screenerRepository.delete(screenerEntity);
+		}
+		return screenerEntity;
+	}
+	
+	public ScreenerEntity saveScreenerEntity(ScreenerEntity entity) {
+		return screenerRepository.save(entity);
 	}
 
 }
