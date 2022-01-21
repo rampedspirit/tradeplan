@@ -23,6 +23,9 @@ public class EntityWriter {
 	private ConditionResultRepository  conditionResultRepository;
 	
 	@Autowired
+	private ExecutableRespository executableRespository;
+	
+	@Autowired
 	private ScreenerRepository screenerRepository;
 	
 	public ExecutableEntity createExecutableEntity(Date marketTime,String note, UUID watchlistId,UUID conditionId) {
@@ -79,4 +82,60 @@ public class EntityWriter {
 		return screenerRepository.save(entity);
 	}
 
+	
+	public boolean adaptConditionDelete(UUID conditionId) {
+		//detachExecutablesOfConditionFromScreeners(conditionId);
+		removeConditionFromScreener(conditionId);
+		removeExecutablesOfCondition(conditionId);
+		removeConditionResults(conditionId);
+		return true;
+	}
+	
+	
+	private void removeConditionFromScreener(UUID conditionId) {
+		List<ScreenerEntity> screenersAssociatedToCondition = screenerRepository.findByConditionId(conditionId);
+		for(ScreenerEntity screener : screenersAssociatedToCondition) {
+			screener.setConditionId(null);
+			screener.setExecutableEntities(new ArrayList<>());
+		}
+		screenerRepository.saveAll(screenersAssociatedToCondition);
+	}
+
+	public boolean adaptConditionUpdate(UUID conditionId) {
+		detachExecutablesOfConditionFromScreeners(conditionId);
+		removeExecutablesOfCondition(conditionId);
+		removeConditionResults(conditionId);
+		return true;
+	}
+
+	private void detachExecutablesOfConditionFromScreeners(UUID conditionId) {
+		List<ScreenerEntity> screenersAssociatedToCondition = screenerRepository.findByConditionId(conditionId);
+		for(ScreenerEntity screener : screenersAssociatedToCondition) {
+			screener.setExecutableEntities(new ArrayList<>());
+		}
+		screenerRepository.saveAll(screenersAssociatedToCondition);
+	}
+	
+	private void removeExecutablesOfCondition(UUID conditionId) {
+		List<ExecutableEntity> executables = executableRespository.findByConditionId(conditionId);
+		for(ExecutableEntity entity : executables) {
+			entity.setConditionResultEntities(new ArrayList<>());
+		}
+		List<ExecutableEntity> associationRemovedExecutables = new ArrayList<>();
+		Iterable<ExecutableEntity> savedExecutables = executableRespository.saveAll(executables);
+		for(ExecutableEntity entity : savedExecutables) {
+			associationRemovedExecutables.add(entity);
+		}
+		executableRespository.deleteAll(associationRemovedExecutables);
+	}
+
+	private void removeConditionResults(UUID conditionId) {
+		List<ConditionResultEntity> conditionResults = conditionResultRepository.findByConditionId(conditionId);
+		conditionResultRepository.deleteAll(conditionResults);
+	}
+
+
+
+
+	
 }

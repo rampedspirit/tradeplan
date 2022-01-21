@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.threeten.bp.DateTimeUtils;
 
+import com.bhs.gtk.screener.messaging.ChangeNotification;
+import com.bhs.gtk.screener.messaging.ChangeNotification.ChangeStatusEnum;
 import com.bhs.gtk.screener.model.ExecutableCreateRequest;
 import com.bhs.gtk.screener.model.ScreenerCreateRequest;
 import com.bhs.gtk.screener.model.ScreenerDetailedResponse;
@@ -83,6 +85,7 @@ public class ScreenerServiceImpl implements ScreernerService {
 
 	@Override
 	public ScreenerResponse updateScreener(List<ScreenerPatchData> patchData, UUID screenerId) {
+		//TODO: improve update of screener.
 		ScreenerEntity screenerEntity = entityReader.getScreenerEntity(screenerId);
 		if(screenerEntity != null) {
 			for(ScreenerPatchData pData : patchData) {
@@ -148,6 +151,22 @@ public class ScreenerServiceImpl implements ScreernerService {
 			break;
 		}
 		return true;
+	}
+
+	@Override
+	public boolean adaptChangeInCondition(ChangeNotification changeNotification) {
+		ChangeStatusEnum status = ChangeStatusEnum.fromValue(changeNotification.getStatus());
+		switch (status) {
+		case UPDATED:
+			 entityWriter.adaptConditionUpdate(changeNotification.getId());
+			break;
+		case DELETED:
+			 entityWriter.adaptConditionDelete(changeNotification.getId());
+			 break;
+		default:
+			throw new IllegalArgumentException();
+		}
+		return false;
 	}
 
 }

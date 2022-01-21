@@ -11,4 +11,5 @@ import org.springframework.stereotype.Repository;
 public interface ExecutableRespository extends CrudRepository<ExecutableEntity, UUID> {
 	List<ExecutableEntity> findByConditionIdAndMarketTime(UUID conditionId, Date marketTime);
 	ExecutableEntity findByConditionIdAndMarketTimeAndWatchlistId(UUID conditionId, Date marketTime,UUID watchlistId);
+	List<ExecutableEntity> findByConditionId(UUID conditionId);
 }

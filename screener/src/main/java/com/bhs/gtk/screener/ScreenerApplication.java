@@ -45,7 +45,8 @@ public class ScreenerApplication {
 		try {
 			NewTopic outputExecutionRequest = new NewTopic(TopicNames.OUTPUT_EXECUTION_REQUEST, 1, (short) 1);
 			NewTopic inputExecutionResponse = new NewTopic(TopicNames.INPUT_EXECUTION_RESPONSE, 1, (short) 1);
-			kafkaAdmin.createOrModifyTopics(outputExecutionRequest,inputExecutionResponse);
+			NewTopic inputChangeNotification = new NewTopic(TopicNames.INPUT_CONDITION_CHANGE_NOTIFICATION, 1, (short) 1);
+			kafkaAdmin.createOrModifyTopics(outputExecutionRequest,inputExecutionResponse,inputChangeNotification);
 			return true;
 		}catch (KafkaException kafkaException) {
 			//Log error
