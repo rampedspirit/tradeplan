@@ -19,7 +19,7 @@ import javax.validation.constraints.*;
  * ConditionResultResponse
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-01-08T12:39:36.275234600+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-01-18T17:32:26.583788100+05:30[Asia/Calcutta]")
 
 public class ConditionResultResponse   {
   @JsonProperty("id")

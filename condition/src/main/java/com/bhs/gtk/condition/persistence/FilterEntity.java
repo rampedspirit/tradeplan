@@ -1,5 +1,6 @@
 package com.bhs.gtk.condition.persistence;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,6 +26,7 @@ public class FilterEntity {
 	public FilterEntity(UUID id, String status) {
 		this.id = id;
 		this.status = status;
+		this.conditions = new ArrayList<>();
 	}
 	
 	public UUID getId() {

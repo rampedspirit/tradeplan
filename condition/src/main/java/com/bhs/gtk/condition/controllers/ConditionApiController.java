@@ -50,10 +50,16 @@ public class ConditionApiController implements ConditionApi {
 	}
 
 	@Override
-	public ResponseEntity<ConditionDetailedResponse> updateCondition(@Valid PatchData body, UUID id) {
-		// TODO Auto-generated method stub
-		return null;
+	public ResponseEntity<ConditionDetailedResponse> updateCondition(@Valid List<PatchData> body, UUID id) {
+		ConditionDetailedResponse condition = conditionServiceImpl.updateCondition(body, id);
+		return new ResponseEntity<ConditionDetailedResponse>(condition, HttpStatus.OK);
 	}
+
+//	@Override
+//	public ResponseEntity<ConditionDetailedResponse> updateCondition(@Valid PatchData body, UUID id) {
+//		ConditionDetailedResponse condition = conditionServiceImpl.updateCondition(body, id);
+//		return new ResponseEntity<ConditionDetailedResponse>(condition, HttpStatus.OK);
+//	}
 
 
 //	@Override

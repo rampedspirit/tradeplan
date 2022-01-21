@@ -1,16 +1,27 @@
 package com.bhs.gtk.condition.messaging;
 
+import java.util.UUID;
+
 import org.apache.kafka.common.errors.InterruptException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.KafkaException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+
+import com.bhs.gtk.condition.messaging.ChangeNotification.ChangeStatusEnum;
 
 @Service
 public class MessageProducer {
 	
 	@Autowired
 	private KafkaTemplate<String, String> kafkaTemplate;
+	
+	public boolean sendChangeNotification(UUID id, ChangeStatusEnum status) {
+		ChangeNotification changeNotification = new ChangeNotification(id, ChangeStatusEnum.UPDATED);
+		JSONObject changeNotificationJsonObject = new JSONObject(changeNotification);
+		return sendMessage(changeNotificationJsonObject.toString(), MessageType.CHANGE_NOTIFICATION);
+	}
 	
 	public boolean sendMessage(String message, MessageType type) {
 		String topicName;
@@ -22,8 +33,8 @@ public class MessageProducer {
 			case EXECUTION_RESPONSE:
 				topicName = TopicNames.OUTPUT_EXECUTION_RESPONSE;
 				break;
-			case UPDATE_NOTIFICATION:
-				topicName = TopicNames.OUTPUT_UPDATE_NOTIFICATION;
+			case CHANGE_NOTIFICATION:
+				topicName = TopicNames.OUTPUT_CHANGE_NOTIFICATION;
 				break;
 			default:
 				throw new IllegalArgumentException(type+" is not supported message type in Condition service");

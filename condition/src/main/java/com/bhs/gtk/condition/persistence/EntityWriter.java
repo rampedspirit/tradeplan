@@ -3,7 +3,6 @@ package com.bhs.gtk.condition.persistence;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -41,15 +40,6 @@ public class EntityWriter {
 	private EntityReader entityReader;
 	
 	
-	private boolean detachAssociatedFilters(ConditionEntity condition) {
-		List<FilterEntity> filters = filterRespository.findByConditionsId(condition.getId());
-		List<FilterEntity> filtersAssociatedOnlyToGivenCondition = filters.stream()
-				.filter(f -> f.getConditions().size() == 1).collect(Collectors.toList());
-		for(FilterEntity f : filtersAssociatedOnlyToGivenCondition) {
-			f.getConditions().remove(condition);
-		}
-		return true;
-	}
 	/**
 	 * remove all condition execution results associated with condition Id
 	 * @param conditionId
@@ -57,8 +47,31 @@ public class EntityWriter {
 	 */
 	public boolean deleteConditionResultEntity(UUID conditionId) {
 		List<ConditionResultEntity> conditionResults = conditionResultRepository.findByConditionId(conditionId);
-		conditionResultRepository.deleteAll(conditionResults);
+		if (!conditionResults.isEmpty()) {
+			conditionResultRepository.deleteAll(conditionResults);
+		}
 		return true;
+	}
+	
+	private boolean detachAssociatedFilters(ConditionEntity condition) {
+		List<FilterEntity> filters = filterRespository.findByConditionsId(condition.getId());
+		List<FilterEntity> filtersAssociatedOnlyToGivenCondition = filters.stream()
+				.filter(f -> f.getConditions().size() == 1).collect(Collectors.toList());
+		for(FilterEntity f : filtersAssociatedOnlyToGivenCondition) {
+			f.getConditions().remove(condition); 
+		}
+		return true;
+	}
+	
+	
+	public boolean removePreviousLogicRelatedAssociations(ConditionEntity conditionEntity) {
+		deleteFiletersNotAssociatedToanyConditions();
+		deleteConditionResultEntity(conditionEntity.getId());
+		return true;
+	}
+
+	private void deleteFiletersNotAssociatedToanyConditions() {
+		filterRespository.deleteAll(filterRespository.findAll());
 	}
 	
 	public ConditionEntity deleteCondition(UUID id) {
@@ -80,7 +93,7 @@ public class EntityWriter {
 		return conditionRepository.save(conditionEntity);
 	}
 
-	private List<FilterEntity> createFilterEntityObjects(@NotNull String parseTree) {
+	public List<FilterEntity> createFilterEntityObjects(@NotNull String parseTree) {
 		List<FilterEntity> filterEntities = new ArrayList<>();
 		Set<UUID> filterIds = converter.getFilterIds(parseTree);
 		for(UUID id : filterIds) {
@@ -92,6 +105,10 @@ public class EntityWriter {
 			}
 		}
 		return filterEntities;
+	}
+	
+	public ConditionEntity saveConditionEntity(ConditionEntity entity) {
+		return conditionRepository.save(entity);
 	}
 	
 	public List<FilterResultEntity> saveFilterResultEntities(List<FilterResultEntity> filterResultEntities) {
