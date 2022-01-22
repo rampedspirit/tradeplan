@@ -7,20 +7,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.threeten.bp.Instant;
 import org.threeten.bp.OffsetDateTime;
 import org.threeten.bp.ZoneId;
-
-import com.bhs.gtk.screener.util.Converter;
-
-import javassist.compiler.SyntaxError;
 
 @Entity
 @IdClass(ConditionResultId.class)

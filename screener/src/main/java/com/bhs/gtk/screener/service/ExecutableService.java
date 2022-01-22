@@ -19,7 +19,10 @@ public interface ExecutableService {
 
 	public ExecutableResponse updateExecutable(ExecutablePatchData executablePatchData, UUID executableId);
 
-	public ExecutableEntity updateStatusOfExecutable(ExecutableEntity executable);
+	public boolean updateStatusOfExecutables(List<ExecutableEntity> executableEntites);
 	
-	public  List<ExecutableEntity> updateStatusOfExecutablesBasedOnConditions(List<ConditionResultEntity> conditions);
+	public ExecutableEntity updateStatusOfExecutable(ExecutableEntity executableEntity);
+	
+	public  boolean updateStatusOfExecutablesBasedOnConditions(List<ConditionResultEntity> conditionsWithChangedStatus);
+	
 }

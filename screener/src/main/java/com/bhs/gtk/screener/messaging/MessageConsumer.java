@@ -18,9 +18,7 @@ public class MessageConsumer {
 	
 	@KafkaListener(topics = TopicNames.INPUT_EXECUTION_RESPONSE)
 	public boolean receiveExecutionResponse(String message) {
-		System.err.println("Screener received excution response:"+message);
-		//processExpression(message);
-		return true;
+		return screenerServiceImpl.adaptExecutionResponse(message);
 	}
 	
 	@KafkaListener(topics = TopicNames.INPUT_CONDITION_CHANGE_NOTIFICATION)

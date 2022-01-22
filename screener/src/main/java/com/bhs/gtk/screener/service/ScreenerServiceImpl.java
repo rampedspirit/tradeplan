@@ -7,9 +7,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.threeten.bp.DateTimeUtils;
+import org.threeten.bp.OffsetDateTime;
 
 import com.bhs.gtk.screener.messaging.ChangeNotification;
 import com.bhs.gtk.screener.messaging.ChangeNotification.ChangeStatusEnum;
@@ -165,6 +167,22 @@ public class ScreenerServiceImpl implements ScreernerService {
 			 break;
 		default:
 			throw new IllegalArgumentException();
+		}
+		return false;
+	}
+
+	@Override
+	public boolean adaptExecutionResponse(String message) {
+		
+		JSONObject jsonObject = new JSONObject(message);
+		UUID conditionId = UUID.fromString((String)jsonObject.get("conditionId"));
+		String scripName = (String)jsonObject.get("scripName");
+		String  status = (String)jsonObject.get("status");
+		String marketTimeAsString = (String)jsonObject.get("marketTime");
+		Date marketTime = DateTimeUtils.toDate(OffsetDateTime.parse(marketTimeAsString).toInstant());
+		
+		if(entityWriter.adaptConditionResultEntity(conditionId,scripName,marketTime,status)) {
+			return executableServiceImpl.updateStatusOfExecutables(entityReader.getExecutableEntitites(conditionId, marketTime));
 		}
 		return false;
 	}

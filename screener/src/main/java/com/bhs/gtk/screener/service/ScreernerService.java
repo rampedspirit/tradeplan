@@ -18,4 +18,5 @@ public interface ScreernerService {
 	public ScreenerResponse updateScreener(List<ScreenerPatchData> patchData, UUID screenerId);
 	public ScreenerDetailedResponse runScreener(ExecutableCreateRequest executableCreateRequest, UUID screenerId);
 	public boolean adaptChangeInCondition(ChangeNotification changeNotification);
+	public boolean adaptExecutionResponse(String message);
 }

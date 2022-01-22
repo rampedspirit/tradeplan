@@ -1,6 +1,7 @@
 package com.bhs.gtk.screener.persistence;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +16,9 @@ public class EntityReader {
 	
 	@Autowired
 	private ScreenerRepository screenerRepository;
+	
+	@Autowired
+	private ExecutableRespository executableRespository;
 	
 	public List<ScreenerEntity> getAllScreenerEntities() {
 		Iterator<ScreenerEntity> iterator = screenerRepository.findAll().iterator();
@@ -33,5 +37,9 @@ public class EntityReader {
 			}
 		}
 		return null;
+	}
+	
+	public List<ExecutableEntity>  getExecutableEntitites(UUID conditionId, Date marketTime) {
+		return executableRespository.findByConditionIdAndMarketTime(conditionId, marketTime);
 	}
 }

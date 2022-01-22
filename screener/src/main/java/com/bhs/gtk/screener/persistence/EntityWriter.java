@@ -82,6 +82,43 @@ public class EntityWriter {
 		return screenerRepository.save(entity);
 	}
 
+
+	/**
+	 * @param conditionId
+	 * @param scripName
+	 * @param marketTime
+	 * @param status
+	 * @return true if status of {@link ConditionResultEntity} associated to above parameters is changed, false otherwise.
+	 */
+	public boolean adaptConditionResultEntity(UUID conditionId, String scripName, Date marketTime, String status) {
+		ConditionResultEntity conditionResult = conditionResultRepository
+				.findByConditionIdAndScripNameAndMarketTime(conditionId, scripName, marketTime);
+
+		if (conditionResult == null) {
+			return false;
+		}
+		boolean saveResultRequired = false;
+		switch (ScripResult.StatusEnum.valueOf(status)) {
+		case RUNNING:
+		case QUEUED:
+			  break;
+		case ERROR:
+		case FAIL:
+		case PASS:
+			saveResultRequired = true;
+			conditionResult.setStatus(status);
+			break;
+		default:
+			throw new IllegalArgumentException(status + " is not a valid filter result status");
+		}
+		
+		if(saveResultRequired) {
+			conditionResultRepository.save(conditionResult);
+			return true;
+		}
+		return false;
+	}
+	
 	
 	public boolean adaptConditionDelete(UUID conditionId) {
 		//detachExecutablesOfConditionFromScreeners(conditionId);
@@ -133,9 +170,6 @@ public class EntityWriter {
 		List<ConditionResultEntity> conditionResults = conditionResultRepository.findByConditionId(conditionId);
 		conditionResultRepository.deleteAll(conditionResults);
 	}
-
-
-
 
 	
 }
