@@ -34,7 +34,7 @@ public class ConditionApplication {
 			NewTopic outputExecutionResponse = new NewTopic(TopicNames.OUTPUT_EXECUTION_RESPONSE, 1, (short) 1);
 			NewTopic outputChangeNotification = new NewTopic(TopicNames.OUTPUT_CHANGE_NOTIFICATION, 1, (short) 1);
 			NewTopic inputExecutionRequest = new NewTopic(TopicNames.INPUT_EXECUTION_REQUEST, 1, (short) 1);
-			NewTopic inputUpdateNotification = new NewTopic(TopicNames.INPUT_UPDATE_NOTIFICATION, 1, (short) 1);
+			NewTopic inputUpdateNotification = new NewTopic(TopicNames.INPUT_CHANGE_NOTIFICATION, 1, (short) 1);
 			
 			kafkaAdmin.createOrModifyTopics(outputExecutionRequest, outputExecutionResponse, outputChangeNotification,
 					inputExecutionRequest, inputUpdateNotification);

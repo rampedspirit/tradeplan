@@ -17,7 +17,7 @@ public class MessageConsumer {
 	private Converter converter;
 	
 	@KafkaListener(topics = TopicNames.INPUT_EXECUTION_REQUEST)
-	public boolean receiveMessageFromInputTopic(String message) {
+	public boolean receiveExecutionRequest(String message) {
 		return executableServiceImpl.RunCondition(converter.convertToExecutableCondition(message));
 	}
 

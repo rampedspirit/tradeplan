@@ -18,7 +18,7 @@ public class MessageProducer {
 	private KafkaTemplate<String, String> kafkaTemplate;
 	
 	public boolean sendChangeNotification(UUID id, ChangeStatusEnum status) {
-		ChangeNotification changeNotification = new ChangeNotification(id, ChangeStatusEnum.UPDATED);
+		ChangeNotification changeNotification = new ChangeNotification(id, status);
 		JSONObject changeNotificationJsonObject = new JSONObject(changeNotification);
 		return sendMessage(changeNotificationJsonObject.toString(), MessageType.CHANGE_NOTIFICATION);
 	}
