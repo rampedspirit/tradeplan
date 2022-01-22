@@ -48,6 +48,8 @@ public class EntityWriter {
 	public boolean deleteConditionResultEntity(UUID conditionId) {
 		List<ConditionResultEntity> conditionResults = conditionResultRepository.findByConditionId(conditionId);
 		if (!conditionResults.isEmpty()) {
+			conditionResults.stream().forEach(c -> c.setFilterResultEntities(new ArrayList<>()));
+			conditionResultRepository.saveAll(conditionResults);
 			conditionResultRepository.deleteAll(conditionResults);
 		}
 		return true;

@@ -109,7 +109,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchData'
+              type: array
+              items:
+               $ref: '#/components/schemas/PatchData'
         required: true
       responses:
         '200':
