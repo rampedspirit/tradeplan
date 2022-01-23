@@ -1,11 +1,16 @@
 package com.bhs.gtk.condition.persistence;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -13,7 +18,6 @@ import org.hibernate.annotations.GenericGenerator;
 @Entity
 public class ConditionEntity {
 	
-
 	@Id
 	@GeneratedValue(generator = "UUID")
 	@GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
@@ -28,6 +32,9 @@ public class ConditionEntity {
 	@Column(length = PersistenceConstants.LARGE_TEXT_LIMIT)
 	private String parseTree;
 	
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	private List<FilterEntity> filters;
+	
 	protected ConditionEntity() {}
 	
 	public ConditionEntity(String name, String description, String code, String parseTree) {
@@ -35,6 +42,7 @@ public class ConditionEntity {
 		this.description = description;
 		this.code = code;
 		this.parseTree = parseTree;
+		this.filters = new ArrayList<>();
 	}
 	
 	public UUID getId() {
@@ -68,4 +76,11 @@ public class ConditionEntity {
 		this.parseTree = parseTree;
 	}
 
+	public List<FilterEntity> getFilters() {
+		return filters;
+	}
+
+	public void setFilters(List<FilterEntity> filters) {
+		this.filters = filters;
+	}
 }

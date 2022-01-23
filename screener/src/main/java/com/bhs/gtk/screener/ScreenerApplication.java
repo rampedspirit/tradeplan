@@ -11,7 +11,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.kafka.KafkaException;
 import org.springframework.kafka.core.KafkaAdmin;
 
-import com.bhs.gtk.screener.messaging.MessageConstants;
+import com.bhs.gtk.screener.messaging.TopicNames;
 import com.bhs.gtk.screener.persistence.ConditionResultEntity;
 import com.bhs.gtk.screener.service.ConditionResultServiceImpl;
 import com.bhs.gtk.screener.service.ExecutableServiceImpl;
@@ -43,9 +43,10 @@ public class ScreenerApplication {
 
 	private boolean createTopicsRequiredForScreenerService() {
 		try {
-			NewTopic outputTopic = new NewTopic(MessageConstants.OUTPUT_TOPIC_NAME, 1, (short) 1);
-			//NewTopic inputTopic = new NewTopic("screener_exe_input_test1", 1, (short) 1);
-			kafkaAdmin.createOrModifyTopics(outputTopic);
+			NewTopic outputExecutionRequest = new NewTopic(TopicNames.OUTPUT_EXECUTION_REQUEST, 1, (short) 1);
+			NewTopic inputExecutionResponse = new NewTopic(TopicNames.INPUT_EXECUTION_RESPONSE, 1, (short) 1);
+			NewTopic inputChangeNotification = new NewTopic(TopicNames.INPUT_CONDITION_CHANGE_NOTIFICATION, 1, (short) 1);
+			kafkaAdmin.createOrModifyTopics(outputExecutionRequest,inputExecutionResponse,inputChangeNotification);
 			return true;
 		}catch (KafkaException kafkaException) {
 			//Log error

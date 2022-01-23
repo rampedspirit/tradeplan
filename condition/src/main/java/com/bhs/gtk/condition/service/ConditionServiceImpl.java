@@ -1,93 +1,135 @@
 package com.bhs.gtk.condition.service;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.bhs.gtk.condition.model.Condition;
-import com.bhs.gtk.condition.model.PatchModel;
+import com.bhs.gtk.condition.messaging.ChangeNotification.ChangeStatusEnum;
+import com.bhs.gtk.condition.messaging.MessageProducer;
+import com.bhs.gtk.condition.model.ConditionDetailedResponse;
+import com.bhs.gtk.condition.model.ConditionRequest;
+import com.bhs.gtk.condition.model.ConditionResponse;
+import com.bhs.gtk.condition.model.PatchData;
+import com.bhs.gtk.condition.model.PatchData.PropertyEnum;
 import com.bhs.gtk.condition.persistence.ConditionEntity;
-import com.bhs.gtk.condition.persistence.ConditionRepository;
+import com.bhs.gtk.condition.persistence.EntityReader;
+import com.bhs.gtk.condition.persistence.EntityWriter;
+import com.bhs.gtk.condition.persistence.FilterEntity;
 import com.bhs.gtk.condition.util.Mapper;
-import com.bhs.gtk.condition.util.UpdateHelper;
 
 @Service
 public class ConditionServiceImpl implements ConditionService{
-
+	
 	@Autowired
-	private ConditionRepository conditionRepository;
+	private EntityWriter entityWriter;
+	
+	@Autowired
+	private EntityReader entityReader;
 	
 	@Autowired
 	private Mapper mapper;
 	
 	@Autowired
-	private UpdateHelper updateHelper;
+	private MessageProducer messageProducer;
 	
 	@Override
-	public Condition createCondition(Condition condition) {
-		ConditionEntity conditionEntity = conditionRepository.save(mapper.getConditionEntityToPersists(condition));
-		return mapper.getCondition(conditionEntity);
+	public ConditionDetailedResponse createCondition(ConditionRequest condition) {
+		ConditionEntity conditionEntity = entityWriter.createConditionEntity(condition);
+		return mapper.getConditionDetailedResponse(conditionEntity);
+	}
+	
+	@Override
+	public List<ConditionResponse> getAllConditions() {
+		List<ConditionEntity> conditionEntities = entityReader.getAllConditions();
+		return mapper.getConditionResponses(conditionEntities);
 	}
 
 	@Override
-	public List<Condition> getAllConditions() {
-		Iterator<ConditionEntity> iterator = conditionRepository.findAll().iterator();
-		List<Condition> condition = new ArrayList<>();
-		while(iterator.hasNext()) {
-			condition.add(mapper.getCondition(iterator.next()));
-		}
-		return condition;
+	public ConditionDetailedResponse getCondition(UUID conditionId) {
+		return mapper.getConditionDetailedResponse(entityReader.getCondition(conditionId));
 	}
-
+	
 	@Override
-	public Condition getCondition(UUID id) {
-		if(id == null) {
-			//throw exception
-			return null;
+	public ConditionDetailedResponse deleteCondition(UUID id) {
+		entityWriter.deleteConditionResultEntity(id);
+		ConditionEntity deletedCondition = entityWriter.deleteCondition(id);
+		if(deletedCondition != null) {
+			messageProducer.sendChangeNotification(deletedCondition.getId(), ChangeStatusEnum.DELETED);
+			return mapper.getConditionDetailedResponse(deletedCondition);
 		}
-		Optional<ConditionEntity> conditionEntityContainer = conditionRepository.findById(id);
-		if(conditionEntityContainer.isPresent()) {
-			return mapper.getCondition(conditionEntityContainer.get());
-		}
-		//throw exception condition not found
 		return null;
 	}
-
+	
 	@Override
-	public Condition deleteCondition(UUID id) {
-		if(id == null) {
-			//throw exception
-			return null;
-		}
-		if(conditionRepository.existsById(id)) {
-			ConditionEntity conditionEntity = conditionRepository.findById(id).get();
-			conditionRepository.delete(conditionEntity);
-			return mapper.getCondition(conditionEntity);
-		}
-		//throw exception
-		return null;
-	}
-
-	@Override
-	public Condition updateCondition(PatchModel patchModel, UUID id) {
-		if(patchModel == null || id == null) {
+	public ConditionDetailedResponse updateCondition(List<PatchData> patchData, UUID conditionId) {
+		if(patchData == null || conditionId == null) {
 			//throw exception if validation fails
 			return null;
 		}
-		Optional<ConditionEntity> persistedConditionContainer = conditionRepository.findById(id);
- 		if(persistedConditionContainer.isPresent()) {
- 			ConditionEntity conditionTobeUpdated = persistedConditionContainer.get();
- 			ConditionEntity updatedFilterEntity = updateHelper.getUpdatedConditionEntity(patchModel,conditionTobeUpdated);
- 			ConditionEntity savedFilterEntity = conditionRepository.save(updatedFilterEntity);
- 			return mapper.getCondition(savedFilterEntity);
- 		}
- 		//throw filter not found exception.
-		return null;
+		if(!isValidatePatchData(patchData)) {
+			return null;
+		}
+		ConditionEntity conditionEntity = entityReader.getCondition(conditionId);
+		boolean logicChanged = false;
+		for (PatchData pd : patchData) {
+			@NotNull
+			String value = pd.getValue();
+			switch (pd.getProperty()) {
+			case NAME:
+				conditionEntity.setName(value);
+				break;
+			case DESCRIPTION:
+				conditionEntity.setDescription(value);
+				break;
+			case CODE:
+				logicChanged = true;
+				conditionEntity.setCode(value);
+				break;
+			case PARSE_TREE:
+				logicChanged = true;
+				conditionEntity.setParseTree(value);
+				break;
+			}
+		}
+		if(logicChanged) {
+			if(!messageProducer.sendChangeNotification(conditionEntity.getId(), ChangeStatusEnum.UPDATED)) {
+				//not able to notify change in logic and hence logic change is aborted.
+				//TODO: find better solution for this use-case.
+				return null;
+			}
+		}
+		ConditionEntity changedConditionEntity;
+		if(logicChanged) {
+			changedConditionEntity = saveConditionEntity(conditionEntity);
+
+		}else {
+			changedConditionEntity = entityWriter.saveConditionEntity(conditionEntity);
+		}
+		return mapper.getConditionDetailedResponse(changedConditionEntity);
+	}
+
+	private ConditionEntity saveConditionEntity(ConditionEntity conditionEntity) {
+		List<FilterEntity> filters = entityWriter.createFilterEntityObjects(conditionEntity.getParseTree());
+		conditionEntity.setFilters(filters);
+		ConditionEntity savedConditionEntity = entityWriter.saveConditionEntity(conditionEntity);
+		entityWriter.removePreviousLogicRelatedAssociations(conditionEntity);
+		return savedConditionEntity;
+		
+	}
+
+	private boolean isValidatePatchData(List<PatchData> patchData) {
+		if(patchData == null || patchData.isEmpty()) {
+			return false;
+		}
+		List<@NotNull PropertyEnum> properties = patchData.stream().map(p -> p.getProperty())
+				.collect(Collectors.toList());
+		// ^ is XOR operation. 
+		return !(properties.contains(PropertyEnum.CODE) ^ properties.contains(PropertyEnum.PARSE_TREE));
 	}
 
 }

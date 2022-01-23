@@ -7,7 +7,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ScreenerMessageProducer {
+public class MessageProducer {
 	
 	@Autowired
 	private KafkaTemplate<String, String> kafkaTemplate;
@@ -15,7 +15,7 @@ public class ScreenerMessageProducer {
 	
 	public boolean sendMessage(String message) {
 		try {
-			kafkaTemplate.send(MessageConstants.OUTPUT_TOPIC_NAME,message);
+			kafkaTemplate.send(TopicNames.OUTPUT_EXECUTION_REQUEST,message);
 			return true;
 		}catch (KafkaException kafkaException) {
 			//log error

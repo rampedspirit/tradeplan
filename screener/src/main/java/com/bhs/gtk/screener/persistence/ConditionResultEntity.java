@@ -7,11 +7,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import org.threeten.bp.Instant;
+import org.threeten.bp.OffsetDateTime;
+import org.threeten.bp.ZoneId;
 
 @Entity
 @IdClass(ConditionResultId.class)
@@ -71,4 +72,9 @@ public class ConditionResultEntity {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+	
+	public OffsetDateTime getMarketTimeAsOffsetDateTime() {
+		return OffsetDateTime.ofInstant(Instant.ofEpochMilli(marketTime.getTime()), ZoneId.systemDefault());
+	}
+	
 }

@@ -3,13 +3,11 @@ package com.bhs.gtk.screener.service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,46 +57,9 @@ public class ExecutableServiceImpl implements ExecutableService{
 	public ExecutableEntity getExecutable(UUID conditionId, Date marketTime, UUID watchlistId) {
 		return executableRespository.findByConditionIdAndMarketTimeAndWatchlistId(conditionId, marketTime, watchlistId);
 	}
-
-	@Override
-	public ExecutableResponse updateExecutable(ExecutablePatchData executablePatchData, UUID executableId) {
-		ExecutableEntity entity = getExecutableEntity(executableId);
-		if (entity != null) {
-			if (StringUtils.equals(executablePatchData.getProperty().name(),
-					ExecutablePatchData.PropertyEnum.NOTE.name())) {
-				entity.setNote(executablePatchData.getValue());
-				ExecutableEntity savedEntity = executableRespository.save(entity);
-				return converter.convertToExecutableResponse(savedEntity);
-			}
-		}
-		return null;
-	}
 	
 	@Override
-	public ExecutableEntity updateStatusOfExecutable(ExecutableEntity executable) {
-		executable.setStatus(deriveExecutableStatus(executable));
-		long resultAvailableCount = executable.getConditionResultEntities().stream()
-				.filter(c -> StringUtils.equals(ScripResult.StatusEnum.PASS.name(), c.getStatus())
-						|| StringUtils.equals(ScripResult.StatusEnum.FAIL.name(), c.getStatus()))
-				.count();
-		executable.setNumberOfScripWithResultAvailable((int)resultAvailableCount);
-		ExecutableEntity savedExecutable = executableRespository.save(executable);
-		return savedExecutable;
-	}
-	
-	private String deriveExecutableStatus(ExecutableEntity executable) {
-		List<String> conditionStatuses = new ArrayList<>();
-		executable.getConditionResultEntities().stream().forEach(e -> conditionStatuses.add(e.getStatus()));
-		if (conditionStatuses.contains(ScripResult.StatusEnum.RUNNING.name())) {
-			return ExecutableStatus.RUNNING.name();
-		} else if (conditionStatuses.contains(ScripResult.StatusEnum.QUEUED.name())) {
-			return ExecutableStatus.QUEUED.name();
-		}
-		return ExecutableStatus.COMPLETED.name();
-	}
-	
-	@Override
-	public  List<ExecutableEntity> updateStatusOfExecutablesBasedOnConditions(List<ConditionResultEntity> conditionsWithChangedStatus) {
+	public  boolean updateStatusOfExecutablesBasedOnConditions(List<ConditionResultEntity> conditionsWithChangedStatus) {
 		Map<UUID,List<Date>> conditionWithMarketTimes = new HashMap<>();
 		for(ConditionResultEntity condition : conditionsWithChangedStatus) {
 			UUID id = condition.getConditionId();
@@ -117,24 +78,75 @@ public class ExecutableServiceImpl implements ExecutableService{
 				executables.addAll(executableRespository.findByConditionIdAndMarketTime(conditionId, marketTime));
 			 }
 		}
-		return updateStatusOfExecutables(executables);
+		return true;
 	}
-	
-	private List<ExecutableEntity> updateStatusOfExecutables(List<ExecutableEntity> executableEntites) {
-		Set<ExecutableEntity> executables = new HashSet<>();
-		executableEntites.stream().forEach(e -> executables.add(e));
-		for( ExecutableEntity entity : executables ) {
-			String newStatus = deriveExecutableStatus(entity);
-			entity.setStatus(newStatus);
-		} 
-		Iterable<ExecutableEntity> savedEntitites = executableRespository.saveAll(executables);
-		List<ExecutableEntity> savedExectables = new ArrayList<>();
-		for(ExecutableEntity entity : savedEntitites) {
-			savedExectables.add(entity);
+
+	@Override
+	public ExecutableResponse updateExecutable(ExecutablePatchData executablePatchData, UUID executableId) {
+		ExecutableEntity entity = getExecutableEntity(executableId);
+		if (entity != null) {
+			if (StringUtils.equals(executablePatchData.getProperty().name(),
+					ExecutablePatchData.PropertyEnum.NOTE.name())) {
+				entity.setNote(executablePatchData.getValue());
+				ExecutableEntity savedEntity = executableRespository.save(entity);
+				return converter.convertToExecutableResponse(savedEntity);
+			}
 		}
-		return savedExectables;
+		return null;
 	}
 	
+	
+	@Override
+	public ExecutableEntity updateStatusOfExecutable(ExecutableEntity executableEntity) {
+		List<ExecutableEntity> executableEntites = new ArrayList<>();
+		executableEntites.add(executableEntity);
+		List<ExecutableEntity> executablesToBeSaved = getExecutablesWithUpdatedStatus(executableEntites);
+		if(!executablesToBeSaved.isEmpty()) {
+				return executableRespository.save(executablesToBeSaved.get(0));
+		}
+		return executableEntity;
+	}
+	
+	@Override
+	public boolean updateStatusOfExecutables(List<ExecutableEntity> executableEntites) {
+		List<ExecutableEntity> executablesToBeSaved = getExecutablesWithUpdatedStatus(executableEntites);
+		if(!executablesToBeSaved.isEmpty()) {
+				executableRespository.saveAll(executablesToBeSaved);
+		}
+		return true;
+	}
+
+	private List<ExecutableEntity> getExecutablesWithUpdatedStatus(List<ExecutableEntity> executableEntites) {
+		List<ExecutableEntity> executablesWithChangedStatus = new ArrayList<>();
+		for( ExecutableEntity executable : executableEntites) {
+			int oldResultCount = executable.getNumberOfScripWithResultAvailable();
+			String oldStatus = executable.getStatus();
+			
+			String newStatus = deriveExecutableStatus(executable);
+			long newResultCount = executable.getConditionResultEntities().stream()
+					.filter(c -> StringUtils.equals(ScripResult.StatusEnum.PASS.name(), c.getStatus())
+							|| StringUtils.equals(ScripResult.StatusEnum.FAIL.name(), c.getStatus()))
+					.count();
+			
+			if(!StringUtils.equals(oldStatus, newStatus) || oldResultCount != newResultCount) {
+				executable.setStatus(newStatus);
+				executable.setNumberOfScripWithResultAvailable((int)newResultCount);
+				executablesWithChangedStatus.add(executable);
+			}
+		}
+		return executablesWithChangedStatus;
+	}
+	
+	private String deriveExecutableStatus(ExecutableEntity executable) {
+		List<String> conditionStatuses = new ArrayList<>();
+		executable.getConditionResultEntities().stream().forEach(e -> conditionStatuses.add(e.getStatus()));
+		if (conditionStatuses.contains(ScripResult.StatusEnum.RUNNING.name())) {
+			return ExecutableStatus.RUNNING.name();
+		} else if (conditionStatuses.contains(ScripResult.StatusEnum.QUEUED.name())) {
+			return ExecutableStatus.QUEUED.name();
+		}
+		return ExecutableStatus.COMPLETED.name();
+	}
 	
 	private ExecutableEntity getExecutableEntity(UUID executableId) {
 		if (executableId != null) {
