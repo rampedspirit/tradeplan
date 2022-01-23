@@ -7,7 +7,6 @@ package com.bhs.gtk.condition.api;
 
 import com.bhs.gtk.condition.model.ConditionResultResponse;
 import com.bhs.gtk.condition.model.Error;
-import org.threeten.bp.OffsetDateTime;
 import java.util.UUID;
 import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +24,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.List;
 import java.util.Map;
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-01-18T17:32:26.583788100+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-01-23T17:42:05.341043500+05:30[Asia/Calcutta]")
 
 @Api(value = "Result", description = "the Result API")
 public interface ResultApi {
@@ -38,6 +37,6 @@ public interface ResultApi {
     @RequestMapping(value = "/v1/condition/{id}/{marketTime}/{scripName}/result",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    ResponseEntity<ConditionResultResponse> getResult(@ApiParam(value = "",required=true) @PathVariable("id") UUID id,@ApiParam(value = "",required=true) @PathVariable("marketTime") OffsetDateTime marketTime,@ApiParam(value = "",required=true) @PathVariable("scripName") String scripName);
+    ResponseEntity<ConditionResultResponse> getResult(@ApiParam(value = "",required=true) @PathVariable("id") UUID id,@ApiParam(value = "",required=true) @PathVariable("marketTime") String marketTime,@ApiParam(value = "",required=true) @PathVariable("scripName") String scripName);
 
 }

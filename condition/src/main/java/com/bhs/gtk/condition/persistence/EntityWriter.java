@@ -73,6 +73,15 @@ public class EntityWriter {
 	}
 
 	private void deleteFiletersNotAssociatedToanyConditions() {
+//		List<FilterEntity> filtersNotAssociatedToAnyConditions = new ArrayList<>();
+//		Iterable<FilterEntity> filterEntities = filterRespository.findAll();
+//		for( FilterEntity filter : filterEntities) {
+//			List<ConditionEntity> conditions = filter.getConditions();
+//			if(conditions == null || conditions.isEmpty()) {
+//				filtersNotAssociatedToAnyConditions.add(filter);
+//			}
+//		}
+//		filterRespository.deleteAll(filtersNotAssociatedToAnyConditions);
 		filterRespository.deleteAll(filterRespository.findAll());
 	}
 	

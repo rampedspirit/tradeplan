@@ -15,7 +15,7 @@ import javax.validation.constraints.*;
  * FilterResult
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-01-18T17:32:26.583788100+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-01-23T17:42:05.341043500+05:30[Asia/Calcutta]")
 
 public class FilterResult   {
   @JsonProperty("filterId")

@@ -43,6 +43,8 @@ public class ConditionEvaluator {
 			conditionStatus =  ConditionResultEnum.RUNNING.name();
 		}else if(filterStatuses.contains(FilterResult.StatusEnum.QUEUED.name())) {
 			conditionStatus = ConditionResultEnum.QUEUED.name();
+		}else if(filterStatuses.contains(FilterResult.StatusEnum.ERROR.name())) {
+			conditionStatus = ConditionResultEnum.ERROR.name();
 		}else {
 			conditionStatus = evaluateConditionResult(conditionId,marketTime,scripName,filterStatuses);
 		}
@@ -100,7 +102,7 @@ public class ConditionEvaluator {
 		if(results.contains(FilterResult.StatusEnum.PASS.name())) {
 			return FilterResult.StatusEnum.PASS.name();
 		}
-		return null;
+		return FilterResult.StatusEnum.FAIL.name();
 	}
 
 	private String evaluateANDoperation(List<String> results) {
@@ -110,7 +112,7 @@ public class ConditionEvaluator {
 		if(results.contains(FilterResult.StatusEnum.FAIL.name())) {
 			return FilterResult.StatusEnum.FAIL.name();
 		}
-		return null;
+		return FilterResult.StatusEnum.PASS.name();
 	}
 
 }

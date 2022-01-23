@@ -178,7 +178,7 @@ paths:
           required: true
           schema:
             type: string
-            format: date-time  
+            description: date and time of market on which execution is performed.
         - in: path
           name: scripName
           required: true

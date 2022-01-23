@@ -7,14 +7,44 @@ import org.springframework.stereotype.Component;
 
 import com.bhs.gtk.condition.model.ConditionDetailedResponse;
 import com.bhs.gtk.condition.model.ConditionResponse;
+import com.bhs.gtk.condition.model.ConditionResultResponse;
 import com.bhs.gtk.condition.model.Filter;
 import com.bhs.gtk.condition.model.Filter.StatusEnum;
+import com.bhs.gtk.condition.model.FilterResult;
+import com.bhs.gtk.condition.model.ConditionResultResponse.ConditionResultEnum;
 import com.bhs.gtk.condition.persistence.ConditionEntity;
+import com.bhs.gtk.condition.persistence.ConditionResultEntity;
 import com.bhs.gtk.condition.persistence.FilterEntity;
+import com.bhs.gtk.condition.persistence.FilterResultEntity;
 
 @Component
 public class Mapper {
+	
+	public ConditionResultResponse getConditionResultResponse(ConditionEntity condition,
+			ConditionResultEntity conditionResult) {
+		ConditionResultResponse conditionResultResponse = new ConditionResultResponse();
+		conditionResultResponse.setId(condition.getId());
+		conditionResultResponse.setName(condition.getName());
+		conditionResultResponse.setScripName(conditionResult.getScripName());
+		conditionResultResponse.setDescription(condition.getDescription());
+		conditionResultResponse.setCode(condition.getCode());
+		conditionResultResponse.setConditionResult(ConditionResultEnum.valueOf(conditionResult.getStatus()));
+		conditionResultResponse.setMarketTime(conditionResult.getMarketTimeAsOffsetDateTime());
+		conditionResultResponse.setFiltersResult(getFilterResults(conditionResult));
+		return conditionResultResponse;
+	}
 
+	private List<FilterResult> getFilterResults(ConditionResultEntity conditionResult) {
+		List<FilterResult> filterResults = new ArrayList<>();
+		List<FilterResultEntity> filterResultEntities = conditionResult.getFilterResultEntities();
+		for(FilterResultEntity filter : filterResultEntities) {
+			FilterResult fResult = new FilterResult();
+			fResult.setFilterId(filter.getFilterId());
+			fResult.setStatus(com.bhs.gtk.condition.model.FilterResult.StatusEnum.fromValue(filter.getStatus()));
+			filterResults.add(fResult);
+		}
+		return filterResults;
+	}
 	
 	public List<ConditionResponse> getConditionResponses(List<ConditionEntity> conditionEntities) {
 		List<ConditionResponse> responses = new ArrayList<>();
