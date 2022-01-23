@@ -73,9 +73,8 @@ public class ConditionResultEntity {
 		this.status = status;
 	}
 	
-	public String getMarketTimeAsOffsetDateTime() {
-		String str = OffsetDateTime.ofInstant(Instant.ofEpochMilli(marketTime.getTime()), ZoneId.systemDefault()).toString();
-		return str;
+	public OffsetDateTime getMarketTimeAsOffsetDateTime() {
+		return OffsetDateTime.ofInstant(Instant.ofEpochMilli(marketTime.getTime()), ZoneId.systemDefault());
 	}
 	
 }

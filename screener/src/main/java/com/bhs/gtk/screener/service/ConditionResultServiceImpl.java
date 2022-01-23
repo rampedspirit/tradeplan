@@ -51,7 +51,7 @@ public class ConditionResultServiceImpl implements ConditionResultService{
 	private Map<String, String> getEntityMapForJson(ConditionResultEntity entity) {
 		Map<String, String> entityMap = new HashMap<>();
 		entityMap.put("conditionId",entity.getConditionId().toString());
-		entityMap.put("marketTime",entity.getMarketTimeAsOffsetDateTime());
+		entityMap.put("marketTime",entity.getMarketTimeAsOffsetDateTime().toString());
 		entityMap.put("scripName",entity.getScripName());
 		entityMap.put("status",entity.getStatus());
 		return entityMap;
