@@ -7,17 +7,6 @@ servers:
   - url: 'http://localhost:5000/'
   - url: 'https://localhost:5000/'
 paths:
-  /:
-    get:
-      tags:
-        - filter
-      summary: checks the health of service
-      description: checks the health of service
-      operationId: checkHealth
-      responses:
-        '200':
-          description: >-
-            Request sucessfully processed.
   /v1/filter:
     post:
       tags:
@@ -30,7 +19,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Filter'
+              $ref: '#/components/schemas/FilterRequest'
         required: true
       responses:
         '201':
@@ -38,7 +27,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Filter'
+                $ref: '#/components/schemas/FilterResponse'
         '400':
           description: Request is not understood.
           content:
@@ -60,13 +49,14 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Filter'
+                  $ref: '#/components/schemas/FilterResponse'
         '400':
           description: Request is not understood.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+                
   '/v1/filter/{id}':
     get:
       tags:
@@ -88,7 +78,7 @@ paths:
           content:
             application/json:
               schema:
-                  $ref: '#/components/schemas/Filter'
+                  $ref: '#/components/schemas/FilterResponse'
         '400':
           description: Request is not understood.
           content:
@@ -119,7 +109,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchModel'
+              type: array
+              items:
+                $ref: '#/components/schemas/PatchData'
         required: true
       responses:
         '200':
@@ -127,7 +119,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Filter'
+                $ref: '#/components/schemas/FilterResponse'
         '400':
           description: Request is not understood.
           content:
@@ -159,7 +151,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Filter'
+                $ref: '#/components/schemas/FilterResponse'
         '404':
           description: Requested filter not found.
           content:
@@ -168,9 +160,27 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
-    Filter:
+    FilterRequest:
       required:
         - name
+        - code
+        - parseTree
+      type: object
+      properties:
+        name:
+          type: string
+          description: name of filter that is unqiue across the application
+        description:
+          type: string
+          description: description of filter
+        code:
+          type: string
+          description: text representing filter code
+        parseTree:
+          type: string
+          description: output after parsing grammar  
+          
+    FilterResponse:
       type: object
       properties:
         id:
@@ -189,9 +199,7 @@ components:
         code:
           type: string
           description: text representing filter code
-        parseTree:
-          type: string
-          description: output after parsing grammar
+
 
     Error:
       type: object
@@ -206,19 +214,7 @@ components:
           type: string
           description: pattern to unqiuely identify error root cause and origin.
           
-    PatchModel:
-      title: Update Properties
-      type: object
-      properties:
-        patchData:
-          type: array
-          description: attributes to be updated.
-          items:
-            $ref: '#/components/schemas/PatchData'
-      description: >-
-        All patch operations follow the json patch api standard. The patch
-        object is provided by the user in the patch operation for the particular
-        resource.
+
     PatchData:
       required:
         - operation

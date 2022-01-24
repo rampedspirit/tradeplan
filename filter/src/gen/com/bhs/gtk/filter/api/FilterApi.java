@@ -6,8 +6,9 @@
 package com.bhs.gtk.filter.api;
 
 import com.bhs.gtk.filter.model.Error;
-import com.bhs.gtk.filter.model.Filter;
-import com.bhs.gtk.filter.model.PatchModel;
+import com.bhs.gtk.filter.model.FilterRequest;
+import com.bhs.gtk.filter.model.FilterResponse;
+import com.bhs.gtk.filter.model.PatchData;
 import java.util.UUID;
 import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
@@ -25,70 +26,62 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.List;
 import java.util.Map;
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-09-23T17:21:44.041795600+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-01-24T11:56:26.914547600+05:30[Asia/Calcutta]")
 
 @Api(value = "Filter", description = "the Filter API")
 public interface FilterApi {
 
-    @ApiOperation(value = "checks the health of service", nickname = "checkHealth", notes = "checks the health of service", tags={ "filter", })
+    @ApiOperation(value = "create new filter", nickname = "createFilter", notes = "create new filter", response = FilterResponse.class, tags={ "filter", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Request sucessfully processed.") })
-    @RequestMapping(value = "/",
-        method = RequestMethod.GET)
-    ResponseEntity<Void> checkHealth();
-
-
-    @ApiOperation(value = "create new filter", nickname = "createFilter", notes = "create new filter", response = Filter.class, tags={ "filter", })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 201, message = "Filter created successfully.", response = Filter.class),
+        @ApiResponse(code = 201, message = "Filter created successfully.", response = FilterResponse.class),
         @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class) })
     @RequestMapping(value = "/v1/filter",
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    ResponseEntity<Filter> createFilter(@ApiParam(value = "payload to create filter" ,required=true )  @Valid @RequestBody Filter body);
+    ResponseEntity<FilterResponse> createFilter(@ApiParam(value = "payload to create filter" ,required=true )  @Valid @RequestBody FilterRequest body);
 
 
-    @ApiOperation(value = "delete", nickname = "deleteFilter", notes = "delete filter of given id", response = Filter.class, tags={ "filter", })
+    @ApiOperation(value = "delete", nickname = "deleteFilter", notes = "delete filter of given id", response = FilterResponse.class, tags={ "filter", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 204, message = "filter with give id is deleted successfully.", response = Filter.class),
+        @ApiResponse(code = 204, message = "filter with give id is deleted successfully.", response = FilterResponse.class),
         @ApiResponse(code = 404, message = "Requested filter not found.", response = Error.class) })
     @RequestMapping(value = "/v1/filter/{id}",
         produces = { "application/json" }, 
         method = RequestMethod.DELETE)
-    ResponseEntity<Filter> deleteFilter(@ApiParam(value = "",required=true) @PathVariable("id") UUID id);
+    ResponseEntity<FilterResponse> deleteFilter(@ApiParam(value = "",required=true) @PathVariable("id") UUID id);
 
 
-    @ApiOperation(value = "get all filter", nickname = "getAllFilters", notes = "get filters", response = Filter.class, responseContainer = "List", tags={ "filter", })
+    @ApiOperation(value = "get all filter", nickname = "getAllFilters", notes = "get filters", response = FilterResponse.class, responseContainer = "List", tags={ "filter", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Request sucessfully processed.", response = Filter.class, responseContainer = "List"),
+        @ApiResponse(code = 200, message = "Request sucessfully processed.", response = FilterResponse.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class) })
     @RequestMapping(value = "/v1/filter",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    ResponseEntity<List<Filter>> getAllFilters();
+    ResponseEntity<List<FilterResponse>> getAllFilters();
 
 
-    @ApiOperation(value = "get filter of given id", nickname = "getFilter", notes = "get filter", response = Filter.class, tags={ "filter", })
+    @ApiOperation(value = "get filter of given id", nickname = "getFilter", notes = "get filter", response = FilterResponse.class, tags={ "filter", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 206, message = "Request sucessfully processed.", response = Filter.class),
+        @ApiResponse(code = 206, message = "Request sucessfully processed.", response = FilterResponse.class),
         @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class),
         @ApiResponse(code = 404, message = "Requested filter not found.", response = Error.class) })
     @RequestMapping(value = "/v1/filter/{id}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    ResponseEntity<Filter> getFilter(@ApiParam(value = "",required=true) @PathVariable("id") UUID id);
+    ResponseEntity<FilterResponse> getFilter(@ApiParam(value = "",required=true) @PathVariable("id") UUID id);
 
 
-    @ApiOperation(value = "update filter", nickname = "updateFilter", notes = "update filter of given id", response = Filter.class, tags={ "filter", })
+    @ApiOperation(value = "update filter", nickname = "updateFilter", notes = "update filter of given id", response = FilterResponse.class, tags={ "filter", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Filter with give id is updated successfully.", response = Filter.class),
+        @ApiResponse(code = 200, message = "Filter with give id is updated successfully.", response = FilterResponse.class),
         @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class),
         @ApiResponse(code = 404, message = "Requested screener not found.", response = Error.class) })
     @RequestMapping(value = "/v1/filter/{id}",
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PATCH)
-    ResponseEntity<Filter> updateFilter(@ApiParam(value = "payload to create filter" ,required=true )  @Valid @RequestBody PatchModel body,@ApiParam(value = "",required=true) @PathVariable("id") UUID id);
+    ResponseEntity<FilterResponse> updateFilter(@ApiParam(value = "payload to create filter" ,required=true )  @Valid @RequestBody List<PatchData> body,@ApiParam(value = "",required=true) @PathVariable("id") UUID id);
 
 }
