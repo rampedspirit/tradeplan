@@ -18,12 +18,7 @@ export class VpcStack extends Stack {
                     name: "publicSubnetOne",
                     subnetType: SubnetType.PUBLIC,
                     cidrMask: 24
-                },
-                {
-                    name: "publicSubnetTwo",
-                    subnetType: SubnetType.PUBLIC,
-                    cidrMask: 24
-                },
+                }
             ]
         });
     }
