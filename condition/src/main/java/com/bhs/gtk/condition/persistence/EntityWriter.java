@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -100,7 +101,10 @@ public class EntityWriter {
 		String parseTree = condition.getParseTree();
 		ConditionEntity conditionEntity = new ConditionEntity(condition.getName(), condition.getDescription(), condition.getCode(),
 				parseTree);
-		conditionEntity.getFilters().addAll(createFilterEntityObjects(parseTree));
+		
+		if(StringUtils.isNotEmpty(parseTree)) {
+			conditionEntity.getFilters().addAll(createFilterEntityObjects(parseTree));
+		}
 		return conditionRepository.save(conditionEntity);
 	}
 

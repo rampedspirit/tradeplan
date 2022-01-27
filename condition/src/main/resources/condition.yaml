@@ -210,8 +210,6 @@ components:
     ConditionRequest:
       required:
         - name
-        - code
-        - parseTree
       type: object
       properties:
         name:

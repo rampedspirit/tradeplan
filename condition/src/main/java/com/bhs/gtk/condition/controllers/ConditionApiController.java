@@ -55,41 +55,4 @@ public class ConditionApiController implements ConditionApi {
 		return new ResponseEntity<ConditionDetailedResponse>(condition, HttpStatus.OK);
 	}
 
-//	@Override
-//	public ResponseEntity<ConditionDetailedResponse> updateCondition(@Valid PatchData body, UUID id) {
-//		ConditionDetailedResponse condition = conditionServiceImpl.updateCondition(body, id);
-//		return new ResponseEntity<ConditionDetailedResponse>(condition, HttpStatus.OK);
-//	}
-
-
-//	@Override
-//	public ResponseEntity<Condition> createCondition(@Valid Condition body) {
-//		Condition condition = conditionServiceImpl.createCondition(body);
-//		return new ResponseEntity<Condition>(condition, HttpStatus.OK);
-//	}
-//
-//	@Override
-//	public ResponseEntity<Condition> deleteCondition(UUID id) {
-//		Condition condition = conditionServiceImpl.deleteCondition(id);
-//		return new ResponseEntity<Condition>(condition, HttpStatus.OK);
-//	}
-//
-//	@Override
-//	public ResponseEntity<List<Condition>> getAllConditions() {
-//		List<Condition> conditions = conditionServiceImpl.getAllConditions();
-//		return new ResponseEntity<List<Condition>>(conditions, HttpStatus.OK);
-//	}
-//
-//	@Override
-//	public ResponseEntity<Condition> getCondition(UUID id) {
-//		Condition condition = conditionServiceImpl.getCondition(id);
-//		return new ResponseEntity<Condition>(condition, HttpStatus.OK);
-//	}
-//
-//	@Override
-//	public ResponseEntity<Condition> updateCondition(@Valid PatchModel body, UUID id) {
-//		Condition condition = conditionServiceImpl.updateCondition(body, id);
-//		return new ResponseEntity<Condition>(condition, HttpStatus.OK);
-//	}
-
 }
