@@ -7,7 +7,7 @@ import { Construct } from "constructs";
  */
 export class EcrStack extends Stack {
 
-    private REPO_NAMES: string[] = ["gtk-filter-service", "gtk-condition-service", "gtk-screener-service", "gtk-kafka-monitor-service"];
+    private REPO_NAMES: string[] = ["appdb", "gtk-filter-service", "gtk-condition-service", "gtk-screener-service", "gtk-kafka-monitor-service"];
 
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props);
