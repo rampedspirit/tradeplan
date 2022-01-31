@@ -23,7 +23,6 @@ import com.bhs.gtk.screener.service.ScreenerServiceImpl;
 @CrossOrigin
 public class ScreenerApiController implements ScreenerApi {
 
-	
 	@Autowired
 	private ScreenerServiceImpl screenerServiceImpl;
 
@@ -48,7 +47,7 @@ public class ScreenerApiController implements ScreenerApi {
 	@Override
 	public ResponseEntity<ScreenerDetailedResponse> getScreener(UUID screenerId) {
 		ScreenerDetailedResponse screener = screenerServiceImpl.getScreener(screenerId);
-		return new ResponseEntity<ScreenerDetailedResponse>(screener, HttpStatus.OK); 
+		return new ResponseEntity<ScreenerDetailedResponse>(screener, HttpStatus.OK);
 	}
 
 	@Override
@@ -56,11 +55,12 @@ public class ScreenerApiController implements ScreenerApi {
 		ScreenerResponse screener = screenerServiceImpl.updateScreener(body, screenerId);
 		return new ResponseEntity<ScreenerResponse>(screener, HttpStatus.OK);
 	}
-	
+
 	@Override
 	public ResponseEntity<ScreenerDetailedResponse> runScreener(@Valid ExecutableCreateRequest body, UUID screenerId) {
+		System.err.println("SCRIPS : " + body.getScripNames());
 		ScreenerDetailedResponse screener = screenerServiceImpl.runScreener(body, screenerId);
-		return new ResponseEntity<ScreenerDetailedResponse>(screener, HttpStatus.OK); 
+		return new ResponseEntity<ScreenerDetailedResponse>(screener, HttpStatus.OK);
 	}
-	
+
 }
