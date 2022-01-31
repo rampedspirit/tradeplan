@@ -32,7 +32,15 @@ jobs:
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
-      
+  
+    - name: Push Application Database Image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.event.inputs.ImageVersion }}
+      run: |
+        docker build databse/appdb/ -f database/appdb/Dockerfile -t $ECR_REGISTRY/appdb:$IMAGE_TAG
+        docker push $ECR_REGISTRY/appdb:$IMAGE_TAG
+        
     - name: Build filter-service
       run: mvn -B package --file filter/pom.xml
 
@@ -65,14 +73,3 @@ jobs:
       run: |
         docker build screener/ -f screener/Dockerfile -t $ECR_REGISTRY/gtk-screener-service:$IMAGE_TAG
         docker push $ECR_REGISTRY/gtk-screener-service:$IMAGE_TAG
-        
-    - name: Build kafka-monitor-service
-      run: mvn -B package --file kafka-monitor/pom.xml
-
-    - name: Push kafka-monitor-service Image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: ${{ github.event.inputs.ImageVersion }}
-      run: |
-        docker build kafka-monitor/ -f kafka-monitor/Dockerfile -t $ECR_REGISTRY/gtk-kafka-monitor-service:$IMAGE_TAG
-        docker push $ECR_REGISTRY/gtk-kafka-monitor-service:$IMAGE_TAG
