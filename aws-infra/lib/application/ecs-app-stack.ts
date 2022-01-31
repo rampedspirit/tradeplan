@@ -241,7 +241,9 @@ export class EcsAppStack extends Stack {
                 "DB_PORT": "5000",
                 "DB_NAME": "appdb",
                 "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
-                "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString()
+                "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
+                "KAFKA_BOOTSTRAP_ADDRESS": "kafka.gtk.com:19092",
+                "ACTIVE_PROFILE":"dev"
             },
             portMappings: [{
                 containerPort: 5000
@@ -277,7 +279,10 @@ export class EcsAppStack extends Stack {
         let targetGroup = new ApplicationTargetGroup(this, stackName + "-condition-service-target-group", {
             vpc: vpc,
             port: 5001,
-            protocol: ApplicationProtocol.HTTP
+            protocol: ApplicationProtocol.HTTP,
+            healthCheck: {
+                path: "/actuator/health"
+            }
         });
 
         new ApplicationListenerRule(this, "conditionservice-listener-rule", {
@@ -303,7 +308,9 @@ export class EcsAppStack extends Stack {
                 "DB_PORT": "5000",
                 "DB_NAME": "appdb",
                 "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
-                "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString()
+                "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
+                "KAFKA_BOOTSTRAP_ADDRESS": "kafka.gtk.com:19092",
+                "ACTIVE_PROFILE":"dev"
             },
             portMappings: [{
                 containerPort: 5001
@@ -369,7 +376,8 @@ export class EcsAppStack extends Stack {
                 "DB_NAME": "appdb",
                 "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
                 "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
-                "KAFKA_BOOTSTRAP_ADDRESS": "kafka.gtk.com:19092"
+                "KAFKA_BOOTSTRAP_ADDRESS": "kafka.gtk.com:19092",
+                "ACTIVE_PROFILE":"dev"
             },
             portMappings: [{
                 containerPort: 5002
