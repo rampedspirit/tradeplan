@@ -4,12 +4,14 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { Tab, TabAreaService } from 'src/app/services/tab-area.service';
-import { Condition, ConditionService } from 'src/gen/condition';
+import { ConditionResponse, ConditionService } from 'src/gen/condition';
 import { ScreenerService } from 'src/gen/screener';
 import { ExecutableResponse } from 'src/gen/screener/model/executableResponse';
 import { ConfirmationComponent } from '../../common/confirmation/confirmation.component';
 import { MessageComponent } from '../../common/message/message.component';
 import { ConditionNotificationService } from '../../condition/condition-notification.service';
+import { ScreenerExecutableCreateComponent } from '../screener-executable-create/screener-executable-create.component';
+import { ScreenerExecutableResultComponent } from '../screener-executable-result/screener-executable-result.component';
 import { ScreenerNotificationService } from '../screener-notification.service';
 
 @Component({
@@ -23,8 +25,10 @@ export class ScreenerEditComponent implements OnInit {
   fetchError2: boolean;
 
   editScreenerForm: FormGroup;
-  conditions: Condition[];
+  conditions: ConditionResponse[];
+
   executables: ExecutableResponse[];
+  executablesTableDisplayedColumns: string[] = ['marketTime', 'note', 'status', 'result'];
 
   @Input()
   tab: Tab;
@@ -49,6 +53,7 @@ export class ScreenerEditComponent implements OnInit {
   ngOnInit(): void {
     this.refresh();
     this.refresh2();
+    this.updateExecutables();
 
     this.conditionNotificationService.createSubject.subscribe(condition => {
       this.refresh2();
@@ -175,5 +180,35 @@ export class ScreenerEditComponent implements OnInit {
   navigateToConditionsList = () => {
     this.router.navigate(["/condition/list"]);
     this.tabAreaService.closeTab(this.tab.id);
+  }
+
+  openCreateScreenerExecutableDialog = () => {
+    const dialogRef = this.dialog.open(ScreenerExecutableCreateComponent, {
+      data: {
+        screenerId: this.tab.id
+      },
+      minWidth: "30%"
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.updateExecutables();
+      }
+    });
+  }
+
+  updateExecutables() {
+    this.screenerService.getScreener(this.tab.id).subscribe(screener => {
+      this.executables = screener.executables;
+    })
+  }
+
+  showExecutableResult(executable: ExecutableResponse) {
+    const dialogRef = this.dialog.open(ScreenerExecutableResultComponent, {
+      data: {
+        executableId: executable.executableId
+      },
+      minWidth: "30%"
+    });
   }
 }

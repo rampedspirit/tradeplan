@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
+import { UUID } from 'angular2-uuid';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ScreenerService } from 'src/gen/screener';
 import { ScreenerNotificationService } from '../screener-notification.service';
@@ -53,7 +54,9 @@ export class ScreenerCreateComponent implements OnInit {
     this.createError = false;
     this.screenerService.createScreener({
       name: name,
-      description: description
+      description: description,
+      conditionId: UUID.UUID(),
+      watchListId: UUID.UUID()
     }).subscribe(screener => {
       this.dialogRef.close();
       this.screenerNotificationService.triggerCreateNotification(screener);

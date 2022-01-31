@@ -1,0 +1,25 @@
+<h2 mat-dialog-title>Run Screener</h2>
+<div mat-dialog-content>
+    <app-message *ngIf="createError" type="error" message="Failed to run screener." [callback]="submit"
+        callbackText="Retry">
+    </app-message>
+    <br>
+    <form fxLayout="column" fxLayoutGap="10px" [formGroup]="createScreenerExecutableForm">
+        <mat-form-field>
+            <mat-label>Market Time</mat-label>
+            <input matInput [formControl]="marketTimeControl" type="datetime-local"/>
+            <mat-error *ngIf="marketTimeControl && marketTimeControl.invalid">Please enter valid market time.
+            </mat-error>
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Note</mat-label>
+            <textarea matInput [formControl]="noteControl"> </textarea>
+            <mat-error *ngIf="noteControl && noteControl.invalid">Please enter valid note.
+            </mat-error>
+        </mat-form-field>
+    </form>
+</div>
+<div mat-dialog-actions align="end">
+    <button mat-button (click)="submit()" cdkFocusInitial>OK</button>
+    <button mat-button [mat-dialog-close]="false">CANCEL</button>
+</div>

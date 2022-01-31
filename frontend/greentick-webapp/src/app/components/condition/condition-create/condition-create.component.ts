@@ -53,7 +53,9 @@ export class ConditionCreateComponent implements OnInit {
     this.createError = false;
     this.conditionService.createCondition({
       name: name,
-      description: description
+      description: description,
+      code: "",
+      parseTree: ""
     }).subscribe(condition => {
       this.dialogRef.close();
       this.conditionNotificationService.triggerCreateNotification(condition);

@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ConditionLanguageEditorOptions } from 'src/app/lang/condition/condition-language.editor.options';
 import { Tab } from 'src/app/services/tab-area.service';
-import { Condition, ConditionService } from 'src/gen/condition';
+import { ConditionRequest, ConditionResponse, ConditionService } from 'src/gen/condition';
 import { ConfirmationComponent } from '../../common/confirmation/confirmation.component';
 import { MessageComponent } from '../../common/message/message.component';
 import { ConditionNotificationService } from '../condition-notification.service';
@@ -14,6 +14,11 @@ import { EditorService } from 'src/app/services/editor.service';
 import { FilterService } from 'src/gen/filter';
 import { ConditionLanguageIntellisense } from 'src/app/lang/condition/condition-language.intellisense';
 import { FilterNotificationService } from '../../filter/filter-notification.service';
+
+class Condition {
+  operation: string;
+  expressions: Condition[] | string[]
+}
 
 @Component({
   selector: 'app-condition-edit',
@@ -80,7 +85,7 @@ export class ConditionEditComponent implements OnInit {
       });
 
       this.editConditionForm.valueChanges.subscribe(change => {
-        let changedCondition: Condition = change;
+        let changedCondition: ConditionRequest = change;
         this.tab.dirtyFlag = changedCondition.name != condition.name ||
           changedCondition.description != condition.description ||
           !this.isSame(changedCondition.code, condition.code);
@@ -121,24 +126,33 @@ export class ConditionEditComponent implements OnInit {
       let description = this.editConditionForm.get('description')?.value;
       let code = this.editConditionForm.get('code')?.value;
 
+      let parseTree = JSON.stringify(this.conditionLanguageParser.getParseTree(code));
+      let condition: Condition = JSON.parse(parseTree);
+      this.replaceWithFilterId(condition);
+      let patchedParseTree = JSON.stringify(condition);
+      console.log(patchedParseTree);
+
       this.spinner.show();
-      this.conditionService.updateCondition({
-        patchData: [{
-          operation: 'REPLACE',
-          property: 'NAME',
-          value: name
-        },
-        {
-          operation: 'REPLACE',
-          property: 'DESCRIPTION',
-          value: description
-        },
-        {
-          operation: 'REPLACE',
-          property: 'CODE',
-          value: code
-        }]
-      }, this.tab.id).subscribe(condition => {
+      this.conditionService.updateCondition([{
+        operation: 'REPLACE',
+        property: 'NAME',
+        value: name
+      },
+      {
+        operation: 'REPLACE',
+        property: 'DESCRIPTION',
+        value: description
+      },
+      {
+        operation: 'REPLACE',
+        property: 'CODE',
+        value: code
+      },
+      {
+        operation: 'REPLACE',
+        property: 'PARSE_TREE',
+        value: patchedParseTree
+      }], this.tab.id).subscribe(condition => {
         this.tab.title = condition.name;
         this.tab.dirtyFlag = false;
         this.conditionNotificationService.triggerUpdateNotification(condition);
@@ -187,6 +201,17 @@ export class ConditionEditComponent implements OnInit {
     });
   }
 
+  private replaceWithFilterId(condition: Condition) {
+    for (let i = 0; i < condition.expressions.length; i++) {
+      let expression = condition.expressions[i];
+      if (typeof expression === "string") {
+        let filter = ConditionLanguageIntellisense.FILTERS.find(filter => filter.name == expression);
+        condition.expressions[i] = filter.id;
+      } else {
+        this.replaceWithFilterId(expression);
+      }
+    }
+  }
   /**
    * EDITOR Configurations
    */

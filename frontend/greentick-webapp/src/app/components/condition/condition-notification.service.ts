@@ -1,27 +1,27 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
-import { Condition } from 'src/gen/condition';
+import { ConditionDetailedResponse } from 'src/gen/condition';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConditionNotificationService {
 
-  public createSubject: Subject<Condition>;
-  public updateSubject: Subject<Condition>;
+  public createSubject: Subject<ConditionDetailedResponse>;
+  public updateSubject: Subject<ConditionDetailedResponse>;
   public deleteSubject: Subject<string>;
 
   constructor() {
-    this.createSubject = new Subject<Condition>();
-    this.updateSubject = new Subject<Condition>();
+    this.createSubject = new Subject<ConditionDetailedResponse>();
+    this.updateSubject = new Subject<ConditionDetailedResponse>();
     this.deleteSubject = new Subject<string>();
   }
 
-  public triggerCreateNotification(condition: Condition) {
+  public triggerCreateNotification(condition: ConditionDetailedResponse) {
     this.createSubject.next(condition);
   }
 
-  public triggerUpdateNotification(condition: Condition) {
+  public triggerUpdateNotification(condition: ConditionDetailedResponse) {
     this.updateSubject.next(condition);
   }
 

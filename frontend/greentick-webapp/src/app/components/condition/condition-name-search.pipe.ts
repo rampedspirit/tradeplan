@@ -1,12 +1,12 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { Condition } from 'src/gen/condition';
+import { ConditionResponse } from 'src/gen/condition';
 
 @Pipe({
   name: 'conditionNameSearch'
 })
 export class ConditionNameSearchPipe implements PipeTransform {
 
-  transform(conditions: Condition[], searchText: string): Condition[] {
+  transform(conditions: ConditionResponse[], searchText: string): ConditionResponse[] {
     if (searchText == null || conditions == null) {
       return conditions;
     }

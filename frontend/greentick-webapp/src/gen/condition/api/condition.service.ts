@@ -17,8 +17,10 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 
 import { Observable }                                        from 'rxjs';
 
-import { Condition } from '../model/condition';
-import { PatchModel } from '../model/patchModel';
+import { ConditionDetailedResponse } from '../model/conditionDetailedResponse';
+import { ConditionRequest } from '../model/conditionRequest';
+import { ConditionResponse } from '../model/conditionResponse';
+import { PatchData } from '../model/patchData';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
@@ -57,51 +59,16 @@ export class ConditionService {
 
 
     /**
-     * checks the health of service
-     * checks the health of service
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public checkHealth(observe?: 'body', reportProgress?: boolean): Observable<any>;
-    public checkHealth(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
-    public checkHealth(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
-    public checkHealth(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.request<any>('get',`${this.basePath}/`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        );
-    }
-
-    /**
      * create new condition
      * create new condition
      * @param body payload to create condition
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public createCondition(body: Condition, observe?: 'body', reportProgress?: boolean): Observable<Condition>;
-    public createCondition(body: Condition, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Condition>>;
-    public createCondition(body: Condition, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Condition>>;
-    public createCondition(body: Condition, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public createCondition(body: ConditionRequest, observe?: 'body', reportProgress?: boolean): Observable<ConditionDetailedResponse>;
+    public createCondition(body: ConditionRequest, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ConditionDetailedResponse>>;
+    public createCondition(body: ConditionRequest, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ConditionDetailedResponse>>;
+    public createCondition(body: ConditionRequest, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (body === null || body === undefined) {
             throw new Error('Required parameter body was null or undefined when calling createCondition.');
@@ -127,7 +94,7 @@ export class ConditionService {
             headers = headers.set('Content-Type', httpContentTypeSelected);
         }
 
-        return this.httpClient.request<Condition>('post',`${this.basePath}/v1/condition`,
+        return this.httpClient.request<ConditionDetailedResponse>('post',`${this.basePath}/v1/condition`,
             {
                 body: body,
                 withCredentials: this.configuration.withCredentials,
@@ -145,9 +112,9 @@ export class ConditionService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public deleteCondition(id: string, observe?: 'body', reportProgress?: boolean): Observable<Condition>;
-    public deleteCondition(id: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Condition>>;
-    public deleteCondition(id: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Condition>>;
+    public deleteCondition(id: string, observe?: 'body', reportProgress?: boolean): Observable<ConditionDetailedResponse>;
+    public deleteCondition(id: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ConditionDetailedResponse>>;
+    public deleteCondition(id: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ConditionDetailedResponse>>;
     public deleteCondition(id: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (id === null || id === undefined) {
@@ -169,7 +136,7 @@ export class ConditionService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<Condition>('delete',`${this.basePath}/v1/condition/${encodeURIComponent(String(id))}`,
+        return this.httpClient.request<ConditionDetailedResponse>('delete',`${this.basePath}/v1/condition/${encodeURIComponent(String(id))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -185,9 +152,9 @@ export class ConditionService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getAllConditions(observe?: 'body', reportProgress?: boolean): Observable<Array<Condition>>;
-    public getAllConditions(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<Condition>>>;
-    public getAllConditions(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<Condition>>>;
+    public getAllConditions(observe?: 'body', reportProgress?: boolean): Observable<Array<ConditionResponse>>;
+    public getAllConditions(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ConditionResponse>>>;
+    public getAllConditions(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ConditionResponse>>>;
     public getAllConditions(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         let headers = this.defaultHeaders;
@@ -205,7 +172,7 @@ export class ConditionService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<Array<Condition>>('get',`${this.basePath}/v1/condition`,
+        return this.httpClient.request<Array<ConditionResponse>>('get',`${this.basePath}/v1/condition`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -222,9 +189,9 @@ export class ConditionService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getCondition(id: string, observe?: 'body', reportProgress?: boolean): Observable<Condition>;
-    public getCondition(id: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Condition>>;
-    public getCondition(id: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Condition>>;
+    public getCondition(id: string, observe?: 'body', reportProgress?: boolean): Observable<ConditionDetailedResponse>;
+    public getCondition(id: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ConditionDetailedResponse>>;
+    public getCondition(id: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ConditionDetailedResponse>>;
     public getCondition(id: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (id === null || id === undefined) {
@@ -246,7 +213,7 @@ export class ConditionService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<Condition>('get',`${this.basePath}/v1/condition/${encodeURIComponent(String(id))}`,
+        return this.httpClient.request<ConditionDetailedResponse>('get',`${this.basePath}/v1/condition/${encodeURIComponent(String(id))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -264,10 +231,10 @@ export class ConditionService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public updateCondition(body: PatchModel, id: string, observe?: 'body', reportProgress?: boolean): Observable<Condition>;
-    public updateCondition(body: PatchModel, id: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Condition>>;
-    public updateCondition(body: PatchModel, id: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Condition>>;
-    public updateCondition(body: PatchModel, id: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public updateCondition(body: Array<PatchData>, id: string, observe?: 'body', reportProgress?: boolean): Observable<ConditionDetailedResponse>;
+    public updateCondition(body: Array<PatchData>, id: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ConditionDetailedResponse>>;
+    public updateCondition(body: Array<PatchData>, id: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ConditionDetailedResponse>>;
+    public updateCondition(body: Array<PatchData>, id: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (body === null || body === undefined) {
             throw new Error('Required parameter body was null or undefined when calling updateCondition.');
@@ -297,7 +264,7 @@ export class ConditionService {
             headers = headers.set('Content-Type', httpContentTypeSelected);
         }
 
-        return this.httpClient.request<Condition>('patch',`${this.basePath}/v1/condition/${encodeURIComponent(String(id))}`,
+        return this.httpClient.request<ConditionDetailedResponse>('patch',`${this.basePath}/v1/condition/${encodeURIComponent(String(id))}`,
             {
                 body: body,
                 withCredentials: this.configuration.withCredentials,

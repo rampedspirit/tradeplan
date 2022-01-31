@@ -30,6 +30,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { NgxSpinnerModule } from "ngx-spinner";
 import { MatTableModule } from '@angular/material/table';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 
 import { Amplify } from 'aws-amplify';
 import { ResetComponent } from './components/auth/reset/reset.component';
@@ -64,6 +65,10 @@ import { ScreenerEditComponent } from './components/screener/screener-edit/scree
 import { ScreenerNameSearchPipe } from './components/screener/screener-name-search.pipe';
 import { Router, ROUTER_CONFIGURATION } from '@angular/router';
 import { DocumentComponent } from './components/document/document.component';
+import { ScreenerExecutableCreateComponent } from './components/screener/screener-executable-create/screener-executable-create.component';
+import { MatNativeDateModule } from '@angular/material/core';
+import { DatePipe } from '@angular/common';
+import { ScreenerExecutableResultComponent } from './components/screener/screener-executable-result/screener-executable-result.component';
 
 Amplify.configure({
   Auth: {
@@ -98,7 +103,9 @@ Amplify.configure({
     ScreenerCreateComponent,
     ScreenerEditComponent,
     ScreenerNameSearchPipe,
-    DocumentComponent
+    DocumentComponent,
+    ScreenerExecutableCreateComponent,
+    ScreenerExecutableResultComponent
   ],
   imports: [
     BrowserModule,
@@ -129,6 +136,9 @@ Amplify.configure({
     MatProgressSpinnerModule,
     MatSidenavModule,
     MatTableModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+
     MonacoEditorModule.forRoot({
       onMonacoLoad: AppModule.onMonacoLoad
     })
@@ -144,7 +154,7 @@ Amplify.configure({
   {
     provide: SCREENER_API_BASE_PATH,
     useValue: environment.screenerApiBasePath
-  }],
+  }, DatePipe],
   bootstrap: [AppComponent]
 })
 export class AppModule {

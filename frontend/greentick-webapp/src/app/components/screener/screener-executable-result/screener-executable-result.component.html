@@ -1,0 +1,23 @@
+<div *ngIf="executable">
+    <button mat-flat-button color="success" (click)="refreshResults()">Refresh</button>
+    <table mat-table [dataSource]="results">
+
+        <!-- Scrip Name Column -->
+        <ng-container matColumnDef="scripName">
+            <th mat-header-cell *matHeaderCellDef>Scrip Name</th>
+            <td mat-cell *matCellDef="let result">{{result.scripName}}</td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let result">{{result.status}}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+</div>
+<app-message *ngIf="fetchError" type="error" message="Failed to fetch results." [callback]="refreshResults"
+    callbackText="Please Retry">
+</app-message>
