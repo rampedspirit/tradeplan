@@ -1,11 +1,15 @@
 package com.bhs.gtk.filter.persistence;
 
+import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -25,6 +29,9 @@ public class FilterEntity {
 	private String code;
 	@Column(length = PersistenceConstants.LARGE_TEXT_LIMIT)
 	private String parseTree;
+	
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	private List<ExpressionEntity> expressions;
 	
 	protected FilterEntity() {}
 	
@@ -64,5 +71,13 @@ public class FilterEntity {
 	}
 	public void setParseTree(String parseTree) {
 		this.parseTree = parseTree;
+	}
+
+	public List<ExpressionEntity> getExpressions() {
+		return expressions;
+	}
+
+	public void setExpressions(List<ExpressionEntity> expressions) {
+		this.expressions = expressions;
 	}
 }
