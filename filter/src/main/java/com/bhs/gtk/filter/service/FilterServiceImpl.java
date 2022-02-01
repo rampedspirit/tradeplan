@@ -1,5 +1,8 @@
 package com.bhs.gtk.filter.service;
 
+import java.util.List;
+import java.util.UUID;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.bhs.gtk.filter.model.FilterRequest;
 import com.bhs.gtk.filter.model.FilterResponse;
+import com.bhs.gtk.filter.persistence.EntityReader;
 import com.bhs.gtk.filter.persistence.EntityWriter;
 import com.bhs.gtk.filter.persistence.FilterEntity;
 import com.bhs.gtk.filter.util.Mapper;
@@ -18,11 +22,26 @@ public class FilterServiceImpl implements FilterService{
 	private EntityWriter entityWriter;
 	
 	@Autowired
+	private EntityReader entityReader;
+	
+	@Autowired
 	private Mapper mapper;
 
 	public FilterResponse createFilter(@Valid FilterRequest filterRequest) {
 		FilterEntity filterEntity = entityWriter.createFilter(filterRequest);
 		return mapper.getFilterResponse(filterEntity);
+	}
+
+	@Override
+	public FilterResponse getFilter(UUID id) {
+		FilterEntity filterEntity = entityReader.getFilterEntity(id);
+		return mapper.getFilterResponse(filterEntity);
+	}
+
+	@Override
+	public List<FilterResponse> getAllFilters() {
+		List<FilterEntity> filters = entityReader.getAllFilterEntites();
+		return mapper.getAllFilterResponses(filters);
 	}
 	
 
