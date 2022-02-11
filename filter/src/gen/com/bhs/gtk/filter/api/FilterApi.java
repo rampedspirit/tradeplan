@@ -8,6 +8,7 @@ package com.bhs.gtk.filter.api;
 import com.bhs.gtk.filter.model.Error;
 import com.bhs.gtk.filter.model.FilterRequest;
 import com.bhs.gtk.filter.model.FilterResponse;
+import com.bhs.gtk.filter.model.FilterResultResponse;
 import com.bhs.gtk.filter.model.PatchData;
 import java.util.UUID;
 import io.swagger.annotations.*;
@@ -26,7 +27,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.List;
 import java.util.Map;
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-01-24T11:56:26.914547600+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-02-06T11:02:32.848233600+05:30[Asia/Calcutta]")
 
 @Api(value = "Filter", description = "the Filter API")
 public interface FilterApi {
@@ -71,6 +72,17 @@ public interface FilterApi {
         produces = { "application/json" }, 
         method = RequestMethod.GET)
     ResponseEntity<FilterResponse> getFilter(@ApiParam(value = "",required=true) @PathVariable("id") UUID id);
+
+
+    @ApiOperation(value = "get filter result", nickname = "getFilterResult", notes = "get filter result", response = FilterResultResponse.class, tags={ "filter", })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Request sucessfully processed.", response = FilterResultResponse.class),
+        @ApiResponse(code = 400, message = "Request is not understood.", response = Error.class),
+        @ApiResponse(code = 404, message = "Requested filter not found.", response = Error.class) })
+    @RequestMapping(value = "/v1/filter/{filterId}/{marketTime}/{scripName}/result",
+        produces = { "application/json" }, 
+        method = RequestMethod.GET)
+    ResponseEntity<FilterResultResponse> getFilterResult(@ApiParam(value = "",required=true) @PathVariable("filterId") UUID filterId,@ApiParam(value = "",required=true) @PathVariable("marketTime") String marketTime,@ApiParam(value = "",required=true) @PathVariable("scripName") String scripName);
 
 
     @ApiOperation(value = "update filter", nickname = "updateFilter", notes = "update filter of given id", response = FilterResponse.class, tags={ "filter", })

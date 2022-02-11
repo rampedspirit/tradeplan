@@ -7,6 +7,7 @@ public class CompareExpression implements BooleanExpression{
 	private String operation;
 	private ArithmeticExpression leftArithmeticExpression;
 	private ArithmeticExpression rightArithmeticExpression;
+	private ExpressionLocation location;
 	
 	protected CompareExpression() {}
 	
@@ -15,12 +16,13 @@ public class CompareExpression implements BooleanExpression{
 	}
 	
 	public CompareExpression(String parseTree, String operation, ArithmeticExpression leftArithmeticExpression,
-			ArithmeticExpression rightArithmeticExpression, String hash) {
+			ArithmeticExpression rightArithmeticExpression, String hash,ExpressionLocation location) {
 		this.parseTree = parseTree;
 		this.operation = operation;
 		this.leftArithmeticExpression = leftArithmeticExpression;
 		this.rightArithmeticExpression = rightArithmeticExpression;
 		this.hash = hash;
+		this.setLocation(location);
 	}
 
 	public String getOperation() {
@@ -52,6 +54,14 @@ public class CompareExpression implements BooleanExpression{
 	}
 	public void setParseTree(String parseTree) {
 		this.parseTree = parseTree;
+	}
+
+	public ExpressionLocation getLocation() {
+		return location;
+	}
+
+	public void setLocation(ExpressionLocation location) {
+		this.location = location;
 	}
 
 }

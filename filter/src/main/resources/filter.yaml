@@ -158,6 +158,55 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+                
+  '/v1/filter/{filterId}/{marketTime}/{scripName}/result':
+    get:
+      tags:
+        - filter
+      summary: get filter result 
+      description: get filter result 
+      operationId: getFilterResult
+      parameters:
+        - in: path
+          name: filterId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: marketTime
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: scripName
+          required: true
+          schema:
+            type: string                
+            
+      responses:
+        '200':
+          description: >-
+            Request sucessfully processed.
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/FilterResultResponse'
+        '400':
+          description: Request is not understood.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Requested filter not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+                
+
 components:
   schemas:
     FilterRequest:
@@ -200,20 +249,57 @@ components:
           type: string
           description: text representing filter code
 
-
-    Error:
+    FilterResultResponse:
       type: object
       properties:
-        message:
+        filterId:
           type: string
-          description: brief information about error
-        resolution:
+          format: uuid   
+        marketTime:
           type: string
-          description: possibly hints to solve the error
-        errorCode:
+          format: date-time
+        scripName:
+          type: string 
+        filterResult:
           type: string
-          description: pattern to unqiuely identify error root cause and origin.
+          enum: [QUEUED, RUNNING, PASS, FAIL, ERROR]
+        expressionResults:
+            type: array
+            items:
+              $ref: '#/components/schemas/ExpressionResult'
+ 
+           
           
+    ExpressionResult:
+      type: object
+      properties:
+        location:
+          $ref : '#/components/schemas/Location'
+        result:
+          oneOf:
+           - type: string
+           - type: number      
+          
+    Location:
+      type: object
+      properties:
+        start:
+          $ref : '#/components/schemas/Position'
+        end:
+          $ref : '#/components/schemas/Position'                 
+          
+    Position:
+     type: object
+     properties:
+       offset:
+         type: integer
+       line:
+         type: integer
+       column:
+         type: integer
+      
+      
+     
 
     PatchData:
       required:
@@ -241,3 +327,16 @@ components:
         value:
           type: string
           description: The new value of the json attribute to be patched.
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: brief information about error
+        resolution:
+          type: string
+          description: possibly hints to solve the error
+        errorCode:
+          type: string
+          description: pattern to unqiuely identify error root cause and origin.          

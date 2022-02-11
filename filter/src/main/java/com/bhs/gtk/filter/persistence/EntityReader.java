@@ -1,6 +1,7 @@
 package com.bhs.gtk.filter.persistence;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,6 +14,54 @@ public class EntityReader {
 	
 	@Autowired
 	private FilterRepository filterRepository;
+	
+	@Autowired
+	private ExpressionEntityRepository expressionEntityRepository;
+	
+	@Autowired
+	private FilterResultRepository filterResultRepository;
+	
+	@Autowired
+	private ArithmeticExpressionResultRepository arithmeticExpressionResultRepository;
+	
+	@Autowired
+	private CompareExpressionResultRepository compareExpressionResultRepository;
+	
+	@Autowired
+	private EntityObjectCreator entityObjectCreator;
+	
+	
+	public FilterResultEntity getFilterResultEntity(FilterResultId filterResultId) {
+		Optional<FilterResultEntity> filterResultContainer = filterResultRepository.findById(filterResultId);
+		if(filterResultContainer.isPresent()) {
+			return filterResultContainer.get();
+		}
+		return null;
+	}
+	
+	public ExpressionEntity getExpressionEntity(String hash) {
+		Optional<ExpressionEntity> expressionContainer = expressionEntityRepository.findById(hash);
+		if(expressionContainer.isPresent()) {
+			return expressionContainer.get();
+		}
+		return null;
+	}
+	
+	public ArithmeticExpressionResultEntity getArithmeticExpressionResultEntity(ArithmeticExpressionResultId arResultId) {
+		Optional<ArithmeticExpressionResultEntity> arithmeticExpressionResultContainer = arithmeticExpressionResultRepository.findById(arResultId);
+		if(arithmeticExpressionResultContainer.isPresent()) {
+			return arithmeticExpressionResultContainer.get();
+		}
+		return null;
+	}
+	
+	public CompareExpressionResultEntity getCompareExpressionResultEntity(CompareExpressionResultId cmpResultId) {
+		Optional<CompareExpressionResultEntity> compareExpressionResultContainer = compareExpressionResultRepository.findById(cmpResultId);
+		if(compareExpressionResultContainer.isPresent()) {
+			return compareExpressionResultContainer.get();
+		}
+		return null;
+	}
 	
 	public FilterEntity getFilterEntity(UUID id) {
 		Optional<FilterEntity> filterContainer = filterRepository.findById(id);
@@ -31,4 +80,35 @@ public class EntityReader {
 		return filters;
 	}
 
+	public List<ExpressionEntity> getExpressionEntities(UUID filterId) {
+		FilterEntity filterEntity = getFilterEntity(filterId);
+		if (filterEntity == null) {
+			return null;
+		}
+		return filterEntity.getExpressions();
+	}
+	
+	public FilterResultEntity getFilterResultEntity(UUID filterId, Date marketTime, String scripName) {
+		FilterResultId filterResultId = entityObjectCreator.createFilterResultIdObject(filterId,marketTime,scripName);
+		FilterResultEntity filterResultEntity = getFilterResultEntity(filterResultId);
+		return filterResultEntity;
+	}
+	
+	public ArithmeticExpressionResultEntity getArithmeticExpressionResultEntity(String hash, Date marketTime, String scripName) {
+		ArithmeticExpressionResultId arResultId = entityObjectCreator.createArithmeticExpressionResultIdObject(hash,
+				marketTime, scripName);
+		ArithmeticExpressionResultEntity arResultEntity = getArithmeticExpressionResultEntity(arResultId);
+		if(arResultEntity != null) {
+			return arResultEntity;
+		}
+		return null;
+	}
+	
+	public CompareExpressionResultEntity getCompareResultEntity(String cmpHash, Date marketTime, String scripName) {
+		CompareExpressionResultEntity compareExpressionResultEntity  = null;
+		CompareExpressionResultId compareResultId = entityObjectCreator.createCompareExpressionResultEntityIdObject(cmpHash, marketTime, scripName);
+		compareExpressionResultEntity = getCompareExpressionResultEntity(compareResultId);
+		return compareExpressionResultEntity; 
+	}
+	
 }

@@ -3,22 +3,21 @@ package com.bhs.gtk.filter.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum OperationType {
+public enum ExecutionStatus {
 	
-    AND("AND"),
-    OR ("OR"),
-    ADD("+"),
-    SUBTRACT("-"),
-    POWER("^"),
-    EQUAL("="),
-    GREATER_THAN(">"),
-    LESS_THAN("<"),
-    GREATER_THAN_OR_EQUAL(">="),
-    LESS_THAN_OR_EQUAL("<=");
+    QUEUED("QUEUED"),
+    
+    RUNNING("RUNNING"),
+    
+    PASS("PASS"),
+    
+    FAIL("FAIL"),
+    
+    ERROR("ERROR");
 
     private String value;
 
-    OperationType(String value) {
+    ExecutionStatus(String value) {
       this.value = value;
     }
 
@@ -29,8 +28,8 @@ public enum OperationType {
     }
 
     @JsonCreator
-    public static OperationType fromValue(String text) {
-      for (OperationType b : OperationType.values()) {
+    public static ExecutionStatus fromValue(String text) {
+      for (ExecutionStatus b : ExecutionStatus.values()) {
         if (String.valueOf(b.value).equals(text)) {
           return b;
         }

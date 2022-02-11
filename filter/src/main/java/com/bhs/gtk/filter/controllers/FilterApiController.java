@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import com.bhs.gtk.filter.api.FilterApi;
 import com.bhs.gtk.filter.model.FilterRequest;
 import com.bhs.gtk.filter.model.FilterResponse;
+import com.bhs.gtk.filter.model.FilterResultResponse;
 import com.bhs.gtk.filter.model.PatchData;
 import com.bhs.gtk.filter.service.FilterServiceImpl;
 
@@ -55,41 +56,10 @@ public class FilterApiController implements FilterApi {
 		return null;
 	}
 
-//	@Autowired
-//	private FilterServiceImpl filterServiceImpl;
-//
-//	@Override
-//	public ResponseEntity<Void> checkHealth() {
-//		return new ResponseEntity<Void>(HttpStatus.OK);
-//	}
-//
-//	@Override
-//	public ResponseEntity<Filter> createFilter(@Valid Filter body) {
-//		Filter filter = filterServiceImpl.createFilter(body);
-//		return new ResponseEntity<Filter>(filter, HttpStatus.OK);
-//	}
-//
-//	@Override
-//	public ResponseEntity<Filter> deleteFilter(UUID id) {
-//		Filter filter = filterServiceImpl.deleteFilter(id);
-//		return new ResponseEntity<Filter>(filter, HttpStatus.OK);
-//	}
-//
-//	@Override
-//	public ResponseEntity<List<Filter>> getAllFilters() {
-//		List<Filter> filters = filterServiceImpl.getAllFilters();
-//		return new ResponseEntity<List<Filter>>(filters, HttpStatus.OK);
-//	}
-//
-//	@Override
-//	public ResponseEntity<Filter> getFilter(UUID id) {
-//		Filter filter = filterServiceImpl.getFilter(id);
-//		return new ResponseEntity<Filter>(filter, HttpStatus.OK);
-//	}
-//
-//	@Override
-//	public ResponseEntity<Filter> updateFilter(@Valid PatchModel body, UUID id) {
-//		Filter filter = filterServiceImpl.updateFilter(body, id);
-//		return new ResponseEntity<Filter>(filter, HttpStatus.OK);
-//	}
+	@Override
+	public ResponseEntity<FilterResultResponse> getFilterResult(UUID filterId, String marketTime, String scripName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
