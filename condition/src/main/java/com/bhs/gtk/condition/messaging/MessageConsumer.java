@@ -17,9 +17,24 @@ public class MessageConsumer {
 	private Converter converter;
 	
 	@KafkaListener(topics = TopicNames.INPUT_EXECUTION_REQUEST)
-	public boolean receiveExecutionRequest(String message) {
+	public boolean receiveConditionExecutionRequest(String message) {
+		//TODO: handle condition already in RUNNING or COMPLETED status.
+		System.err.println("CS:<-"+message);
 		return executableServiceImpl.RunCondition(converter.convertToExecutableCondition(message));
 	}
+	
+	@KafkaListener(topics = TopicNames.INPUT_EXECUTION_RESPONSE)
+	public boolean receiveFilterExecutionResponse(String message) {
+		System.err.println("CS :"+message);
+		return true;
+	}
+	
+	@KafkaListener(topics = TopicNames.INPUT_CHANGE_NOTIFICATION)
+	public boolean receiveFilterChangeNotification(String message) {
+		System.err.println("CS :"+message);
+		return true;
+	}
+	
 
 
 }

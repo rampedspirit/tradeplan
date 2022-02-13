@@ -174,6 +174,7 @@ public class FilterServiceImpl implements FilterService{
 	private List<CompareExpressionResultEntity> createCompareResultEntities(UUID filterId, Date marketTime, String scripName) {
 		List<ExpressionEntity> expressions = entityReader.getExpressionEntities(filterId);
 		
+		//TODO: handle empty expressions
 		List<ExpressionEntity> arExpressions = expressions.stream().filter(e -> StringUtils.equals(e.getType(), ExpressionType.ARITHEMETIC_EXPRESSION.name()))
 				.collect(Collectors.toList());
 		

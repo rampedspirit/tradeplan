@@ -15,6 +15,7 @@ public class MessageProducer {
 	
 	public boolean sendMessage(String message) {
 		try {
+			System.err.println("SS:->"+message);
 			kafkaTemplate.send(TopicNames.OUTPUT_EXECUTION_REQUEST,message);
 			return true;
 		}catch (KafkaException kafkaException) {

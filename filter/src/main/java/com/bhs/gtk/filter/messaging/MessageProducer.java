@@ -1,4 +1,4 @@
-package com.bhs.gtk.condition.messaging;
+package com.bhs.gtk.filter.messaging;
 
 import java.util.UUID;
 
@@ -9,7 +9,8 @@ import org.springframework.kafka.KafkaException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import com.bhs.gtk.condition.messaging.ChangeNotification.ChangeStatusEnum;
+import com.bhs.gtk.filter.messaging.ChangeNotification.ChangeStatusEnum;
+
 
 @Service
 public class MessageProducer {
@@ -39,7 +40,7 @@ public class MessageProducer {
 			default:
 				throw new IllegalArgumentException(type+" is not supported message type in Condition service");
 			}
-			System.err.println("CS:->"+message);
+			System.err.println("FS:->"+message);
 			kafkaTemplate.send(topicName,message);
 			return true;
 		}catch (KafkaException kafkaException) {
