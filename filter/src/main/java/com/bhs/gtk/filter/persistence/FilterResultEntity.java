@@ -90,8 +90,8 @@ public class FilterResultEntity {
 		this.compareExpressionResultEntities = compareExpressionResultEntities;
 	}
 	
-	public String getMarketTimeAsOffsetDateTime() {
-		return OffsetDateTime.ofInstant(Instant.ofEpochMilli(marketTime.getTime()), ZoneId.systemDefault()).toString();
+	public OffsetDateTime getMarketTimeAsOffsetDateTime() {
+		return OffsetDateTime.ofInstant(Instant.ofEpochMilli(marketTime.getTime()), ZoneId.systemDefault());
 	}
 	
 }

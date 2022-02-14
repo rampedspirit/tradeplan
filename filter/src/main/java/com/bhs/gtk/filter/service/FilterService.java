@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import com.bhs.gtk.filter.model.ExecutableFilter;
 import com.bhs.gtk.filter.model.FilterRequest;
 import com.bhs.gtk.filter.model.FilterResponse;
+import com.bhs.gtk.filter.model.FilterResultResponse;
 import com.bhs.gtk.filter.persistence.ArithmeticExpressionResultEntity;
 import com.bhs.gtk.filter.persistence.FilterResultEntity;
 
@@ -17,4 +18,5 @@ public interface FilterService {
 	public List<FilterResponse> getAllFilters();
 	public FilterResultEntity executeFilter(ExecutableFilter executableFilter);
 	public List<ArithmeticExpressionResultEntity> runArithmeticExpressionResultEntities(List<ArithmeticExpressionResultEntity> arResultEntitites);
+	public FilterResultResponse getFilterResult(UUID filterId, String marketTime, String scripName);
 }

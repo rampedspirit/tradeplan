@@ -58,8 +58,8 @@ public class FilterApiController implements FilterApi {
 
 	@Override
 	public ResponseEntity<FilterResultResponse> getFilterResult(UUID filterId, String marketTime, String scripName) {
-		// TODO Auto-generated method stub
-		return null;
+		FilterResultResponse filterResultResponse = filterServiceImpl.getFilterResult(filterId, marketTime, scripName);
+		return new ResponseEntity<FilterResultResponse>(filterResultResponse, HttpStatus.OK);
 	}
 
 }

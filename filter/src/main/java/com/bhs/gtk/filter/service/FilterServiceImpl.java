@@ -14,14 +14,24 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.threeten.bp.DateTimeUtils;
+import org.threeten.bp.OffsetDateTime;
 
 import com.bhs.gtk.filter.messaging.MessageProducer;
 import com.bhs.gtk.filter.messaging.MessageType;
+import com.bhs.gtk.filter.model.ArithmeticExpression;
+import com.bhs.gtk.filter.model.BooleanExpression;
+import com.bhs.gtk.filter.model.CompareExpression;
 import com.bhs.gtk.filter.model.ExecutableFilter;
 import com.bhs.gtk.filter.model.ExecutionStatus;
+import com.bhs.gtk.filter.model.ExpressionLocation;
+import com.bhs.gtk.filter.model.ExpressionResult;
 import com.bhs.gtk.filter.model.ExpressionType;
 import com.bhs.gtk.filter.model.FilterRequest;
 import com.bhs.gtk.filter.model.FilterResponse;
+import com.bhs.gtk.filter.model.FilterResultResponse;
+import com.bhs.gtk.filter.model.FilterResultResponse.FilterResultEnum;
+import com.bhs.gtk.filter.model.LogicalExpression;
 import com.bhs.gtk.filter.model.OperationType;
 import com.bhs.gtk.filter.persistence.ArithmeticExpressionResultEntity;
 import com.bhs.gtk.filter.persistence.CompareExpressionResultEntity;
@@ -98,6 +108,87 @@ public class FilterServiceImpl implements FilterService{
 			return filterResultEntity;
 		}
 		return createFilterResultEntity(filterId, marketTime, scripName);
+	}
+
+	@Override
+	public FilterResultResponse getFilterResult(UUID filterId, String marketTime, String scripName) {
+		Date mTime = DateTimeUtils.toDate(OffsetDateTime.parse(marketTime).toInstant());
+		FilterResultEntity filterResultEntity = entityReader.getFilterResultEntity(filterId, mTime, scripName);
+		if(filterResultEntity == null) {
+			//Log no result available for given input.
+			return null;
+		}
+		FilterResultResponse filterResultResponse = new FilterResultResponse();
+		filterResultResponse.setFilterId(filterId);
+		filterResultResponse.setMarketTime(filterResultEntity.getMarketTimeAsOffsetDateTime());
+		filterResultResponse.setScripName(scripName);
+		filterResultResponse.setFilterResult(FilterResultEnum.fromValue(filterResultEntity.getStatus()));
+		filterResultResponse.setExpressionResults(getExpressionResults(filterResultEntity));
+		return filterResultResponse;
+	}
+	
+	private List<ExpressionResult> getExpressionResults(FilterResultEntity filterResultEntity) {
+
+		HashMap<String, String> resultMap = getExpressionsResultMap(filterResultEntity);
+		HashMap<String, ExpressionLocation> locationMap = getExpressionsLocationMap(filterResultEntity.getFilterId());
+
+		List<ExpressionResult> expressionResults = new ArrayList<>();
+		for (String expHash : resultMap.keySet()) {
+			ExpressionResult result = new ExpressionResult();
+			result.setResult(resultMap.get(expHash));
+			result.setLocation(mapper.getLocation(locationMap.get(expHash)));
+			expressionResults.add(result);
+		}
+		return expressionResults;
+	}
+
+	private HashMap<String, ExpressionLocation> getExpressionsLocationMap(UUID filterId) {
+		HashMap<String, ExpressionLocation> locationMap = new HashMap<>();
+		
+		FilterEntity filterEntity = entityReader.getFilterEntity(filterId);
+		if(filterEntity == null) {
+			return locationMap;
+		}
+		BooleanExpression booleanExpression = converter.convertToBooleanExpression(filterEntity.getParseTree());
+		locationMap.putAll(getExpressionsLocationMap(booleanExpression));
+		return locationMap;
+	}
+	
+	private HashMap<String, ExpressionLocation> getExpressionsLocationMap(BooleanExpression expression) {
+		HashMap<String, ExpressionLocation> locationMap = new HashMap<>();
+		
+		if(expression instanceof LogicalExpression) {
+			LogicalExpression logicalExpression = (LogicalExpression) expression;
+			for(BooleanExpression exp : logicalExpression.getBooleanExpressions()) {
+				locationMap.putAll(getExpressionsLocationMap(exp));
+			}
+		}else if(expression instanceof CompareExpression) {
+			CompareExpression compareExpression = (CompareExpression) expression;
+			locationMap.putAll(getExpressionsLocationMap(compareExpression));
+		}
+		return locationMap;
+	}
+	
+	private HashMap<String, ExpressionLocation> getExpressionsLocationMap(CompareExpression compareExpression) {
+		ArithmeticExpression leftARexp = compareExpression.getLeftArithmeticExpression();
+		ArithmeticExpression rightARexp = compareExpression.getRightArithmeticExpression();
+		
+		HashMap<String, ExpressionLocation> locationMap = new HashMap<>();
+		locationMap.put(compareExpression.getHash(), compareExpression.getLocation());
+		locationMap.put(leftARexp.getHash(), leftARexp.getLocation());
+		locationMap.put(rightARexp.getHash(), rightARexp.getLocation());
+		return locationMap;
+	}
+
+	private HashMap<String, String> getExpressionsResultMap(FilterResultEntity filterResultEntity) {
+		HashMap<String, String> resultMap = new HashMap<>();
+		for(CompareExpressionResultEntity cmp : filterResultEntity.getCompareExpressionResultEntities()) {
+			resultMap.put(cmp.getHash(), cmp.getStatus());
+			for(ArithmeticExpressionResultEntity arExp : cmp.getArithmeticExpressionResultEntities()) {
+				resultMap.put(arExp.getHash(), arExp.getStatus());
+			}
+		}
+		return resultMap;
 	}
 
 	private FilterResultEntity createFilterResultEntity(UUID filterId, Date marketTime, String scripName) {
@@ -327,4 +418,5 @@ public class FilterServiceImpl implements FilterService{
 		entityMap.put("status",entity.getStatus());
 		return entityMap;
 	}
+
 }

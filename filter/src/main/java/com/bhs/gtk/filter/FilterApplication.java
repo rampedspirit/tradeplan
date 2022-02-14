@@ -24,7 +24,7 @@ public class FilterApplication {
 	@EventListener(ApplicationReadyEvent.class)
 	public void handleAfterStartupTasks() {
 		if(createTopicsRequiredForScreenerService()) {
-			// handle maintenance tasks here
+			//TODO: handle maintenance tasks here
 		}
 	}
 
