@@ -31,24 +31,22 @@ import com.bhs.gtk.screener.util.Converter;
 
 @Service
 public class ScreenerServiceImpl implements ScreernerService {
-	
+
 	@Autowired
 	private Converter converter;
-	
+
 	@Autowired
 	private EntityWriter entityWriter;
-	
+
 	@Autowired
 	private EntityReader entityReader;
-	
+
 	@Autowired
 	private ExecutableServiceImpl executableServiceImpl;
-	
+
 	@Autowired
 	private ConditionResultServiceImpl conditionResultServiceImpl;
-	
-	
-	
+
 	@Override
 	public ScreenerResponse createScreener(ScreenerCreateRequest screenerCreateRequest) {
 		ScreenerEntity entity = entityWriter.createScreenerEntity(screenerCreateRequest);
@@ -59,7 +57,7 @@ public class ScreenerServiceImpl implements ScreernerService {
 	public List<ScreenerResponse> getAllScreeners() {
 		List<ScreenerEntity> screenerEntities = entityReader.getAllScreenerEntities();
 		List<ScreenerResponse> screenerResponses = new ArrayList<>();
-		for(ScreenerEntity entity : screenerEntities) {
+		for (ScreenerEntity entity : screenerEntities) {
 			screenerResponses.add(converter.convertToScreenerResponse(entity));
 		}
 		return screenerResponses;
@@ -68,52 +66,52 @@ public class ScreenerServiceImpl implements ScreernerService {
 	@Override
 	public ScreenerDetailedResponse getScreener(UUID screenerId) {
 		ScreenerEntity screenerEntity = entityReader.getScreenerEntity(screenerId);
-		if(screenerEntity != null) {
+		if (screenerEntity != null) {
 			return converter.convertToScreenerDetailedResponse(screenerEntity);
 		}
-		//throw exception screener not found
+		// throw exception screener not found
 		return null;
 	}
 
 	@Override
 	public ScreenerResponse deleteScreener(UUID screenerId) {
 		ScreenerEntity deletedScreener = entityWriter.deleteScreener(screenerId);
-		if(deletedScreener != null) {
+		if (deletedScreener != null) {
 			return converter.convertToScreenerResponse(deletedScreener);
 		}
-		//throw exception
+		// throw exception
 		return null;
 	}
 
 	@Override
 	public ScreenerResponse updateScreener(List<ScreenerPatchData> patchData, UUID screenerId) {
-		//TODO: improve update of screener.
+		// TODO: improve update of screener.
 		ScreenerEntity screenerEntity = entityReader.getScreenerEntity(screenerId);
-		if(screenerEntity != null) {
-			for(ScreenerPatchData pData : patchData) {
-				update(screenerEntity, pData.getProperty(),pData.getValue());
+		if (screenerEntity != null) {
+			for (ScreenerPatchData pData : patchData) {
+				update(screenerEntity, pData.getProperty(), pData.getValue());
 			}
 			ScreenerEntity savedEntity = entityWriter.saveScreenerEntity(screenerEntity);
 			return converter.convertToScreenerResponse(savedEntity);
 		}
 		return null;
 	}
-	
+
 	@Override
 	public ScreenerDetailedResponse runScreener(ExecutableCreateRequest executableCreateRequest, UUID screenerId) {
 		ScreenerEntity screenerEntity = entityReader.getScreenerEntity(screenerId);
-		if(screenerEntity != null) {
+		if (screenerEntity != null) {
 			Date marketTime = DateTimeUtils.toDate(executableCreateRequest.getMarketTime().toInstant());
 			UUID conditionId = screenerEntity.getConditionId();
 			UUID watchlistId = screenerEntity.getWatchlistId();
 			String note = executableCreateRequest.getNote();
 			List<String> scripNames = executableCreateRequest.getScripNames();
-			addExecutableToScreener(screenerEntity, marketTime, conditionId,watchlistId, note, scripNames);
-			runExecutable(conditionId,marketTime,watchlistId);
+			addExecutableToScreener(screenerEntity, marketTime, conditionId, watchlistId, note, scripNames);
+			runExecutable(conditionId, marketTime, watchlistId);
 			return converter.convertToScreenerDetailedResponse(entityReader.getScreenerEntity(screenerId));
 		}
-		//throw exception
-		return null; 	
+		// throw exception
+		return null;
 	}
 
 	private ExecutableEntity runExecutable(UUID conditionId, Date marketTime, UUID watchlistId) {
@@ -124,10 +122,11 @@ public class ScreenerServiceImpl implements ScreernerService {
 		return executableServiceImpl.updateStatusOfExecutable(executable);
 	}
 
-	private ScreenerEntity addExecutableToScreener(ScreenerEntity screenerEntity, Date marketTime, UUID conditionId, UUID watchlistId,
-			String note, List<String> scripNames) {
-		ExecutableEntity executable = entityWriter.createExecutableEntity(marketTime,note,	watchlistId, conditionId);
-		List<ConditionResultEntity> resultEntities = entityWriter.queueConditionsToExecute(scripNames,marketTime, conditionId);
+	private ScreenerEntity addExecutableToScreener(ScreenerEntity screenerEntity, Date marketTime, UUID conditionId,
+			UUID watchlistId, String note, List<String> scripNames) {
+		ExecutableEntity executable = entityWriter.createExecutableEntity(marketTime, note, watchlistId, conditionId);
+		List<ConditionResultEntity> resultEntities = entityWriter.queueConditionsToExecute(scripNames, marketTime,
+				conditionId);
 		executable.setConditionResultEntities(resultEntities);
 		executable.setNumberOfScripForExecution(resultEntities.size());
 		screenerEntity.getExecutableEntities().add(executable);
@@ -143,13 +142,13 @@ public class ScreenerServiceImpl implements ScreernerService {
 			screenerEntity.setDescription(value);
 			break;
 		case WATCHLIST_ID:
-			screenerEntity.setConditionId(UUID.fromString(value));
-			break;
-		case CONDITION_ID:
 			screenerEntity.setWatchlistId(UUID.fromString(value));
 			break;
+		case CONDITION_ID:
+			screenerEntity.setConditionId(UUID.fromString(value));
+			break;
 		default:
-			//throw unsupported exception.
+			// throw unsupported exception.
 			break;
 		}
 		return true;
@@ -160,11 +159,11 @@ public class ScreenerServiceImpl implements ScreernerService {
 		ChangeStatusEnum status = ChangeStatusEnum.fromValue(changeNotification.getStatus());
 		switch (status) {
 		case UPDATED:
-			 entityWriter.adaptConditionUpdate(changeNotification.getId());
+			entityWriter.adaptConditionUpdate(changeNotification.getId());
 			break;
 		case DELETED:
-			 entityWriter.adaptConditionDelete(changeNotification.getId());
-			 break;
+			entityWriter.adaptConditionDelete(changeNotification.getId());
+			break;
 		default:
 			throw new IllegalArgumentException();
 		}
@@ -173,16 +172,17 @@ public class ScreenerServiceImpl implements ScreernerService {
 
 	@Override
 	public boolean adaptExecutionResponse(String message) {
-		
+
 		JSONObject jsonObject = new JSONObject(message);
-		UUID conditionId = UUID.fromString((String)jsonObject.get("conditionId"));
-		String scripName = (String)jsonObject.get("scripName");
-		String  status = (String)jsonObject.get("status");
-		String marketTimeAsString = (String)jsonObject.get("marketTime");
+		UUID conditionId = UUID.fromString((String) jsonObject.get("conditionId"));
+		String scripName = (String) jsonObject.get("scripName");
+		String status = (String) jsonObject.get("status");
+		String marketTimeAsString = (String) jsonObject.get("marketTime");
 		Date marketTime = DateTimeUtils.toDate(OffsetDateTime.parse(marketTimeAsString).toInstant());
-		
-		if(entityWriter.adaptConditionResultEntity(conditionId,scripName,marketTime,status)) {
-			return executableServiceImpl.updateStatusOfExecutables(entityReader.getExecutableEntitites(conditionId, marketTime));
+
+		if (entityWriter.adaptConditionResultEntity(conditionId, scripName, marketTime, status)) {
+			return executableServiceImpl
+					.updateStatusOfExecutables(entityReader.getExecutableEntitites(conditionId, marketTime));
 		}
 		return false;
 	}
