@@ -1,5 +1,6 @@
 import { CfnOutput, RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
 import { InstanceType, IVpc, Peer, Port, SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2";
+import { Repository } from "aws-cdk-lib/aws-ecr";
 import { Cluster, ContainerDependencyCondition, ContainerImage, Ec2Service, Ec2TaskDefinition, EcsOptimizedImage, LogDriver, NetworkMode, Scope } from "aws-cdk-lib/aws-ecs";
 import { NetworkLoadBalancer, NetworkTargetGroup, Protocol } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
@@ -180,7 +181,7 @@ export class EcsDbStack extends Stack {
         });
 
         const containerDefinition = taskDefinition.addContainer(stackName + "-appdb-container", {
-            image: ContainerImage.fromRegistry("enterprisedb/postgresql:12"),
+            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "appdb", "appdb")),
             cpu: 50,
             memoryLimitMiB: 1024,
             essential: true,
@@ -253,7 +254,7 @@ export class EcsDbStack extends Stack {
         });
 
         const containerDefinition = taskDefinition.addContainer(stackName + "-stockdb-container", {
-            image: ContainerImage.fromRegistry("enterprisedb/postgresql:12"),
+            image: ContainerImage.fromRegistry("postgres:14"),
             cpu: 50,
             memoryLimitMiB: 1024,
             essential: true,

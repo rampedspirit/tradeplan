@@ -22,7 +22,7 @@ public class ExecutableApiController implements ExecutableApi {
 
 	@Autowired
 	private ExecutableServiceImpl executableServiceImpl;
-	
+
 	@Override
 	public ResponseEntity<ExecutableResponse> getExecutable(UUID executableId) {
 		ExecutableResponse executable = executableServiceImpl.getExecutable(executableId);
@@ -37,7 +37,7 @@ public class ExecutableApiController implements ExecutableApi {
 
 	@Override
 	public ResponseEntity<ExecutableResponse> updateExecutable(@Valid ExecutablePatchData body, UUID executableId) {
-		 ExecutableResponse executable = executableServiceImpl.updateExecutable(body, executableId);
+		ExecutableResponse executable = executableServiceImpl.updateExecutable(body, executableId);
 		return new ResponseEntity<ExecutableResponse>(executable, HttpStatus.OK);
 	}
 

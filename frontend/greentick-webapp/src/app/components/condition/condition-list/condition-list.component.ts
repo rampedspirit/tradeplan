@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSelectionList, MatSelectionListChange } from '@angular/material/list';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { TabAreaService, Tab } from 'src/app/services/tab-area.service';
-import { Condition, ConditionService } from 'src/gen/condition';
+import { ConditionResponse, ConditionService } from 'src/gen/condition';
 import { ConditionCreateComponent } from '../../condition/condition-create/condition-create.component';
 import { ConditionNotificationService } from '../condition-notification.service';
 
@@ -17,7 +17,7 @@ export class ConditionListComponent implements OnInit {
   @ViewChild(MatSelectionList)
   conditionList!: MatSelectionList;
 
-  public conditions: Condition[];
+  public conditions: ConditionResponse[];
   public fetchError = false;
 
   constructor(private conditionService: ConditionService, private conditionNotificationService: ConditionNotificationService,
@@ -62,11 +62,11 @@ export class ConditionListComponent implements OnInit {
 
   onSelectionChange(event: MatSelectionListChange) {
     this.conditionList.deselectAll();
-    let selectedcondition: Condition = event.options[0].value;
+    let selectedcondition: ConditionResponse = event.options[0].value;
     this.openTab(selectedcondition);
   }
 
-  private openTab(condition: Condition) {
+  private openTab(condition: ConditionResponse) {
     let tab: Tab = {
       id: condition.id,
       type: 'condition',

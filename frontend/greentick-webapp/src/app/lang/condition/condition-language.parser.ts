@@ -82,4 +82,8 @@ export class ConditionLanguageParser {
             message: "Invalid Filter Name"
         }
     }
+
+    public getParseTree(query: string): string {
+        return parser.parse(query);
+    }
 }

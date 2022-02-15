@@ -4,13 +4,15 @@ import { HttpClient } from '@angular/common/http';
 
 
 import { ConditionService } from './api/condition.service';
+import { ResultService } from './api/result.service';
 
 @NgModule({
   imports:      [],
   declarations: [],
   exports:      [],
   providers: [
-    ConditionService ]
+    ConditionService,
+    ResultService ]
 })
 export class ApiModule {
     public static forRoot(configurationFactory: () => Configuration): ModuleWithProviders<ApiModule> {
