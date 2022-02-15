@@ -1,5 +1,6 @@
 package com.bhs.gtk.filter.persistence;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -44,6 +45,7 @@ public class CompareExpressionResultEntity {
 		this.setMarketTime(marketTime);
 		this.setScripName(scripName);
 		this.setStatus(status);
+		this.arithmeticExpressionResultEntities = new ArrayList<>();
 	}
 
 	public Date getMarketTime() {

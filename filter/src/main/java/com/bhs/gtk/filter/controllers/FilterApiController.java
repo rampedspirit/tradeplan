@@ -52,8 +52,8 @@ public class FilterApiController implements FilterApi {
 
 	@Override
 	public ResponseEntity<FilterResponse> updateFilter(@Valid List<PatchData> body, UUID id) {
-		// TODO Auto-generated method stub
-		return null;
+		FilterResponse filterResponse = filterServiceImpl.updateFilter(body, id);
+		return new ResponseEntity<FilterResponse>(filterResponse, HttpStatus.OK);
 	}
 
 	@Override

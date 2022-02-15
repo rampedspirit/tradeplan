@@ -20,6 +20,9 @@ public class EntityWriter {
 	private FilterRepository filterRepository;
 	
 	@Autowired
+	private ExpressionEntityRepository expressionEntityRepository;
+	
+	@Autowired
 	private ArithmeticExpressionResultRepository arithmeticExpressionResultRepository;
 	
 	@Autowired
@@ -34,6 +37,30 @@ public class EntityWriter {
 	@Autowired
 	private Converter converter;
 	
+	
+	public boolean removePreviousAssociations(FilterEntity filterEntity) {
+		deleteExpressionsNotAssociatedToAnyFilter();
+		deleteFilterResultEntity(filterEntity.getId());
+		return true;
+	}
+	
+	private boolean deleteFilterResultEntity(UUID filterId) {
+		List<FilterResultEntity> filterResults = filterResultRepository.findByFilterId(filterId);
+		if(!filterResults.isEmpty()) {
+			filterResults.stream().forEach(ft -> ft.setCompareExpressionResultEntities(new ArrayList<>()));
+			filterResultRepository.saveAll(filterResults);
+			filterResultRepository.deleteAll(filterResults);
+		}
+		return true;
+	}
+
+	private void deleteExpressionsNotAssociatedToAnyFilter() {
+		expressionEntityRepository.deleteAll(expressionEntityRepository.findAll());
+	}
+
+	public FilterEntity saveFilterEntity(FilterEntity filterEntity) {
+		return filterRepository.save(filterEntity);
+	}
 	
 	public FilterResultEntity createFilterResultEntity(UUID filterId, Date marketTime, String scripName, String status,
 			List<CompareExpressionResultEntity> compareResults) {

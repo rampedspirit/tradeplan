@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.threeten.bp.DateTimeUtils;
 import org.threeten.bp.OffsetDateTime;
 
+import com.bhs.gtk.filter.messaging.ChangeNotification.ChangeStatusEnum;
 import com.bhs.gtk.filter.messaging.MessageProducer;
 import com.bhs.gtk.filter.messaging.MessageType;
 import com.bhs.gtk.filter.model.ArithmeticExpression;
@@ -33,8 +35,11 @@ import com.bhs.gtk.filter.model.FilterResultResponse;
 import com.bhs.gtk.filter.model.FilterResultResponse.FilterResultEnum;
 import com.bhs.gtk.filter.model.LogicalExpression;
 import com.bhs.gtk.filter.model.OperationType;
+import com.bhs.gtk.filter.model.PatchData;
+import com.bhs.gtk.filter.model.PatchData.PropertyEnum;
 import com.bhs.gtk.filter.persistence.ArithmeticExpressionResultEntity;
 import com.bhs.gtk.filter.persistence.CompareExpressionResultEntity;
+import com.bhs.gtk.filter.persistence.EntityObjectCreator;
 import com.bhs.gtk.filter.persistence.EntityReader;
 import com.bhs.gtk.filter.persistence.EntityWriter;
 import com.bhs.gtk.filter.persistence.ExpressionEntity;
@@ -51,6 +56,9 @@ public class FilterServiceImpl implements FilterService{
 	
 	@Autowired
 	private EntityReader entityReader;
+	
+	@Autowired
+	private EntityObjectCreator entityObjectCreator;
 	
 	@Autowired
 	private Mapper mapper;
@@ -127,8 +135,78 @@ public class FilterServiceImpl implements FilterService{
 		return filterResultResponse;
 	}
 	
-	private List<ExpressionResult> getExpressionResults(FilterResultEntity filterResultEntity) {
+	@Override
+	public FilterResponse updateFilter(@Valid List<PatchData> patchData, UUID filterId) {
+		if(patchData == null || filterId == null) {
+			//throw exception if validation fails
+			return null;
+		}
+		if(!isValidatePatchData(patchData)) {
+			return null;
+		}
+		
+		FilterEntity filterEntity = entityReader.getFilterEntity(filterId);
+		boolean logicChanged = false;
+		
+		for( PatchData pd : patchData) {
+			@NotNull
+			String value = pd.getValue();
+			switch (pd.getProperty()) {
+			case NAME: 
+				filterEntity.setName(value);
+				break;
+			case DESCRIPTION: 
+				filterEntity.setDescription(value); 
+				break;
+			case CODE: 
+				logicChanged = true;
+				filterEntity.setCode(value);
+				break;
+			case PARSE_TREE: 
+				logicChanged = true;
+				filterEntity.setParseTree(value);
+				break;
+			}
+		}
+		
+		if(logicChanged) {
+			if(!messageProducer.sendChangeNotification(filterEntity.getId(), ChangeStatusEnum.UPDATED)) {
+				//not able to notify change in logic and hence logic change is aborted.
+				return null;
+			}
+		}
+		
+		FilterEntity changedFilterEntity;
+		if(logicChanged) {
+			changedFilterEntity = updateFilterEntity(filterEntity);
 
+		}else {
+			changedFilterEntity = entityWriter.saveFilterEntity(filterEntity);
+		}
+		return mapper.getFilterResponse(changedFilterEntity);
+	}
+	
+	
+	private FilterEntity updateFilterEntity(FilterEntity filterEntity) {
+		BooleanExpression booleanExpression = converter.convertToBooleanExpression(filterEntity.getParseTree());
+		List<ExpressionEntity> expressions = entityObjectCreator.createExpressionEntityObjects(booleanExpression);
+		filterEntity.setExpressions(expressions);
+		FilterEntity savedFilterEntity = entityWriter.saveFilterEntity(filterEntity);
+		entityWriter.removePreviousAssociations(filterEntity);
+		return savedFilterEntity;            
+	}
+
+	private boolean isValidatePatchData(List<PatchData> patchData) {
+		if(patchData == null || patchData.isEmpty()) {
+			return false;
+		}
+		List<@NotNull PropertyEnum> properties = patchData.stream().map( p -> p.getProperty()).collect(Collectors.toList());
+		// ^ is XOR operation. 
+		return !(properties.contains(PropertyEnum.CODE) ^ properties.contains(PropertyEnum.PARSE_TREE));
+	}
+	
+	
+	private List<ExpressionResult> getExpressionResults(FilterResultEntity filterResultEntity) {
 		HashMap<String, String> resultMap = getExpressionsResultMap(filterResultEntity);
 		HashMap<String, ExpressionLocation> locationMap = getExpressionsLocationMap(filterResultEntity.getFilterId());
 
