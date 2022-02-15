@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.bhs.gtk.screener.api.ExecutableApi;
 import com.bhs.gtk.screener.model.ExecutableDetailedResponse;
@@ -16,6 +17,7 @@ import com.bhs.gtk.screener.model.ExecutableResponse;
 import com.bhs.gtk.screener.service.ExecutableServiceImpl;
 
 @Controller
+@CrossOrigin
 public class ExecutableApiController implements ExecutableApi {
 
 	@Autowired

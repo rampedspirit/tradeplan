@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.threeten.bp.DateTimeUtils;
 import org.threeten.bp.OffsetDateTime;
 
@@ -15,6 +16,7 @@ import com.bhs.gtk.condition.model.ConditionResultResponse;
 import com.bhs.gtk.condition.service.ResultServiceImpl;
 
 @Controller
+@CrossOrigin
 public class ResultApiController implements ResultApi{
 	
 	@Autowired
