@@ -39,6 +39,7 @@ public class MessageProducer {
 			default:
 				throw new IllegalArgumentException(type+" is not supported message type in Condition service");
 			}
+			System.err.println("CS:->"+message);
 			kafkaTemplate.send(topicName,message);
 			return true;
 		}catch (KafkaException kafkaException) {

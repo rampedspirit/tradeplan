@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 import org.threeten.bp.DateTimeUtils;
 import org.threeten.bp.OffsetDateTime;
 
+import com.bhs.gtk.condition.messaging.ChangeNotification;
+import com.bhs.gtk.condition.messaging.ChangeNotification.ChangeStatusEnum;
 import com.bhs.gtk.condition.model.BooleanExpression;
 import com.bhs.gtk.condition.model.ConditionExpression;
 import com.bhs.gtk.condition.model.ConditionResultResponse;
@@ -24,6 +26,15 @@ import com.bhs.gtk.condition.model.FilterExpression;
 
 @Component
 public class Converter {
+	
+	
+	public ChangeNotification convertToChangeNotification(String message) {
+		JSONObject jsonObject = new JSONObject(message);
+		String id = (String)jsonObject.get("id");
+		String status = (String)jsonObject.get("status");
+		ChangeNotification changeNotification = new ChangeNotification(UUID.fromString(id), ChangeStatusEnum.fromValue(status));
+		return changeNotification;
+	}
 	
 	public ExecutableCondition convertToExecutableCondition(String message) {
 		try {

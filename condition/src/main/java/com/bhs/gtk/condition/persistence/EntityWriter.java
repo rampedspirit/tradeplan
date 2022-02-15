@@ -13,6 +13,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.bhs.gtk.condition.messaging.ChangeNotification.ChangeStatusEnum;
+import com.bhs.gtk.condition.messaging.MessageProducer;
 import com.bhs.gtk.condition.model.ConditionRequest;
 import com.bhs.gtk.condition.model.ConditionResultResponse.ConditionResultEnum;
 import com.bhs.gtk.condition.model.Filter.StatusEnum;
@@ -33,6 +35,10 @@ public class EntityWriter {
 	
 	@Autowired
 	private FilterRespository filterRespository;
+	
+	@Autowired
+	private MessageProducer messageProducer;
+	
 	
 	@Autowired
 	private Converter converter;
@@ -74,15 +80,6 @@ public class EntityWriter {
 	}
 
 	private void deleteFiletersNotAssociatedToanyConditions() {
-//		List<FilterEntity> filtersNotAssociatedToAnyConditions = new ArrayList<>();
-//		Iterable<FilterEntity> filterEntities = filterRespository.findAll();
-//		for( FilterEntity filter : filterEntities) {
-//			List<ConditionEntity> conditions = filter.getConditions();
-//			if(conditions == null || conditions.isEmpty()) {
-//				filtersNotAssociatedToAnyConditions.add(filter);
-//			}
-//		}
-//		filterRespository.deleteAll(filtersNotAssociatedToAnyConditions);
 		filterRespository.deleteAll(filterRespository.findAll());
 	}
 	
@@ -112,7 +109,7 @@ public class EntityWriter {
 		List<FilterEntity> filterEntities = new ArrayList<>();
 		Set<UUID> filterIds = converter.getFilterIds(parseTree);
 		for(UUID id : filterIds) {
-			FilterEntity savedFilterEntity = entityReader.getFilterInRepository(id);
+			FilterEntity savedFilterEntity = entityReader.getFilterEntity(id);
 			if(savedFilterEntity != null) {
 				filterEntities.add(savedFilterEntity);
 			}else {
@@ -170,10 +167,70 @@ public class EntityWriter {
 		if(status == null || conditionResultEntity == null) {
 			return null;
 		}
-		//ConditionResultEnum.valueOf(evaluatedStatus);
 		//TODO: verify whether value of status is valid or not.
 		conditionResultEntity.setStatus(status);
 		return conditionResultRepository.save(conditionResultEntity);
+	}
+
+	public boolean adaptFilterDelete(UUID filterId) {
+		FilterEntity filterEntity = entityReader.getFilterEntity(filterId);
+		if(filterEntity == null) {
+			return false;
+		}
+		List<ConditionEntity> conditions = filterEntity.getConditions();
+		List<UUID> conditionIds = conditions.stream().map(c -> c.getId()).collect(Collectors.toList());
+		
+		removeResults(conditionIds, filterEntity.getId());
+		conditions.forEach(c -> c.getFilters().remove(filterEntity));
+		conditionRepository.saveAll(conditions);
+		filterRespository.deleteById(filterEntity.getId());
+		return false;
+	}
+	
+	public boolean adaptFilterUpdate(UUID filterId) {
+		FilterEntity filterEntity = updateFilterEntity(filterId, StatusEnum.UPDATED.name());
+		if(filterEntity == null) {
+			return false;
+		}
+		List<UUID> conditionIds = filterEntity.getConditions().stream().map(c -> c.getId())
+				.collect(Collectors.toList());
+		removeResults(conditionIds, filterEntity.getId());
+		return true;
+	}
+
+	private void removeResults(List<UUID> conditionIds, UUID filterId) {
+		sendUpdateNotification(conditionIds);
+		removeConditionResults(conditionIds);
+		List<FilterResultEntity> filterResultEntities = filterResultRepository.findByFilterId(filterId);
+		filterResultRepository.deleteAll(filterResultEntities);
+	}
+	
+	private boolean sendUpdateNotification(List<UUID> conditionIds) {
+		for(UUID id : conditionIds) {
+			if(!messageProducer.sendChangeNotification(id, ChangeStatusEnum.UPDATED)) {
+				//not able to notify change in logic and hence logic change is aborted.
+				//TODO: Log condition ids to which update could not be sent.
+			}
+		}
+		return true;
+	}
+
+	private boolean removeConditionResults(List<UUID> conditionIds) {
+		List<ConditionResultEntity> conditionResults = conditionResultRepository.findByConditionIdIn(conditionIds);
+		for(ConditionResultEntity cr : conditionResults) {
+			cr.setFilterResultEntities(new ArrayList<>());
+		}
+		conditionResultRepository.deleteAll(conditionResults);
+		return true;
+	}
+
+	private FilterEntity updateFilterEntity(UUID filterId, String status) {
+		FilterEntity filterEntity = entityReader.getFilterEntity(filterId);
+		if(filterEntity == null) {
+			return null;
+		}
+		filterEntity.setStatus(status);
+		return filterRespository.save(filterEntity);
 	}
 
 }

@@ -11,12 +11,12 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * Filter
+ * FilterResponse
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-09-23T17:21:44.041795600+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-02-06T11:02:32.848233600+05:30[Asia/Calcutta]")
 
-public class Filter   {
+public class FilterResponse   {
   @JsonProperty("id")
   private UUID id = null;
 
@@ -29,10 +29,7 @@ public class Filter   {
   @JsonProperty("code")
   private String code = null;
 
-  @JsonProperty("parseTree")
-  private String parseTree = null;
-
-  public Filter id(UUID id) {
+  public FilterResponse id(UUID id) {
     this.id = id;
     return this;
   }
@@ -53,7 +50,7 @@ public class Filter   {
     this.id = id;
   }
 
-  public Filter name(String name) {
+  public FilterResponse name(String name) {
     this.name = name;
     return this;
   }
@@ -62,8 +59,7 @@ public class Filter   {
    * name of filter that is unqiue across the application
    * @return name
   **/
-  @ApiModelProperty(required = true, value = "name of filter that is unqiue across the application")
-  @NotNull
+  @ApiModelProperty(value = "name of filter that is unqiue across the application")
 
 
   public String getName() {
@@ -74,7 +70,7 @@ public class Filter   {
     this.name = name;
   }
 
-  public Filter description(String description) {
+  public FilterResponse description(String description) {
     this.description = description;
     return this;
   }
@@ -94,7 +90,7 @@ public class Filter   {
     this.description = description;
   }
 
-  public Filter code(String code) {
+  public FilterResponse code(String code) {
     this.code = code;
     return this;
   }
@@ -114,26 +110,6 @@ public class Filter   {
     this.code = code;
   }
 
-  public Filter parseTree(String parseTree) {
-    this.parseTree = parseTree;
-    return this;
-  }
-
-  /**
-   * output after parsing grammar
-   * @return parseTree
-  **/
-  @ApiModelProperty(value = "output after parsing grammar")
-
-
-  public String getParseTree() {
-    return parseTree;
-  }
-
-  public void setParseTree(String parseTree) {
-    this.parseTree = parseTree;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -143,29 +119,27 @@ public class Filter   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    Filter filter = (Filter) o;
-    return Objects.equals(this.id, filter.id) &&
-        Objects.equals(this.name, filter.name) &&
-        Objects.equals(this.description, filter.description) &&
-        Objects.equals(this.code, filter.code) &&
-        Objects.equals(this.parseTree, filter.parseTree);
+    FilterResponse filterResponse = (FilterResponse) o;
+    return Objects.equals(this.id, filterResponse.id) &&
+        Objects.equals(this.name, filterResponse.name) &&
+        Objects.equals(this.description, filterResponse.description) &&
+        Objects.equals(this.code, filterResponse.code);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, code, parseTree);
+    return Objects.hash(id, name, description, code);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class Filter {\n");
+    sb.append("class FilterResponse {\n");
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    code: ").append(toIndentedString(code)).append("\n");
-    sb.append("    parseTree: ").append(toIndentedString(parseTree)).append("\n");
     sb.append("}");
     return sb.toString();
   }

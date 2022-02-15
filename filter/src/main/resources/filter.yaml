@@ -7,17 +7,6 @@ servers:
   - url: 'http://localhost:5000/'
   - url: 'https://localhost:5000/'
 paths:
-  /:
-    get:
-      tags:
-        - filter
-      summary: checks the health of service
-      description: checks the health of service
-      operationId: checkHealth
-      responses:
-        '200':
-          description: >-
-            Request sucessfully processed.
   /v1/filter:
     post:
       tags:
@@ -30,7 +19,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Filter'
+              $ref: '#/components/schemas/FilterRequest'
         required: true
       responses:
         '201':
@@ -38,7 +27,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Filter'
+                $ref: '#/components/schemas/FilterResponse'
         '400':
           description: Request is not understood.
           content:
@@ -60,13 +49,14 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Filter'
+                  $ref: '#/components/schemas/FilterResponse'
         '400':
           description: Request is not understood.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+                
   '/v1/filter/{id}':
     get:
       tags:
@@ -88,7 +78,7 @@ paths:
           content:
             application/json:
               schema:
-                  $ref: '#/components/schemas/Filter'
+                  $ref: '#/components/schemas/FilterResponse'
         '400':
           description: Request is not understood.
           content:
@@ -119,7 +109,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchModel'
+              type: array
+              items:
+                $ref: '#/components/schemas/PatchData'
         required: true
       responses:
         '200':
@@ -127,7 +119,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Filter'
+                $ref: '#/components/schemas/FilterResponse'
         '400':
           description: Request is not understood.
           content:
@@ -159,18 +151,85 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Filter'
+                $ref: '#/components/schemas/FilterResponse'
         '404':
           description: Requested filter not found.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+                
+  '/v1/filter/{filterId}/{marketTime}/{scripName}/result':
+    get:
+      tags:
+        - filter
+      summary: get filter result 
+      description: get filter result 
+      operationId: getFilterResult
+      parameters:
+        - in: path
+          name: filterId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: marketTime
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: scripName
+          required: true
+          schema:
+            type: string                
+            
+      responses:
+        '200':
+          description: >-
+            Request sucessfully processed.
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/FilterResultResponse'
+        '400':
+          description: Request is not understood.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Requested filter not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+                
+
 components:
   schemas:
-    Filter:
+    FilterRequest:
       required:
         - name
+        - code
+        - parseTree
+      type: object
+      properties:
+        name:
+          type: string
+          description: name of filter that is unqiue across the application
+        description:
+          type: string
+          description: description of filter
+        code:
+          type: string
+          description: text representing filter code
+        parseTree:
+          type: string
+          description: output after parsing grammar  
+          
+    FilterResponse:
       type: object
       properties:
         id:
@@ -189,36 +248,59 @@ components:
         code:
           type: string
           description: text representing filter code
-        parseTree:
-          type: string
-          description: output after parsing grammar
 
-    Error:
+    FilterResultResponse:
       type: object
       properties:
-        message:
+        filterId:
           type: string
-          description: brief information about error
-        resolution:
+          format: uuid   
+        marketTime:
           type: string
-          description: possibly hints to solve the error
-        errorCode:
+          format: date-time
+        scripName:
+          type: string 
+        filterResult:
           type: string
-          description: pattern to unqiuely identify error root cause and origin.
+          enum: [QUEUED, RUNNING, PASS, FAIL, ERROR]
+        expressionResults:
+            type: array
+            items:
+              $ref: '#/components/schemas/ExpressionResult'
+ 
+           
           
-    PatchModel:
-      title: Update Properties
+    ExpressionResult:
       type: object
       properties:
-        patchData:
-          type: array
-          description: attributes to be updated.
-          items:
-            $ref: '#/components/schemas/PatchData'
-      description: >-
-        All patch operations follow the json patch api standard. The patch
-        object is provided by the user in the patch operation for the particular
-        resource.
+        location:
+          $ref : '#/components/schemas/Location'
+        result:
+          oneOf:
+           - type: string
+           - type: number      
+          
+    Location:
+      type: object
+      properties:
+        start:
+          $ref : '#/components/schemas/Position'
+        end:
+          $ref : '#/components/schemas/Position'                 
+          
+    Position:
+     type: object
+     properties:
+       offset:
+         type: integer
+       line:
+         type: integer
+       column:
+         type: integer
+      
+      
+     
+
     PatchData:
       required:
         - operation
@@ -245,3 +327,16 @@ components:
         value:
           type: string
           description: The new value of the json attribute to be patched.
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: brief information about error
+        resolution:
+          type: string
+          description: possibly hints to solve the error
+        errorCode:
+          type: string
+          description: pattern to unqiuely identify error root cause and origin.          
