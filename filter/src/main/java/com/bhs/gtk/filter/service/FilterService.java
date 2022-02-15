@@ -21,4 +21,5 @@ public interface FilterService {
 	public List<ArithmeticExpressionResultEntity> runArithmeticExpressionResultEntities(List<ArithmeticExpressionResultEntity> arResultEntitites);
 	public FilterResultResponse getFilterResult(UUID filterId, String marketTime, String scripName);
 	public FilterResponse updateFilter(@Valid List<PatchData> patchData, UUID filterId);
+	public FilterResponse deleteFilter(UUID filterId);
 }

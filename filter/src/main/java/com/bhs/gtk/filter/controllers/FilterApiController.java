@@ -34,14 +34,14 @@ public class FilterApiController implements FilterApi {
 
 	@Override
 	public ResponseEntity<FilterResponse> deleteFilter(UUID id) {
-		// TODO Auto-generated method stub
-		return null;
+		FilterResponse filterResponse = filterServiceImpl.deleteFilter(id);
+		return new ResponseEntity<FilterResponse>(filterResponse, HttpStatus.OK);
 	}
  
 	@Override
 	public ResponseEntity<List<FilterResponse>> getAllFilters() {
-			List<FilterResponse> filterResponses = filterServiceImpl.getAllFilters();
-			return new ResponseEntity<List<FilterResponse>>(filterResponses, HttpStatus.OK);
+		List<FilterResponse> filterResponses = filterServiceImpl.getAllFilters();
+		return new ResponseEntity<List<FilterResponse>>(filterResponses, HttpStatus.OK);
 	}
 
 	@Override

@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bhs.gtk.condition.messaging.ChangeNotification;
 import com.bhs.gtk.condition.messaging.ChangeNotification.ChangeStatusEnum;
 import com.bhs.gtk.condition.messaging.MessageProducer;
 import com.bhs.gtk.condition.model.ConditionDetailedResponse;
@@ -64,6 +65,23 @@ public class ConditionServiceImpl implements ConditionService{
 		}
 		return null;
 	}
+	
+	@Override
+	public boolean adaptChangeInFilter(ChangeNotification changeNotification) {
+		ChangeStatusEnum status = ChangeStatusEnum.fromValue(changeNotification.getStatus());
+		switch (status) {
+		case UPDATED:
+			 entityWriter.adaptFilterUpdate(changeNotification.getId());
+			break;
+		case DELETED:
+			entityWriter.adaptFilterDelete(changeNotification.getId());
+			 break;
+		default:
+			throw new IllegalArgumentException();
+		}
+		return false;
+	}
+	
 	
 	@Override
 	public ConditionDetailedResponse updateCondition(List<PatchData> patchData, UUID conditionId) {

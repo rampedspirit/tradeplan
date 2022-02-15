@@ -44,7 +44,12 @@ public class EntityWriter {
 		return true;
 	}
 	
-	private boolean deleteFilterResultEntity(UUID filterId) {
+	public boolean deleteFilterEntity(FilterEntity filterEntity) {
+		filterRepository.delete(filterEntity);
+		return true;
+	}
+	
+	public boolean deleteFilterResultEntity(UUID filterId) {
 		List<FilterResultEntity> filterResults = filterResultRepository.findByFilterId(filterId);
 		if(!filterResults.isEmpty()) {
 			filterResults.stream().forEach(ft -> ft.setCompareExpressionResultEntities(new ArrayList<>()));
@@ -54,8 +59,9 @@ public class EntityWriter {
 		return true;
 	}
 
-	private void deleteExpressionsNotAssociatedToAnyFilter() {
+	public boolean deleteExpressionsNotAssociatedToAnyFilter() {
 		expressionEntityRepository.deleteAll(expressionEntityRepository.findAll());
+		return true;
 	}
 
 	public FilterEntity saveFilterEntity(FilterEntity filterEntity) {

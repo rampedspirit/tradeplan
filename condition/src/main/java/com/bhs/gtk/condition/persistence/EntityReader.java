@@ -24,7 +24,7 @@ public class EntityReader {
 	@Autowired
 	private ConditionResultRepository conditionResultRepository;
 	
-	public FilterEntity getFilterInRepository(UUID id) {
+	public FilterEntity getFilterEntity(UUID id) {
 		Optional<FilterEntity> entityContainer = filterRespository.findById(id);
 		if(entityContainer.isPresent()) {
 			return entityContainer.get();

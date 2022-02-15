@@ -136,6 +136,24 @@ public class FilterServiceImpl implements FilterService{
 	}
 	
 	@Override
+	public FilterResponse deleteFilter(UUID filterId) {
+		FilterEntity filterEntity = entityReader.getFilterEntity(filterId);
+		if(filterEntity == null) {
+			return null;
+		}
+		if(messageProducer.sendChangeNotification(filterEntity.getId(), ChangeStatusEnum.DELETED)) {
+			entityWriter.deleteFilterResultEntity(filterId);
+			filterEntity.setExpressions(new ArrayList<>());
+			entityWriter.saveFilterEntity(filterEntity);
+			entityWriter.deleteFilterEntity(filterEntity);
+			entityWriter.deleteExpressionsNotAssociatedToAnyFilter();
+			return mapper.getFilterResponse(filterEntity);
+		}
+		return null;
+	}
+	
+	
+	@Override
 	public FilterResponse updateFilter(@Valid List<PatchData> patchData, UUID filterId) {
 		if(patchData == null || filterId == null) {
 			//throw exception if validation fails

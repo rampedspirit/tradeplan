@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+import com.bhs.gtk.condition.service.ConditionServiceImpl;
 import com.bhs.gtk.condition.service.ExecutableServiceImpl;
 import com.bhs.gtk.condition.util.Converter;
 
@@ -12,6 +13,9 @@ public class MessageConsumer {
 	
 	@Autowired
 	private ExecutableServiceImpl executableServiceImpl;
+	
+	@Autowired
+	private ConditionServiceImpl conditionServiceImpl;
 	
 	@Autowired
 	private Converter converter;
@@ -31,10 +35,9 @@ public class MessageConsumer {
 	
 	@KafkaListener(topics = TopicNames.INPUT_CHANGE_NOTIFICATION)
 	public boolean receiveFilterChangeNotification(String message) {
-		System.err.println("CS :"+message);
+		ChangeNotification changeNotification = converter.convertToChangeNotification(message);
+		conditionServiceImpl.adaptChangeInFilter(changeNotification);
 		return true;
 	}
 	
-
-
 }
