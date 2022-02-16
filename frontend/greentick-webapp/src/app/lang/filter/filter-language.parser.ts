@@ -147,4 +147,8 @@ export class FilterLanguageParser {
     private getFunctionName(functionCall: string): string {
         return functionCall.match(/\w*/)[0];
     }
+
+    public getParseTree(query: string): string {
+        return parser.parse(query);
+    }
 }

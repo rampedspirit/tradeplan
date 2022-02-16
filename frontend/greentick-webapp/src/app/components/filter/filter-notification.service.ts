@@ -1,27 +1,27 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
-import { Filter } from 'src/gen/filter';
+import { FilterResponse } from 'src/gen/filter';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FilterNotificationService {
 
-  public createSubject: Subject<Filter>;
-  public updateSubject: Subject<Filter>;
+  public createSubject: Subject<FilterResponse>;
+  public updateSubject: Subject<FilterResponse>;
   public deleteSubject: Subject<string>;
 
   constructor() {
-    this.createSubject = new Subject<Filter>();
-    this.updateSubject = new Subject<Filter>();
+    this.createSubject = new Subject<FilterResponse>();
+    this.updateSubject = new Subject<FilterResponse>();
     this.deleteSubject = new Subject<string>();
   }
 
-  public triggerCreateNotification(filter: Filter) {
+  public triggerCreateNotification(filter: FilterResponse) {
     this.createSubject.next(filter);
   }
 
-  public triggerUpdateNotification(filter: Filter) {
+  public triggerUpdateNotification(filter: FilterResponse) {
     this.updateSubject.next(filter);
   }
 

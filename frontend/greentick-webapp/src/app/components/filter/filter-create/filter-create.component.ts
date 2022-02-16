@@ -60,7 +60,9 @@ export class FilterCreateComponent implements OnInit {
     this.createError = false;
     this.filterService.createFilter({
       name: name,
-      description: description
+      description: description,
+      code: "",
+      parseTree: ""
     }).subscribe(filter => {
       this.dialogRef.close();
       this.filterNotificationService.triggerCreateNotification(filter);

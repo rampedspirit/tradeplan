@@ -27,8 +27,9 @@ export class ScreenerEditComponent implements OnInit {
   editScreenerForm: FormGroup;
   conditions: ConditionResponse[];
 
+  selectedExecutableId: string;
   executables: ExecutableResponse[];
-  executablesTableDisplayedColumns: string[] = ['marketTime', 'note', 'status', 'result'];
+  executablesTableDisplayedColumns: string[] = ['marketTime', 'note', 'status'];
 
   @Input()
   tab: Tab;
@@ -201,14 +202,5 @@ export class ScreenerEditComponent implements OnInit {
     this.screenerService.getScreener(this.tab.id).subscribe(screener => {
       this.executables = screener.executables;
     })
-  }
-
-  showExecutableResult(executable: ExecutableResponse) {
-    const dialogRef = this.dialog.open(ScreenerExecutableResultComponent, {
-      data: {
-        executableId: executable.executableId
-      },
-      minWidth: "30%"
-    });
   }
 }

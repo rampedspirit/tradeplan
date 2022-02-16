@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSelectionList, MatSelectionListChange } from '@angular/material/list';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { Tab, TabAreaService } from 'src/app/services/tab-area.service';
-import { Filter, FilterService } from 'src/gen/filter';
+import { FilterResponse, FilterService } from 'src/gen/filter';
 import { FilterCreateComponent } from '../filter-create/filter-create.component';
 import { FilterNotificationService } from '../filter-notification.service';
 
@@ -17,7 +17,7 @@ export class FilterListComponent implements OnInit {
   @ViewChild(MatSelectionList)
   filterList!: MatSelectionList;
 
-  public filters: Filter[];
+  public filters: FilterResponse[];
   public fetchError = false;
 
   constructor(private filterService: FilterService, private filterNotificationService: FilterNotificationService,
@@ -62,11 +62,11 @@ export class FilterListComponent implements OnInit {
 
   onSelectionChange(event: MatSelectionListChange) {
     this.filterList.deselectAll();
-    let selectedFilter: Filter = event.options[0].value;
+    let selectedFilter: FilterResponse = event.options[0].value;
     this.openTab(selectedFilter);
   }
 
-  private openTab(filter: Filter) {
+  private openTab(filter: FilterResponse) {
     let tab: Tab = {
       id: filter.id,
       type: 'filter',

@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FilterLanguageEditorOptions } from 'src/app/lang/filter/filter-language.editor.options';
 import { FilterLanguageParser, LibraryError, SytntaxError } from 'src/app/lang/filter/filter-language.parser';
 import { EditorService, MonacoWrapper } from 'src/app/services/editor.service';
-import { Filter, FilterService } from 'src/gen/filter';
+import { FilterResponse, FilterService } from 'src/gen/filter';
 
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { NgxSpinnerService } from 'ngx-spinner';
@@ -64,7 +64,7 @@ export class FilterEditComponent implements OnInit {
       });
 
       this.editFilterForm.valueChanges.subscribe(change => {
-        let changedFilter: Filter = change;
+        let changedFilter: FilterResponse = change;
         this.tab.dirtyFlag = changedFilter.name != filter.name ||
           changedFilter.description != filter.description ||
           !this.isSame(changedFilter.code, filter.code);
@@ -92,10 +92,10 @@ export class FilterEditComponent implements OnInit {
       let name = this.editFilterForm.get('name')?.value;
       let description = this.editFilterForm.get('description')?.value;
       let code = this.editFilterForm.get('code')?.value;
-
+      let parseTree = JSON.stringify(this.filterLanguageParser.getParseTree(code));
       this.spinner.show();
-      this.filterService.updateFilter({
-        patchData: [{
+      this.filterService.updateFilter(
+        [{
           operation: 'REPLACE',
           property: 'NAME',
           value: name
@@ -109,23 +109,27 @@ export class FilterEditComponent implements OnInit {
           operation: 'REPLACE',
           property: 'CODE',
           value: code
-        }]
-      }, this.tab.id).subscribe(filter => {
-        this.tab.title = filter.name;
-        this.tab.dirtyFlag = false;
-        this.filterNotificationService.triggerUpdateNotification(filter);
-        this.spinner.hide();
-      }, error => {
-        this.spinner.hide();
-        this.dialog.open(MessageComponent, {
-          data: {
-            type: "error",
-            message: "Failed to save filter.",
-            callbackText: "Retry",
-            callback: this.save
-          }
-        });
-      })
+        },
+        {
+          operation: 'REPLACE',
+          property: 'PARSE_TREE',
+          value: parseTree
+        }], this.tab.id).subscribe(filter => {
+          this.tab.title = filter.name;
+          this.tab.dirtyFlag = false;
+          this.filterNotificationService.triggerUpdateNotification(filter);
+          this.spinner.hide();
+        }, error => {
+          this.spinner.hide();
+          this.dialog.open(MessageComponent, {
+            data: {
+              type: "error",
+              message: "Failed to save filter.",
+              callbackText: "Retry",
+              callback: this.save
+            }
+          });
+        })
     }
   }
 

@@ -1,13 +1,13 @@
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Filter, FilterService } from 'src/gen/filter';
+import { FilterResponse, FilterService } from 'src/gen/filter';
 import { ConditionLanguageParser, SytntaxError } from './condition-language.parser';
 import { TokenType } from './token-type';
 
 export class ConditionLanguageIntellisense implements monaco.languages.CompletionItemProvider, monaco.languages.HoverProvider {
 
-    public static FILTERS: Filter[];
+    public static FILTERS: FilterResponse[];
     public triggerCharacters: string[] = ['.'];
 
     provideCompletionItems(model: monaco.editor.ITextModel, position: monaco.Position, context: monaco.languages.CompletionContext, token: monaco.CancellationToken): monaco.languages.ProviderResult<monaco.languages.CompletionList> {
@@ -37,7 +37,7 @@ export class ConditionLanguageIntellisense implements monaco.languages.Completio
 
     provideHover(model: monaco.editor.ITextModel, position: monaco.Position, token: monaco.CancellationToken): monaco.languages.ProviderResult<monaco.languages.Hover> {
         let word: string = model.getWordAtPosition(position)?.word;
-        let filter: Filter = ConditionLanguageIntellisense.FILTERS.find(f => f.name == word);
+        let filter: FilterResponse = ConditionLanguageIntellisense.FILTERS.find(f => f.name == word);
         if (filter) {
             return {
                 contents: [{ value: this.getFilterDocumentation(filter) }]
@@ -60,7 +60,7 @@ export class ConditionLanguageIntellisense implements monaco.languages.Completio
         };
     }
 
-    private getFilterDocumentation(filter: Filter): string {
+    private getFilterDocumentation(filter: FilterResponse): string {
         let documentation = "# " + filter.name
             + "\n"
             + filter.description;
