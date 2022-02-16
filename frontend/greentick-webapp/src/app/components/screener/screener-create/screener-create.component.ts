@@ -54,9 +54,7 @@ export class ScreenerCreateComponent implements OnInit {
     this.createError = false;
     this.screenerService.createScreener({
       name: name,
-      description: description,
-      conditionId: UUID.UUID(),
-      watchListId: UUID.UUID()
+      description: description
     }).subscribe(screener => {
       this.dialogRef.close();
       this.screenerNotificationService.triggerCreateNotification(screener);

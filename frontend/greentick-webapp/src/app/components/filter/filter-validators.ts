@@ -1,7 +1,7 @@
 import { AbstractControl, AsyncValidatorFn, ValidationErrors } from "@angular/forms";
 import { Observable, of } from "rxjs";
 import { catchError, map } from "rxjs/operators";
-import { Filter, FilterService } from "src/gen/filter";
+import { FilterResponse, FilterService } from "src/gen/filter";
 
 export class FilterValidators {
 
@@ -18,7 +18,7 @@ export class FilterValidators {
                 return of(null);
             } else {
                 return filterService.getAllFilters().pipe(map(
-                    (filters: Filter[]) => {
+                    (filters: FilterResponse[]) => {
                         return (filters && filters.find(f => f.name == control.value)) ? { "notUnique": true } : null;
                     }
                 ), catchError(error => of({ "serviceNotReachable": true })));
@@ -30,7 +30,7 @@ export class FilterValidators {
         return (control: AbstractControl): Promise<ValidationErrors | null> | Observable<ValidationErrors | null> => {
             onStart();
             return filterService.getAllFilters().pipe(map(
-                (filters: Filter[]) => {
+                (filters: FilterResponse[]) => {
                     onEnd();
                     return (filters && filters.find(f => f.name == control.value)) ? { "notUnique": true } : null;
                 }

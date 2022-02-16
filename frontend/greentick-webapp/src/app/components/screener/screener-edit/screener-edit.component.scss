@@ -9,3 +9,12 @@ table {
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
+  .mat-row .mat-cell {
+    cursor: pointer;
+  }
+
+  .mat-row:hover .mat-cell {
+    border-color: currentColor;
+  }
+  

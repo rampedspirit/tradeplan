@@ -27,7 +27,7 @@ export class ScreenerExecutableCreateComponent implements OnInit {
     private screenerService: ScreenerService, private spinner: NgxSpinnerService, private datePipe: DatePipe) { }
 
   ngOnInit(): void {
-    let dateStr: string = this.datePipe.transform(new Date(), 'yyyy-MM-ddThh:mm');
+    let dateStr: string = this.datePipe.transform(new Date(), 'yyyy-MM-ddTHH:mm', "GMT+0530");
     this.createScreenerExecutableForm = new FormGroup({
       marketTime: new FormControl(dateStr, [Validators.required]),
       note: new FormControl(null, [])

@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,43 +16,42 @@ import com.bhs.gtk.filter.util.Converter;
 
 @Component
 public class EntityWriter {
-	
+
 	@Autowired
 	private FilterRepository filterRepository;
-	
+
 	@Autowired
 	private ExpressionEntityRepository expressionEntityRepository;
-	
+
 	@Autowired
 	private ArithmeticExpressionResultRepository arithmeticExpressionResultRepository;
-	
+
 	@Autowired
-	private CompareExpressionResultRepository  compareExpressionResultRepository;
-	
+	private CompareExpressionResultRepository compareExpressionResultRepository;
+
 	@Autowired
 	private FilterResultRepository filterResultRepository;
-	
+
 	@Autowired
 	private EntityObjectCreator entityObjectCreator;
-	
+
 	@Autowired
 	private Converter converter;
-	
-	
+
 	public boolean removePreviousAssociations(FilterEntity filterEntity) {
 		deleteExpressionsNotAssociatedToAnyFilter();
 		deleteFilterResultEntity(filterEntity.getId());
 		return true;
 	}
-	
+
 	public boolean deleteFilterEntity(FilterEntity filterEntity) {
 		filterRepository.delete(filterEntity);
 		return true;
 	}
-	
+
 	public boolean deleteFilterResultEntity(UUID filterId) {
 		List<FilterResultEntity> filterResults = filterResultRepository.findByFilterId(filterId);
-		if(!filterResults.isEmpty()) {
+		if (!filterResults.isEmpty()) {
 			filterResults.stream().forEach(ft -> ft.setCompareExpressionResultEntities(new ArrayList<>()));
 			filterResultRepository.saveAll(filterResults);
 			filterResultRepository.deleteAll(filterResults);
@@ -67,60 +67,66 @@ public class EntityWriter {
 	public FilterEntity saveFilterEntity(FilterEntity filterEntity) {
 		return filterRepository.save(filterEntity);
 	}
-	
+
 	public FilterResultEntity createFilterResultEntity(UUID filterId, Date marketTime, String scripName, String status,
 			List<CompareExpressionResultEntity> compareResults) {
 		FilterResultEntity filterEntity = new FilterResultEntity(filterId, marketTime, scripName, status);
 		filterEntity.setCompareExpressionResultEntities(compareResults);
 		return filterResultRepository.save(filterEntity);
 	}
-	
-	
-	public List<CompareExpressionResultEntity> saveCompareExpressionResultEntities(List<CompareExpressionResultEntity> compareResults) {
-		Iterable<CompareExpressionResultEntity> savedCmpResults = compareExpressionResultRepository.saveAll(compareResults);
+
+	public List<CompareExpressionResultEntity> saveCompareExpressionResultEntities(
+			List<CompareExpressionResultEntity> compareResults) {
+		Iterable<CompareExpressionResultEntity> savedCmpResults = compareExpressionResultRepository
+				.saveAll(compareResults);
 		List<CompareExpressionResultEntity> cmpResults = new ArrayList<>();
-		for(CompareExpressionResultEntity cr : savedCmpResults) {
+		for (CompareExpressionResultEntity cr : savedCmpResults) {
 			cmpResults.add(cr);
 		}
 		return cmpResults;
 	}
-	
-	public List<ArithmeticExpressionResultEntity> saveArithmeticExpressionResultEntities(List<ArithmeticExpressionResultEntity> arResultEntities) {
-		Iterable<ArithmeticExpressionResultEntity> savedARresults = arithmeticExpressionResultRepository.saveAll(arResultEntities);
+
+	public List<ArithmeticExpressionResultEntity> saveArithmeticExpressionResultEntities(
+			List<ArithmeticExpressionResultEntity> arResultEntities) {
+		Iterable<ArithmeticExpressionResultEntity> savedARresults = arithmeticExpressionResultRepository
+				.saveAll(arResultEntities);
 		List<ArithmeticExpressionResultEntity> arResults = new ArrayList<>();
-		for(ArithmeticExpressionResultEntity ar : savedARresults) {
+		for (ArithmeticExpressionResultEntity ar : savedARresults) {
 			arResults.add(ar);
 		}
 		return arResults;
 	}
-	
-	public List<ArithmeticExpressionResultEntity> queueARexpression(List<ExpressionEntity> arExpressions, Date marketTime,
-			String scripName) {
+
+	public List<ArithmeticExpressionResultEntity> queueARexpression(List<ExpressionEntity> arExpressions,
+			Date marketTime, String scripName) {
 		List<ArithmeticExpressionResultEntity> arResults = new ArrayList<>();
-		for( ExpressionEntity ar : arExpressions) {
+		for (ExpressionEntity ar : arExpressions) {
 			arResults.add(new ArithmeticExpressionResultEntity(ar.getHash(), marketTime, scripName,
 					ExecutionStatus.QUEUED.name()));
 		}
-		Iterable<ArithmeticExpressionResultEntity> savedARresults = arithmeticExpressionResultRepository.saveAll(arResults);
+		Iterable<ArithmeticExpressionResultEntity> savedARresults = arithmeticExpressionResultRepository
+				.saveAll(arResults);
 		List<ArithmeticExpressionResultEntity> queuedARresults = new ArrayList<>();
-		for( ArithmeticExpressionResultEntity ar : savedARresults) {
+		for (ArithmeticExpressionResultEntity ar : savedARresults) {
 			queuedARresults.add(ar);
 		}
 		return queuedARresults;
 	}
-	
-	
+
 	public FilterEntity createFilter(FilterRequest filter) {
 		String name = filter.getName();
 		String description = filter.getDescription();
 		String code = filter.getCode();
 		String parseTree = filter.getParseTree();
-		//TODO: handle validations
-		FilterEntity filterEntity = new FilterEntity(name, description, code, parseTree);
-		BooleanExpression booleanExpression = converter.convertToBooleanExpression(parseTree);
-		List<ExpressionEntity> expressionEntities = entityObjectCreator.createExpressionEntityObjects(booleanExpression);
-		filterEntity.setExpressions(expressionEntities);
+		// TODO: handle validations
+		FilterEntity filterEntity = new FilterEntity(name, description);
+		if (StringUtils.isNotEmpty(parseTree)) {
+			BooleanExpression booleanExpression = converter.convertToBooleanExpression(parseTree);
+			List<ExpressionEntity> expressionEntities = entityObjectCreator
+					.createExpressionEntityObjects(booleanExpression);
+			filterEntity.setExpressions(expressionEntities);
+		}
 		return filterRepository.save(filterEntity);
 	}
-	
+
 }

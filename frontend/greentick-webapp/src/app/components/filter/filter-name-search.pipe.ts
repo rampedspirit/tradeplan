@@ -1,12 +1,12 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { Filter } from 'src/gen/filter';
+import { FilterResponse } from 'src/gen/filter';
 
 @Pipe({
   name: 'filterNameSearch'
 })
 export class FilterNameSearchPipe implements PipeTransform {
 
-  transform(filters: Filter[], searchText: string): Filter[] {
+  transform(filters: FilterResponse[], searchText: string): FilterResponse[] {
     if (searchText == null || filters == null) {
       return filters;
     }

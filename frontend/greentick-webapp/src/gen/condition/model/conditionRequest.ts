@@ -22,9 +22,9 @@ export interface ConditionRequest {
     /**
      * text representing condition code
      */
-    code: string;
+    code?: string;
     /**
      * output after parsing grammar
      */
-    parseTree: string;
+    parseTree?: string;
 }

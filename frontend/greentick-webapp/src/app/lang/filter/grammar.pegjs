@@ -139,7 +139,8 @@ function_chain
         }      
         return {
         	type: "functionChain",
-        	functions:functions
+        	functions:functions,
+            location: location()
         }
     }
 
@@ -197,7 +198,8 @@ value "value"
     {
         return {
         	type: "value",
-            value: text()
+            value: text(),
+            location: location()
         }
     }
 

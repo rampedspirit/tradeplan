@@ -1,23 +1,50 @@
-<div *ngIf="executable">
-    <button mat-flat-button color="success" (click)="refreshResults()">Refresh</button>
-    <table mat-table [dataSource]="results">
-
-        <!-- Scrip Name Column -->
-        <ng-container matColumnDef="scripName">
-            <th mat-header-cell *matHeaderCellDef>Scrip Name</th>
-            <td mat-cell *matCellDef="let result">{{result.scripName}}</td>
-        </ng-container>
-
-        <!-- Status Column -->
-        <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let result">{{result.status}}</td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
-</div>
 <app-message *ngIf="fetchError" type="error" message="Failed to fetch results." [callback]="refreshResults"
     callbackText="Please Retry">
 </app-message>
+<div *ngIf="executable">
+
+    <div fxLayout="column" fxLayoutGap="10px" fxFlexFill>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+            <div fxLayout="row" fxLayoutGap="10px">
+                <div><b>Market Time</b></div>
+                <div>{{executable.marketTime | date:'medium'}}</div>
+            </div>
+            <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+                <button mat-flat-button color="success" (click)="back.emit()">Back To Screener</button>
+                <button mat-flat-button color="primary" (click)="refreshResults()">Refresh</button>
+            </div>
+        </div>
+        <div fxLayout="row" fxLayoutGap="10px">
+            <div><b>Note</b></div>
+            <div>{{executable.note}}</div>
+        </div>
+    </div>
+
+    <div fxLayout="column" fxLayoutGap="10px" fxFlexFill>
+        <table mat-table [dataSource]="results" fxFlex="50">
+            <!-- Scrip Name Column -->
+            <ng-container matColumnDef="scripName">
+                <th mat-header-cell *matHeaderCellDef>Scrip Name</th>
+                <td mat-cell *matCellDef="let result">{{result.scripName}}</td>
+            </ng-container>
+
+            <!-- Status Column -->
+            <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let result">{{result.status}}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onScripSelected(row.scripName);">
+            </tr>
+        </table>
+        <div fxLayout="row" fxLayoutGap="10px">
+            <div fxFlex="50" style="background-color: aqua;">
+                Condition
+            </div>
+            <div fxFlex="50" style="background-color: beige;">
+                Filter
+            </div>
+        </div>
+    </div>
+</div>
