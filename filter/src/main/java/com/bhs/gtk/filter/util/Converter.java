@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.UUID;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
@@ -109,14 +110,19 @@ public class Converter {
 	}
 
 	private JSONObject getJSONobjectWithOutLocation(JSONObject arObject) {
-		JSONArray expressionObjects = (JSONArray) arObject.get("expressions");
-		for(Object obj : expressionObjects) {
-			if(obj instanceof JSONObject) {
-				JSONObject jsonObject = (JSONObject) obj;
-				jsonObject.remove("location");
+		String type = (String)arObject.get("type");
+		if(StringUtils.equals(type, "functionChain") || StringUtils.equals(type, "value")) {
+			arObject.remove("location");
+		}else if(StringUtils.equals(type, "expressionGroup")) {
+			JSONArray expressionObjects = (JSONArray) arObject.get("expressions");
+			for(Object obj : expressionObjects) {
+				if(obj instanceof JSONObject) {
+					JSONObject jsonObject = (JSONObject) obj;
+					jsonObject.remove("location");
+				}
 			}
+			arObject.put("expressions", expressionObjects);
 		}
-		arObject.put("expressions", expressionObjects);
 		return arObject;
 	}
 
@@ -127,10 +133,18 @@ public class Converter {
 	}
 
 	private ExpressionLocation getLocation(JSONObject arExp) {
-		JSONArray expressionObjects = (JSONArray) arExp.get("expressions");
-		int numberOfFunctions = expressionObjects.length();
-		Object firstFunction = expressionObjects.get(0);
-		Object lastFunction = expressionObjects.get(numberOfFunctions -1);
+		String type = (String)arExp.get("type");
+		Object firstFunction = null;
+		Object lastFunction = null;
+		if(StringUtils.equals(type, "functionChain") || StringUtils.equals(type, "value")) {
+			firstFunction = arExp;
+			lastFunction = arExp;
+		}else if(StringUtils.equals(type, "expressionGroup")) {
+			JSONArray expressionObjects = (JSONArray) arExp.get("expressions");
+			int numberOfFunctions = expressionObjects.length();
+			firstFunction = expressionObjects.get(0);
+			lastFunction = expressionObjects.get(numberOfFunctions - 1);
+		}
 		if(!(firstFunction instanceof JSONObject) || !(lastFunction instanceof JSONObject) ) {
 			return null;
 		}

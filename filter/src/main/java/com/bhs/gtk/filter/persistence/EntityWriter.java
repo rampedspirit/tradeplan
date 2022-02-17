@@ -123,9 +123,21 @@ public class EntityWriter {
 			BooleanExpression booleanExpression = converter.convertToBooleanExpression(parseTree);
 			List<ExpressionEntity> expressionEntities = entityObjectCreator
 					.createExpressionEntityObjects(booleanExpression);
-			filterEntity.setExpressions(expressionEntities);
+			filterEntity.setExpressions(getUniqueExpressionEntities(expressionEntities));
 		}
 		return filterRepository.save(filterEntity);
+	}
+
+	private List<ExpressionEntity> getUniqueExpressionEntities(List<ExpressionEntity> expressionEntities) {
+		List<ExpressionEntity> uniqueExpression = new ArrayList<>();
+		List<String> hashValues = new ArrayList<>();
+		for(ExpressionEntity exp : expressionEntities) {
+			if(!hashValues.contains(exp.getHash())) {
+				uniqueExpression.add(exp);
+				hashValues.add(exp.getHash());
+			}
+		}
+		return uniqueExpression;
 	}
 
 }
