@@ -118,8 +118,7 @@ public class EntityWriter {
 		String description = filter.getDescription();
 		String code = filter.getCode();
 		String parseTree = filter.getParseTree();
-		// TODO: handle validations
-		FilterEntity filterEntity = new FilterEntity(name, description);
+		FilterEntity filterEntity = new FilterEntity(name, description, code, parseTree);
 		if (StringUtils.isNotEmpty(parseTree)) {
 			BooleanExpression booleanExpression = converter.convertToBooleanExpression(parseTree);
 			List<ExpressionEntity> expressionEntities = entityObjectCreator
