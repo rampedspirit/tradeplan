@@ -92,7 +92,10 @@ public class FilterServiceImpl implements FilterService{
 	public List<ArithmeticExpressionResultEntity> runArithmeticExpressionResultEntities(List<ArithmeticExpressionResultEntity> arResultEntitites) {
 		List<ArithmeticExpressionResultEntity> arResultEntitypSentForExecution = new ArrayList<>();
 		for( ArithmeticExpressionResultEntity arResult : arResultEntitites) {
+			
+		  ExpressionEntity expression = entityReader.getExpressionEntity(arResult.getHash());
 		  Map<String, String> entityMap = getEntityMapForJson(arResult);
+		  entityMap.put("parseTree", expression.getParseTree());
 		  JSONObject entityAsJson = new JSONObject(entityMap);
 			if (messageProducer.sendMessage(entityAsJson.toString(), MessageType.EXECUTION_REQUEST)) {
 				arResult.setStatus(ExecutionStatus.RUNNING.name());
@@ -102,7 +105,6 @@ public class FilterServiceImpl implements FilterService{
 			}	
 		}
 		return entityWriter.saveArithmeticExpressionResultEntities(arResultEntitypSentForExecution);
-		
 	}
 	
 	@Override

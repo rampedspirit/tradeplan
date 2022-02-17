@@ -36,9 +36,11 @@ public class FilterEntity {
 	protected FilterEntity() {
 	}
 
-	public FilterEntity(String name, String description) {
+	public FilterEntity(String name, String description, String code, String parseTree) {
 		this.name = name;
 		this.description = description;
+		this.code = code;
+		this.parseTree = parseTree;
 	}
 
 	public UUID getId() {
