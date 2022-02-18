@@ -48,7 +48,10 @@ operand
 filter_name "filter_name"
     = name:[a-zA-Z1-9]+ 
     {
-        return name.join("");
+        return {
+            filter: name.join(""),
+            location: location()
+        }
     }
 
 ws "mandatory_space"

@@ -17,7 +17,12 @@ import { FilterNotificationService } from '../../filter/filter-notification.serv
 
 class Condition {
   operation: string;
-  expressions: Condition[] | string[]
+  expressions: Condition[] | Filter[]
+}
+
+class Filter {
+  filter: string;
+  location: any
 }
 
 @Component({
@@ -58,8 +63,12 @@ export class ConditionEditComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.refresh();
-    this.refresh2();
+    this.filterService.getAllFilters().subscribe(filters => {
+      ConditionLanguageIntellisense.FILTERS = filters;
+      this.refresh();
+    }, error => {
+      this.fetchError2 = true;
+    });
 
     this.filterNotificationService.createSubject.subscribe(condition => {
       this.refresh2();
@@ -81,14 +90,14 @@ export class ConditionEditComponent implements OnInit {
       this.editConditionForm = new FormGroup({
         name: new FormControl(condition.name, [Validators.required]),
         description: new FormControl(condition.description, [Validators.required]),
-        code: new FormControl(condition.code, [Validators.required])
+        code: new FormControl(this.replaceFilterIdWithName(condition.code), [Validators.required])
       });
 
       this.editConditionForm.valueChanges.subscribe(change => {
         let changedCondition: ConditionRequest = change;
         this.tab.dirtyFlag = changedCondition.name != condition.name ||
           changedCondition.description != condition.description ||
-          !this.isSame(changedCondition.code, condition.code);
+          !this.isSame(changedCondition.code, this.replaceFilterIdWithName(condition.code));
       });
       this.spinner.hide();
     }, error => {
@@ -124,13 +133,14 @@ export class ConditionEditComponent implements OnInit {
     if (this.editConditionForm.valid) {
       let name = this.editConditionForm.get('name')?.value;
       let description = this.editConditionForm.get('description')?.value;
+
       let code = this.editConditionForm.get('code')?.value;
+      let patchedCode = this.replaceFilterNameWithId(code);
 
       let parseTree = JSON.stringify(this.conditionLanguageParser.getParseTree(code));
       let condition: Condition = JSON.parse(parseTree);
       this.replaceWithFilterId(condition);
       let patchedParseTree = JSON.stringify(condition);
-      console.log(patchedParseTree);
 
       this.spinner.show();
       this.conditionService.updateCondition([{
@@ -146,7 +156,7 @@ export class ConditionEditComponent implements OnInit {
       {
         operation: 'REPLACE',
         property: 'CODE',
-        value: code
+        value: patchedCode
       },
       {
         operation: 'REPLACE',
@@ -201,17 +211,48 @@ export class ConditionEditComponent implements OnInit {
     });
   }
 
-  private replaceWithFilterId(condition: Condition) {
-    for (let i = 0; i < condition.expressions.length; i++) {
-      let expression = condition.expressions[i];
-      if (typeof expression === "string") {
-        let filter = ConditionLanguageIntellisense.FILTERS.find(filter => filter.name == expression);
-        condition.expressions[i] = filter.id;
-      } else {
-        this.replaceWithFilterId(expression);
+  private replaceWithFilterId(condition: Condition | Filter) {
+    if ('filter' in condition) {
+      let filter = ConditionLanguageIntellisense.FILTERS.find(filter => filter.name == (condition as Filter).filter);
+      (condition as Filter).filter = filter.id;
+    } else {
+      for (let i = 0; i < condition.expressions.length; i++) {
+        let expression = condition.expressions[i];
+        if ('filter' in expression) {
+          let filter = ConditionLanguageIntellisense.FILTERS.find(filter => filter.name == (expression as Filter).filter);
+          (expression as Filter).filter = filter.id;
+        } else {
+          this.replaceWithFilterId(expression);
+        }
       }
     }
   }
+
+  private replaceFilterNameWithId(code: string) {
+    let filterNames = Array.from(code.matchAll(/[a-zA-Z0-9]*/g)).map(match => {
+      return ConditionLanguageIntellisense.FILTERS.find(filter => filter.name == match[0]);
+    }).filter(f => f != null || f != undefined).map(f => f.name);
+
+    filterNames.forEach(filterName => {
+      let filterId = ConditionLanguageIntellisense.FILTERS.find(f => f.name == filterName).id;
+      code = code.replace(filterName, filterId);
+    });
+    return code;
+  }
+
+  private replaceFilterIdWithName(code: string): string {
+    let replacedCode = code;
+    let filterIds = Array.from(code.matchAll(/[a-zA-Z0-9-]*/g)).map(match => {
+      return ConditionLanguageIntellisense.FILTERS.find(filter => filter.id == match[0]);
+    }).filter(f => f != null || f != undefined).map(f => f.id);
+
+    filterIds.forEach(filterId => {
+      let filterName = ConditionLanguageIntellisense.FILTERS.find(f => f.id == filterId).name;
+      replacedCode = replacedCode.replace(filterId, filterName);
+    });
+    return replacedCode;
+  }
+
   /**
    * EDITOR Configurations
    */

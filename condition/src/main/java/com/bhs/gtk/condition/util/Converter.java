@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,43 +25,43 @@ import com.bhs.gtk.condition.model.FilterExpression;
 
 @Component
 public class Converter {
-	
-	
+
 	public ChangeNotification convertToChangeNotification(String message) {
 		JSONObject jsonObject = new JSONObject(message);
-		String id = (String)jsonObject.get("id");
-		String status = (String)jsonObject.get("status");
-		ChangeNotification changeNotification = new ChangeNotification(UUID.fromString(id), ChangeStatusEnum.fromValue(status));
+		String id = (String) jsonObject.get("id");
+		String status = (String) jsonObject.get("status");
+		ChangeNotification changeNotification = new ChangeNotification(UUID.fromString(id),
+				ChangeStatusEnum.fromValue(status));
 		return changeNotification;
 	}
-	
+
 	public ExecutableCondition convertToExecutableCondition(String message) {
 		try {
 			JSONObject jsonObject = new JSONObject(message);
-			UUID conditionId = UUID.fromString((String)jsonObject.get("conditionId"));
-			String scripName = (String)jsonObject.get("scripName");
+			UUID conditionId = UUID.fromString((String) jsonObject.get("conditionId"));
+			String scripName = (String) jsonObject.get("scripName");
 			String status = ConditionResultResponse.ConditionResultEnum.QUEUED.name();
-			String marketTimeAsString = (String)jsonObject.get("marketTime");
+			String marketTimeAsString = (String) jsonObject.get("marketTime");
 			Date marketTime = DateTimeUtils.toDate(OffsetDateTime.parse(marketTimeAsString).toInstant());
 			return new ExecutableCondition(conditionId, marketTime, scripName, status);
-		}catch (JSONException jsonEx) {
-			//handle JSON exception
+		} catch (JSONException jsonEx) {
+			// handle JSON exception
 			throw new JSONException(jsonEx.getMessage());
-		}catch(IllegalArgumentException illegalArgEx) {
-			//handle wrong UUID exception.
+		} catch (IllegalArgumentException illegalArgEx) {
+			// handle wrong UUID exception.
 			throw new IllegalArgumentException(illegalArgEx.getMessage());
 		}
 	}
-	
+
 	public ConditionExpression convertToConditionExpression(String parseTree) {
+		JSONObject object = new JSONObject(parseTree);
 		try {
-			if(isSingleFilterExpression(parseTree)) {
-				return new FilterExpression(parseTree);
+			if (isSingleFilterExpression(object)) {
+				return new FilterExpression(object.getString("filter"));
 			}
-			JSONObject expressionObject = new JSONObject(parseTree);
-			BooleanExpression booleanExpression = getBooleanExpression(expressionObject);
+			BooleanExpression booleanExpression = getBooleanExpression(object);
 			return booleanExpression;
-		}catch (JSONException e) {
+		} catch (JSONException e) {
 			System.err.println(e.getMessage());
 			return null;
 		}
@@ -76,46 +75,38 @@ public class Converter {
 		booleanExpression.getConditionExpressions().addAll(expressions);
 		return booleanExpression;
 	}
-	
+
 	private List<ConditionExpression> getConditionExpressions(JSONArray jsonExpressions) {
 		List<ConditionExpression> conditionExpressions = new ArrayList<>();
-		for( Object obj : jsonExpressions) {
-			 if(obj instanceof String && isSingleFilterExpression((String)obj)) {
-				 conditionExpressions.add(new FilterExpression((String)obj));
-			 }else if(obj instanceof JSONObject) {
-				 conditionExpressions.add(getBooleanExpression((JSONObject)obj));
-			 }
+		for (Object obj : jsonExpressions) {
+			if (isSingleFilterExpression((JSONObject) obj)) {
+				conditionExpressions.add(new FilterExpression(((JSONObject) obj).getString("filter")));
+			} else if (obj instanceof JSONObject) {
+				conditionExpressions.add(getBooleanExpression((JSONObject) obj));
+			}
 		}
 		return conditionExpressions;
 	}
 
-	private boolean isSingleFilterExpression(String parseTree) {
-		if(!StringUtils.startsWith(parseTree, "{")) {
-		   try {
-			   UUID.fromString(parseTree);
-		   }catch(IllegalArgumentException exception) {
-			   throw new IllegalArgumentException(); 
-		   }
-			return true;
-		}
-		return false;
+	private boolean isSingleFilterExpression(JSONObject object) {
+		return object.has("filter");
 	}
 
 	public Set<UUID> getFilterIds(String parseTree) {
 		Set<UUID> filterIds = new HashSet<>();
 		ConditionExpression conditionExpression = convertToConditionExpression(parseTree);
 		filterIds.addAll(getFilterIds(conditionExpression));
-		return filterIds; 
+		return filterIds;
 	}
 
 	private Collection<? extends UUID> getFilterIds(ConditionExpression conditionExpression) {
 		Set<UUID> filterIds = new HashSet<>();
-		if(conditionExpression instanceof FilterExpression) {
+		if (conditionExpression instanceof FilterExpression) {
 			FilterExpression filterExpression = (FilterExpression) conditionExpression;
 			filterIds.add(UUID.fromString(filterExpression.getFilterId()));
-		}else if(conditionExpression instanceof BooleanExpression) {
+		} else if (conditionExpression instanceof BooleanExpression) {
 			BooleanExpression booleanExpression = (BooleanExpression) conditionExpression;
-			for(ConditionExpression exp : booleanExpression.getConditionExpressions()) {
+			for (ConditionExpression exp : booleanExpression.getConditionExpressions()) {
 				filterIds.addAll(getFilterIds(exp));
 			}
 		}

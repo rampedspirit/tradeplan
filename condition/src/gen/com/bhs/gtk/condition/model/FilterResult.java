@@ -1,6 +1,7 @@
 package com.bhs.gtk.condition.model;
 
 import java.util.Objects;
+import com.bhs.gtk.condition.model.Location;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -15,11 +16,14 @@ import javax.validation.constraints.*;
  * FilterResult
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-01-27T06:56:31.566079200+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-02-18T13:27:13.752501500+05:30[Asia/Calcutta]")
 
 public class FilterResult   {
   @JsonProperty("filterId")
   private UUID filterId = null;
+
+  @JsonProperty("location")
+  private Location location = null;
 
   /**
    * Gets or Sets status
@@ -83,6 +87,28 @@ public class FilterResult   {
     this.filterId = filterId;
   }
 
+  public FilterResult location(Location location) {
+    this.location = location;
+    return this;
+  }
+
+  /**
+   * Get location
+   * @return location
+  **/
+  @ApiModelProperty(required = true, value = "")
+  @NotNull
+
+  @Valid
+
+  public Location getLocation() {
+    return location;
+  }
+
+  public void setLocation(Location location) {
+    this.location = location;
+  }
+
   public FilterResult status(StatusEnum status) {
     this.status = status;
     return this;
@@ -115,12 +141,13 @@ public class FilterResult   {
     }
     FilterResult filterResult = (FilterResult) o;
     return Objects.equals(this.filterId, filterResult.filterId) &&
+        Objects.equals(this.location, filterResult.location) &&
         Objects.equals(this.status, filterResult.status);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(filterId, status);
+    return Objects.hash(filterId, location, status);
   }
 
   @Override
@@ -129,6 +156,7 @@ public class FilterResult   {
     sb.append("class FilterResult {\n");
     
     sb.append("    filterId: ").append(toIndentedString(filterId)).append("\n");
+    sb.append("    location: ").append(toIndentedString(location)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("}");
     return sb.toString();
