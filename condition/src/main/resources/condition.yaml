@@ -318,16 +318,35 @@ components:
       required:
        - filterId
        - status
+       - location
       type: object
       properties:
         filterId:
           type: string
           format: uuid
+        location:
+           $ref : '#/components/schemas/Location'
         status:
           type: string
           enum: [QUEUED, RUNNING, PASS, FAIL, ERROR]          
-         
- 
+
+    Location:
+      type: object
+      properties:
+        start:
+          $ref : '#/components/schemas/Position'
+        end:
+          $ref : '#/components/schemas/Position'                 
+          
+    Position:
+     type: object
+     properties:
+       offset:
+         type: integer
+       line:
+         type: integer
+       column:
+         type: integer
 
     Error:
       type: object

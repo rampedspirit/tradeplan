@@ -63,12 +63,13 @@ import { ScreenerListComponent } from './components/screener/screener-list/scree
 import { ScreenerCreateComponent } from './components/screener/screener-create/screener-create.component';
 import { ScreenerEditComponent } from './components/screener/screener-edit/screener-edit.component';
 import { ScreenerNameSearchPipe } from './components/screener/screener-name-search.pipe';
-import { Router, ROUTER_CONFIGURATION } from '@angular/router';
+import { Router } from '@angular/router';
 import { DocumentComponent } from './components/document/document.component';
 import { ScreenerExecutableCreateComponent } from './components/screener/screener-executable-create/screener-executable-create.component';
 import { MatNativeDateModule } from '@angular/material/core';
 import { DatePipe } from '@angular/common';
 import { ScreenerExecutableResultComponent } from './components/screener/screener-executable-result/screener-executable-result.component';
+import { ConditionResultComponent } from './components/condition/condition-result/condition-result.component';
 
 Amplify.configure({
   Auth: {
@@ -105,7 +106,8 @@ Amplify.configure({
     ScreenerNameSearchPipe,
     DocumentComponent,
     ScreenerExecutableCreateComponent,
-    ScreenerExecutableResultComponent
+    ScreenerExecutableResultComponent,
+    ConditionResultComponent
   ],
   imports: [
     BrowserModule,

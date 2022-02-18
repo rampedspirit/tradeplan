@@ -1,6 +1,9 @@
 <app-message *ngIf="fetchError" type="error" message="Failed to fetch results." [callback]="refreshResults"
     callbackText="Please Retry">
 </app-message>
+<app-message *ngIf="fetchError2" type="error" message="Failed to fetch result." [callback]="refreshConditionResult"
+    callbackText="Please Retry">
+</app-message>
 <div *ngIf="executable">
 
     <div fxLayout="column" fxLayoutGap="10px" fxFlexFill>
@@ -39,8 +42,8 @@
             </tr>
         </table>
         <div fxLayout="row" fxLayoutGap="10px">
-            <div fxFlex="50" style="background-color: aqua;">
-                Condition
+            <div fxFlex="50">
+                <app-condition-result *ngIf="conditionResult" [result]="conditionResult"></app-condition-result>
             </div>
             <div fxFlex="50" style="background-color: beige;">
                 Filter

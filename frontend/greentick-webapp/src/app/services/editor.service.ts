@@ -43,27 +43,43 @@ export class MonacoWrapper {
       new FilterLanguage(),
       new GreentickLanguageFormatter(), filterLangIntellisense, filterLangIntellisense);
 
+    //FILTER RESULT
+    MonacoWrapper.registerLanguage(FilterLanguageConstants.ResultLanguageId,
+      new GreentickLanguageConfiguration(),
+      new FilterLanguage(),
+      new GreentickLanguageFormatter());
+
     //CONDITION
     let conditionLangIntellisense: ConditionLanguageIntellisense = new ConditionLanguageIntellisense();
     MonacoWrapper.registerLanguage(ConditionLanguageConstants.LanguageId,
       new GreentickLanguageConfiguration(),
       new ConditionLanguage(),
       new GreentickLanguageFormatter(), conditionLangIntellisense, conditionLangIntellisense);
+
+    //CONDITION RESULT
+    MonacoWrapper.registerLanguage(ConditionLanguageConstants.ResultLanguageId,
+      new GreentickLanguageConfiguration(),
+      new ConditionLanguage(),
+      new GreentickLanguageFormatter());
   }
 
   private static registerLanguage(id: string,
     languageConfig: monaco.languages.LanguageConfiguration,
     language: monaco.languages.IMonarchLanguage,
     formattingProvider: monaco.languages.DocumentFormattingEditProvider,
-    completionItemProvider: monaco.languages.CompletionItemProvider,
-    hoverProvider: monaco.languages.HoverProvider): void {
+    completionItemProvider?: monaco.languages.CompletionItemProvider,
+    hoverProvider?: monaco.languages.HoverProvider): void {
 
     MonacoWrapper.register({ id: id });
     MonacoWrapper.setLanguageConfiguration(id, languageConfig);
     MonacoWrapper.setMonarchTokensProvider(id, language);
     MonacoWrapper.registerDocumentFormattingEditProvider(id, formattingProvider);
-    MonacoWrapper.registerCompletionItemProvider(id, completionItemProvider);
-    MonacoWrapper.registerHoverProvider(id, hoverProvider);
+    if (completionItemProvider) {
+      MonacoWrapper.registerCompletionItemProvider(id, completionItemProvider);
+    }
+    if (hoverProvider) {
+      MonacoWrapper.registerHoverProvider(id, hoverProvider);
+    }
   }
 
   private static registerTheme(name: string, data: monaco.editor.IStandaloneThemeData): void {
