@@ -22,6 +22,8 @@ import com.bhs.gtk.condition.model.ConditionExpression;
 import com.bhs.gtk.condition.model.ConditionResultResponse;
 import com.bhs.gtk.condition.model.ExecutableCondition;
 import com.bhs.gtk.condition.model.FilterExpression;
+import com.bhs.gtk.condition.model.FilterLocation;
+import com.bhs.gtk.condition.model.FilterPosition;
 
 @Component
 public class Converter {
@@ -57,7 +59,7 @@ public class Converter {
 		JSONObject object = new JSONObject(parseTree);
 		try {
 			if (isSingleFilterExpression(object)) {
-				return new FilterExpression(object.getString("filter"));
+				return new FilterExpression(object.getString("filter"),getFilterLocation(object));
 			}
 			BooleanExpression booleanExpression = getBooleanExpression(object);
 			return booleanExpression;
@@ -65,6 +67,20 @@ public class Converter {
 			System.err.println(e.getMessage());
 			return null;
 		}
+	}
+
+	private FilterLocation getFilterLocation(JSONObject object) {
+		JSONObject locationObject = object.getJSONObject("location");
+		FilterPosition startPosition = getFilterPosition(locationObject.getJSONObject("start"));
+		FilterPosition endPosition = getFilterPosition(locationObject.getJSONObject("end"));
+		return  new FilterLocation(startPosition, endPosition);
+	}
+
+	private FilterPosition getFilterPosition(JSONObject position) {
+		int offset = (int)position.get("offset"); 
+		int line = (int)position.get("line");
+		int column = (int)position.get("column");
+		return new FilterPosition(offset, line, column);
 	}
 
 	private BooleanExpression getBooleanExpression(JSONObject expressionObject) {
@@ -80,7 +96,9 @@ public class Converter {
 		List<ConditionExpression> conditionExpressions = new ArrayList<>();
 		for (Object obj : jsonExpressions) {
 			if (isSingleFilterExpression((JSONObject) obj)) {
-				conditionExpressions.add(new FilterExpression(((JSONObject) obj).getString("filter")));
+				JSONObject filterObject = (JSONObject) obj;
+				FilterExpression filterExpression = new FilterExpression(filterObject.getString("filter"), getFilterLocation(filterObject));
+				conditionExpressions.add(filterExpression);
 			} else if (obj instanceof JSONObject) {
 				conditionExpressions.add(getBooleanExpression((JSONObject) obj));
 			}

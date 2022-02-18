@@ -6,11 +6,14 @@ import org.springframework.stereotype.Component;
 public class FilterExpression extends ConditionExpression{
 
 	private String filterId;
+	
+	private FilterLocation filterLocation;
 
 	protected FilterExpression() {}
 	
-	public FilterExpression(String filterId) {
+	public FilterExpression(String filterId, FilterLocation filterLocation) {
 		this.filterId = filterId;
+		this.setFilterLocation(filterLocation);
 	}
 	
 	public String getFilterId() {
@@ -19,6 +22,14 @@ public class FilterExpression extends ConditionExpression{
 
 	public void setFilterId(String filterId) {
 		this.filterId = filterId;
+	}
+
+	public FilterLocation getFilterLocation() {
+		return filterLocation;
+	}
+
+	public void setFilterLocation(FilterLocation filterLocation) {
+		this.filterLocation = filterLocation;
 	}
 	
 }

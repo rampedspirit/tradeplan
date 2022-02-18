@@ -1,24 +1,43 @@
 package com.bhs.gtk.condition.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.bhs.gtk.condition.model.BooleanExpression;
 import com.bhs.gtk.condition.model.ConditionDetailedResponse;
+import com.bhs.gtk.condition.model.ConditionExpression;
 import com.bhs.gtk.condition.model.ConditionResponse;
 import com.bhs.gtk.condition.model.ConditionResultResponse;
 import com.bhs.gtk.condition.model.Filter;
 import com.bhs.gtk.condition.model.Filter.StatusEnum;
+import com.bhs.gtk.condition.model.FilterExpression;
+import com.bhs.gtk.condition.model.FilterLocation;
+import com.bhs.gtk.condition.model.FilterPosition;
 import com.bhs.gtk.condition.model.FilterResult;
+import com.bhs.gtk.condition.model.Location;
+import com.bhs.gtk.condition.model.Position;
 import com.bhs.gtk.condition.model.ConditionResultResponse.ConditionResultEnum;
 import com.bhs.gtk.condition.persistence.ConditionEntity;
 import com.bhs.gtk.condition.persistence.ConditionResultEntity;
+import com.bhs.gtk.condition.persistence.EntityReader;
 import com.bhs.gtk.condition.persistence.FilterEntity;
 import com.bhs.gtk.condition.persistence.FilterResultEntity;
 
 @Component
 public class Mapper {
+	
+	//TODO: reconsider autowiring converter and entityReader here. Re-designing classes may help.
+	@Autowired
+	private Converter converter;
+	
+	@Autowired
+	private EntityReader entityReader;
 	
 	public ConditionResultResponse getConditionResultResponse(ConditionEntity condition,
 			ConditionResultEntity conditionResult) {
@@ -36,16 +55,62 @@ public class Mapper {
 
 	private List<FilterResult> getFilterResults(ConditionResultEntity conditionResult) {
 		List<FilterResult> filterResults = new ArrayList<>();
+		ConditionExpression conditionExpression = getConditionExpression(conditionResult);
+		Map<String, FilterLocation> filterLocations = getFiltersLocation(conditionExpression);
+
 		List<FilterResultEntity> filterResultEntities = conditionResult.getFilterResultEntities();
 		for(FilterResultEntity filter : filterResultEntities) {
 			FilterResult fResult = new FilterResult();
-			fResult.setFilterId(filter.getFilterId());
+			UUID filterId = filter.getFilterId();
+			fResult.setFilterId(filterId);
+			FilterLocation filterLocation = filterLocations.get(filterId.toString());
+			fResult.setLocation(getLocation(filterLocation));
 			fResult.setStatus(com.bhs.gtk.condition.model.FilterResult.StatusEnum.fromValue(filter.getStatus()));
 			filterResults.add(fResult);
 		}
 		return filterResults;
 	}
 	
+	private Location getLocation(FilterLocation filterLocation) {
+		Location location = new Location();
+		location.setStart(getPosition(filterLocation.getStart()));
+		location.setEnd(getPosition(filterLocation.getEnd()));
+		return location;
+	}
+
+	private Position getPosition(FilterPosition filterPosition) {
+		int offset = filterPosition.getOffset();
+		int line = filterPosition.getLine();
+		int column = filterPosition.getColumn();
+		Position position = new Position();
+		position.setOffset(offset);
+		position.setLine(line);
+		position.setColumn(column);
+		return position;
+	}
+
+	private Map<String, FilterLocation> getFiltersLocation(ConditionExpression expression) {
+		Map<String, FilterLocation> filterLocations = new HashMap<>();
+		if(expression instanceof FilterExpression) {
+			FilterExpression filterExpression = (FilterExpression)expression;
+			filterLocations.put(filterExpression.getFilterId(), filterExpression.getFilterLocation());
+			return filterLocations;
+		}else if(expression instanceof BooleanExpression) {
+			BooleanExpression booleanExpression = (BooleanExpression) expression;
+			for(ConditionExpression exp : booleanExpression.getConditionExpressions()) {
+				filterLocations.putAll(getFiltersLocation(exp));
+			}
+			return filterLocations;
+		}
+		throw new IllegalArgumentException(expression + "is not a valid type of expression in condition");
+	}
+
+	private ConditionExpression getConditionExpression(ConditionResultEntity conditionResult) {
+		UUID conditionId = conditionResult.getConditionId();
+		ConditionEntity conditionEntity = entityReader.getCondition(conditionId);
+		return converter.convertToConditionExpression(conditionEntity.getParseTree());
+	}
+
 	public List<ConditionResponse> getConditionResponses(List<ConditionEntity> conditionEntities) {
 		List<ConditionResponse> responses = new ArrayList<>();
 		for(ConditionEntity entity : conditionEntities) {
