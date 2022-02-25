@@ -1,15 +1,11 @@
 package com.bhs.gtk.expression.persistence;
 
 import java.util.Date;
-import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
-import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -36,9 +32,6 @@ public class ExpressionResultEntity {
 	
 	@Column(length = PersistenceConstants.SMALL_TEXT_LIMIT)
 	private String status;
-	
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	private List<ExpressionResultEntity> expressionResults;
 	
 	protected ExpressionResultEntity() {};
 	
@@ -79,14 +72,6 @@ public class ExpressionResultEntity {
 
 	public void setHash(String hash) {
 		this.hash = hash;
-	}
-	
-	public List<ExpressionResultEntity> getExpressionResults() {
-		return expressionResults;
-	}
-
-	public void setExpressionResults(List<ExpressionResultEntity> expressionResults) {
-		this.expressionResults = expressionResults;
 	}
 	
 	public OffsetDateTime getMarketTimeAsOffsetDateTime() {
