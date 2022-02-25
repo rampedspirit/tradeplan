@@ -14,6 +14,7 @@ import com.bhs.gtk.condition.model.ConditionDetailedResponse;
 import com.bhs.gtk.condition.model.ConditionExpression;
 import com.bhs.gtk.condition.model.ConditionResponse;
 import com.bhs.gtk.condition.model.ConditionResultResponse;
+import com.bhs.gtk.condition.model.ConditionResultResponse.ConditionResultEnum;
 import com.bhs.gtk.condition.model.Filter;
 import com.bhs.gtk.condition.model.Filter.StatusEnum;
 import com.bhs.gtk.condition.model.FilterExpression;
@@ -22,7 +23,6 @@ import com.bhs.gtk.condition.model.FilterPosition;
 import com.bhs.gtk.condition.model.FilterResult;
 import com.bhs.gtk.condition.model.Location;
 import com.bhs.gtk.condition.model.Position;
-import com.bhs.gtk.condition.model.ConditionResultResponse.ConditionResultEnum;
 import com.bhs.gtk.condition.persistence.ConditionEntity;
 import com.bhs.gtk.condition.persistence.ConditionResultEntity;
 import com.bhs.gtk.condition.persistence.EntityReader;
@@ -31,14 +31,15 @@ import com.bhs.gtk.condition.persistence.FilterResultEntity;
 
 @Component
 public class Mapper {
-	
-	//TODO: reconsider autowiring converter and entityReader here. Re-designing classes may help.
+
+	// TODO: reconsider autowiring converter and entityReader here. Re-designing
+	// classes may help.
 	@Autowired
 	private Converter converter;
-	
+
 	@Autowired
 	private EntityReader entityReader;
-	
+
 	public ConditionResultResponse getConditionResultResponse(ConditionEntity condition,
 			ConditionResultEntity conditionResult) {
 		ConditionResultResponse conditionResultResponse = new ConditionResultResponse();
@@ -54,23 +55,24 @@ public class Mapper {
 	}
 
 	private List<FilterResult> getFilterResults(ConditionResultEntity conditionResult) {
-		List<FilterResult> filterResults = new ArrayList<>();
 		ConditionExpression conditionExpression = getConditionExpression(conditionResult);
-		Map<String, FilterLocation> filterLocations = getFiltersLocation(conditionExpression);
+		Map<String, List<FilterLocation>> filterLocations = new HashMap<>();
+		updateFilterLocations(conditionExpression, filterLocations);
 
-		List<FilterResultEntity> filterResultEntities = conditionResult.getFilterResultEntities();
-		for(FilterResultEntity filter : filterResultEntities) {
-			FilterResult fResult = new FilterResult();
+		List<FilterResult> filterResults = new ArrayList<>();
+		for (FilterResultEntity filter : conditionResult.getFilterResultEntities()) {
 			UUID filterId = filter.getFilterId();
-			fResult.setFilterId(filterId);
-			FilterLocation filterLocation = filterLocations.get(filterId.toString());
-			fResult.setLocation(getLocation(filterLocation));
-			fResult.setStatus(com.bhs.gtk.condition.model.FilterResult.StatusEnum.fromValue(filter.getStatus()));
-			filterResults.add(fResult);
+			for (FilterLocation filterLocation : filterLocations.get(filterId.toString())) {
+				FilterResult fResult = new FilterResult();
+				fResult.setFilterId(filterId);
+				fResult.setLocation(getLocation(filterLocation));
+				fResult.setStatus(com.bhs.gtk.condition.model.FilterResult.StatusEnum.fromValue(filter.getStatus()));
+				filterResults.add(fResult);
+			}
 		}
 		return filterResults;
 	}
-	
+
 	private Location getLocation(FilterLocation filterLocation) {
 		Location location = new Location();
 		location.setStart(getPosition(filterLocation.getStart()));
@@ -89,20 +91,20 @@ public class Mapper {
 		return position;
 	}
 
-	private Map<String, FilterLocation> getFiltersLocation(ConditionExpression expression) {
-		Map<String, FilterLocation> filterLocations = new HashMap<>();
-		if(expression instanceof FilterExpression) {
-			FilterExpression filterExpression = (FilterExpression)expression;
-			filterLocations.put(filterExpression.getFilterId(), filterExpression.getFilterLocation());
-			return filterLocations;
-		}else if(expression instanceof BooleanExpression) {
-			BooleanExpression booleanExpression = (BooleanExpression) expression;
-			for(ConditionExpression exp : booleanExpression.getConditionExpressions()) {
-				filterLocations.putAll(getFiltersLocation(exp));
+	private void updateFilterLocations(ConditionExpression expression,
+			Map<String, List<FilterLocation>> filterLocations) {
+		if (expression instanceof FilterExpression) {
+			FilterExpression filterExpression = (FilterExpression) expression;
+			if (!filterLocations.containsKey(filterExpression.getFilterId())) {
+				filterLocations.put(filterExpression.getFilterId(), new ArrayList<>());
 			}
-			return filterLocations;
+			filterLocations.get(filterExpression.getFilterId()).add(filterExpression.getFilterLocation());
+		} else if (expression instanceof BooleanExpression) {
+			BooleanExpression booleanExpression = (BooleanExpression) expression;
+			for (ConditionExpression exp : booleanExpression.getConditionExpressions()) {
+				updateFilterLocations(exp, filterLocations);
+			}
 		}
-		throw new IllegalArgumentException(expression + "is not a valid type of expression in condition");
 	}
 
 	private ConditionExpression getConditionExpression(ConditionResultEntity conditionResult) {
@@ -113,12 +115,12 @@ public class Mapper {
 
 	public List<ConditionResponse> getConditionResponses(List<ConditionEntity> conditionEntities) {
 		List<ConditionResponse> responses = new ArrayList<>();
-		for(ConditionEntity entity : conditionEntities) {
+		for (ConditionEntity entity : conditionEntities) {
 			responses.add(getConditionResponse(entity));
 		}
 		return responses;
 	}
-	
+
 	private ConditionResponse getConditionResponse(ConditionEntity entity) {
 		ConditionResponse response = new ConditionResponse();
 		response.setName(entity.getName());
@@ -126,11 +128,11 @@ public class Mapper {
 		response.setDescription(entity.getDescription());
 		return response;
 	}
-	
+
 	public ConditionDetailedResponse getConditionDetailedResponse(ConditionEntity conditionEntity) {
 		ConditionDetailedResponse condition = new ConditionDetailedResponse();
-		if(conditionEntity == null || conditionEntity.getId() == null) {
-			//throw exception
+		if (conditionEntity == null || conditionEntity.getId() == null) {
+			// throw exception
 		}
 		condition.setId(conditionEntity.getId());
 		condition.setName(conditionEntity.getName());
@@ -143,7 +145,7 @@ public class Mapper {
 
 	private List<Filter> getFilters(List<FilterEntity> filterEntities) {
 		List<Filter> mappedFilters = new ArrayList<>();
-		for(FilterEntity ft : filterEntities) {
+		for (FilterEntity ft : filterEntities) {
 			Filter filter = new Filter();
 			filter.setFilterId(ft.getId());
 			filter.setStatus(StatusEnum.valueOf(ft.getStatus()));
@@ -151,5 +153,5 @@ public class Mapper {
 		}
 		return mappedFilters;
 	}
-	
+
 }
