@@ -43,9 +43,6 @@ public class Converter {
 	
 	
 	public ExecutableFilter convertToExecutableFilter(String message) {
-		// {"filterId":"1116b21a-fb3c-4dc7-9764-5f182c3769cc",
-		//"scripName":"BETA","marketTime":"2022-02-05T22:40:24.357+05:30",
-		//"status":"QUEUED"}
 		JSONObject jsonObject = new JSONObject(message);
 		UUID filterId = UUID.fromString((String)jsonObject.get("filterId"));
 		String scripName = (String)jsonObject.get("scripName");
@@ -71,9 +68,6 @@ public class Converter {
 		case "AND":
 		case "OR":
 			return createLogicalExpression(operation, jsonObject);
-		case"+":
-		case "-":
-		case "^":
 		case "=":
 		case ">":
 		case "<":

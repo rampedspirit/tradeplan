@@ -38,7 +38,7 @@ public class MessageProducer {
 				topicName = TopicNames.OUTPUT_CHANGE_NOTIFICATION;
 				break;
 			default:
-				throw new IllegalArgumentException(type+" is not supported message type in Condition service");
+				throw new IllegalArgumentException(type+" is not supported message type in Filter service");
 			}
 			System.err.println("FS:->"+message);
 			kafkaTemplate.send(topicName,message);

@@ -7,9 +7,6 @@ public enum OperationType {
 	
     AND("AND"),
     OR ("OR"),
-    ADD("+"),
-    SUBTRACT("-"),
-    POWER("^"),
     EQUAL("="),
     GREATER_THAN(">"),
     LESS_THAN("<"),

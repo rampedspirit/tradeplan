@@ -20,7 +20,6 @@ public class MessageConsumer {
 	
 	@KafkaListener(topics = TopicNames.INPUT_EXECUTION_REQUEST)
 	public boolean receiveFilterExecutionRequest(String message) {
-		System.err.println("FS:<-"+message);
 		ExecutableFilter executableFilter =  converter.convertToExecutableFilter(message);
 		filterServiceImpl.executeFilter(executableFilter);
 		return true;
@@ -28,7 +27,7 @@ public class MessageConsumer {
 	
 	@KafkaListener(topics = TopicNames.INPUT_EXECUTION_RESPONSE)
 	public boolean receiveExpressionExecutionResponse(String message) {
-		System.out.println("FS: expression execution response:"+message);
+		System.err.println("FS <-: expression execution response:"+message);
 		return true;
 	}
 	
