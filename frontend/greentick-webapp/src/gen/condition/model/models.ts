@@ -4,5 +4,7 @@ export * from './conditionResponse';
 export * from './conditionResultResponse';
 export * from './filter';
 export * from './filterResult';
+export * from './location';
 export * from './modelError';
 export * from './patchData';
+export * from './position';

@@ -1,9 +1,9 @@
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { GreentickLanguageConstants } from '../greentick-language.constants';
-import { ConditionLanguageConstants } from './condition-language.constants';
+import { FilterLanguageConstants } from './filter-language.constants';
 
-export class ConditionLanguageResultEditorOptions implements monaco.editor.IStandaloneEditorConstructionOptions {
-    language = ConditionLanguageConstants.ResultLanguageId;
+export class FilterLanguageResultEditorOptions implements monaco.editor.IStandaloneEditorConstructionOptions {
+    language = FilterLanguageConstants.ResultLanguageId;
     contextmenu = false;
     theme = GreentickLanguageConstants.ThemeId
     fontSize = 18

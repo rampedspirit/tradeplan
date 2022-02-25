@@ -38,15 +38,17 @@
             </ng-container>
 
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onScripSelected(row.scripName);">
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                [ngClass]="{highlighted: selectedScripName == row.scripName}" (click)="onScripSelected(row.scripName);">
             </tr>
         </table>
         <div fxLayout="row" fxLayoutGap="10px">
             <div fxFlex="50">
-                <app-condition-result *ngIf="conditionResult" [result]="conditionResult"></app-condition-result>
+                <app-condition-result *ngIf="conditionResult" [result]="conditionResult"
+                    (onFilterSelect)="onFilterSelected($event)"></app-condition-result>
             </div>
-            <div fxFlex="50" style="background-color: beige;">
-                Filter
+            <div fxFlex="50">
+                <app-filter-result *ngIf="filterResult" [result]="filterResult"> </app-filter-result>
             </div>
         </div>
     </div>

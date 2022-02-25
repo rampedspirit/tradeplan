@@ -9,9 +9,11 @@
  * https://github.com/swagger-api/swagger-codegen.git
  * Do not edit the class manually.
  */
+import { Location } from './location';
 
 export interface FilterResult { 
     filterId: string;
+    location: Location;
     status: FilterResult.StatusEnum;
 }
 export namespace FilterResult {

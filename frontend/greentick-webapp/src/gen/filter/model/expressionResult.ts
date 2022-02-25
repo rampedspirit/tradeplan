@@ -12,6 +12,14 @@
 import { Location } from './location';
 
 export interface ExpressionResult { 
+    type?: ExpressionResult.TypeEnum;
     location?: Location;
     result?: string | number;
+}
+export namespace ExpressionResult {
+    export type TypeEnum = 'COMPARE' | 'ARITHMETIC';
+    export const TypeEnum = {
+        COMPARE: 'COMPARE' as TypeEnum,
+        ARITHMETIC: 'ARITHMETIC' as TypeEnum
+    };
 }
