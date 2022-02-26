@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import org.threeten.bp.DateTimeUtils;
@@ -14,15 +15,30 @@ import org.threeten.bp.OffsetDateTime;
 import com.bhs.gtk.filter.model.ArithmeticExpression;
 import com.bhs.gtk.filter.model.BooleanExpression;
 import com.bhs.gtk.filter.model.CompareExpression;
-import com.bhs.gtk.filter.model.ExecutableFilter;
 import com.bhs.gtk.filter.model.ExpressionLocation;
 import com.bhs.gtk.filter.model.ExpressionPosition;
 import com.bhs.gtk.filter.model.FilterResultResponse;
 import com.bhs.gtk.filter.model.LogicalExpression;
+import com.bhs.gtk.filter.model.communication.ArithmeticExpressionResult;
+import com.bhs.gtk.filter.model.communication.ExecutableFilter;
 
 @Component
 public class Converter {
 	
+	public ArithmeticExpressionResult convertToARexpressionResult(String message) {
+		try {
+			JSONObject jsonObject = new JSONObject(message);
+			String hash = jsonObject.getString("hash");
+			String scripName = jsonObject.getString("scripName");
+			String marketTime = jsonObject.getString("marketTime");
+			String status = jsonObject.getString("status");
+			return new ArithmeticExpressionResult(hash, scripName, marketTime, status);
+			
+		}catch (JSONException jsonException) {
+			//log exception
+			throw new IllegalStateException("Convertion of message from ES in FS failed with JSONexception. Message = "+ message);
+		}
+	}
 	
 	public String getOperationFromParseTree(String parseTree) {
 		JSONObject jsonObject = new JSONObject(parseTree);

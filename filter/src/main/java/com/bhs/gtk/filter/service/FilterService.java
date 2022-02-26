@@ -5,11 +5,11 @@ import java.util.UUID;
 
 import javax.validation.Valid;
 
-import com.bhs.gtk.filter.model.ExecutableFilter;
 import com.bhs.gtk.filter.model.FilterRequest;
 import com.bhs.gtk.filter.model.FilterResponse;
 import com.bhs.gtk.filter.model.FilterResultResponse;
 import com.bhs.gtk.filter.model.PatchData;
+import com.bhs.gtk.filter.model.communication.ExecutableFilter;
 import com.bhs.gtk.filter.persistence.ArithmeticExpressionResultEntity;
 import com.bhs.gtk.filter.persistence.FilterResultEntity;
 

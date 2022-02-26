@@ -1,4 +1,4 @@
-package com.bhs.gtk.filter.model;
+package com.bhs.gtk.filter.model.communication;
 
 import java.util.Date;
 import java.util.UUID;
