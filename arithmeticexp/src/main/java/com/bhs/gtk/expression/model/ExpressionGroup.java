@@ -10,6 +10,10 @@ import org.springframework.stereotype.Component;
 public class ExpressionGroup extends Expression {
 
 	private List<Expression> expressions;
+	
+	public ExpressionGroup() {
+		expressions = new ArrayList<>();
+	}
 
 	public List<Expression> getExpressions() {
 		return Collections.unmodifiableList(expressions);
