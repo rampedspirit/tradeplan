@@ -30,20 +30,26 @@ public class Converter {
 			JSONObject jsonObject = new JSONObject(message);
 			String hash = jsonObject.getString("hash");
 			String scripName = jsonObject.getString("scripName");
-			String marketTime = jsonObject.getString("marketTime");
+			String marketTimeAsString = jsonObject.getString("marketTime");
+			Date marketTime = DateTimeUtils.toDate(OffsetDateTime.parse(marketTimeAsString).toInstant());
 			String status = jsonObject.getString("status");
 			return new ArithmeticExpressionResult(hash, scripName, marketTime, status);
-			
 		}catch (JSONException jsonException) {
 			//log exception
 			throw new IllegalStateException("Convertion of message from ES in FS failed with JSONexception. Message = "+ message);
 		}
 	}
 	
+	/**
+	 * @param parseTree
+	 * @return value of key  'operation' in the json (parseTree), EMPTY string if the no operation found.
+	 */
 	public String getOperationFromParseTree(String parseTree) {
 		JSONObject jsonObject = new JSONObject(parseTree);
-		String operation = (String) jsonObject.get("operation");
-		return operation;
+		if (jsonObject.isNull("operation")) {
+			throw new IllegalArgumentException("No operation found in parseTree = "+parseTree);
+		}
+		return jsonObject.getString("operation");
 	}
 	
 	public String getARexpHashFromCompareParseTree(String parseTree, boolean leftAR) {

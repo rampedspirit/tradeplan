@@ -3,8 +3,10 @@ package com.bhs.gtk.filter.service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -36,6 +38,7 @@ import com.bhs.gtk.filter.model.LogicalExpression;
 import com.bhs.gtk.filter.model.OperationType;
 import com.bhs.gtk.filter.model.PatchData;
 import com.bhs.gtk.filter.model.PatchData.PropertyEnum;
+import com.bhs.gtk.filter.model.communication.ArithmeticExpressionResult;
 import com.bhs.gtk.filter.model.communication.ExecutableFilter;
 import com.bhs.gtk.filter.persistence.ArithmeticExpressionResultEntity;
 import com.bhs.gtk.filter.persistence.CompareExpressionResultEntity;
@@ -92,21 +95,31 @@ public class FilterServiceImpl implements FilterService{
 	public List<ArithmeticExpressionResultEntity> runArithmeticExpressionResultEntities(List<ArithmeticExpressionResultEntity> arResultEntitites) {
 		List<ArithmeticExpressionResultEntity> arResultEntitypSentForExecution = new ArrayList<>();
 		for( ArithmeticExpressionResultEntity arResult : arResultEntitites) {
-			
 		  ExpressionEntity expression = entityReader.getExpressionEntity(arResult.getHash());
-		  Map<String, String> entityMap = getEntityMapForJson(arResult);
-		  entityMap.put("parseTree", expression.getParseTree());
-		  JSONObject entityAsJson = new JSONObject(entityMap);
-			if (messageProducer.sendMessage(entityAsJson.toString(), MessageType.EXECUTION_REQUEST)) {
+		  String message = getARexecutionRequestMessag(arResult, expression.getParseTree());
+		// Map<String, String> entityMap = getEntityMapForJson(arResult);
+		//  entityMap.put("parseTree", expression.getParseTree());
+		//  JSONObject entityAsJson = new JSONObject(entityMap);
+			if (messageProducer.sendMessage(message, MessageType.EXECUTION_REQUEST)) {
 				arResult.setStatus(ExecutionStatus.RUNNING.name());
 				arResultEntitypSentForExecution.add(arResult);
 			}else {
-				System.err.println(" failed to request "+ entityAsJson);
+				System.err.println(" failed to request AR expression for execution from FS to ES : "+ message);
 			}	
 		}
 		return entityWriter.saveArithmeticExpressionResultEntities(arResultEntitypSentForExecution);
 	}
 	
+	private String getARexecutionRequestMessag(ArithmeticExpressionResultEntity entity, String parseTree) {
+		Map<String, String> entityMap = new HashMap<>();
+		entityMap.put("hash",entity.getHash().toString());
+		entityMap.put("marketTime",entity.getMarketTimeAsOffsetDateTime());
+		entityMap.put("scripName",entity.getScripName());
+		entityMap.put("status",entity.getStatus());
+		entityMap.put("parseTree", parseTree);
+		return new JSONObject(entityMap).toString();
+	}
+
 	@Override
 	public FilterResultEntity executeFilter(ExecutableFilter executableFilter) {
 		UUID filterId = executableFilter.getFilterId();
@@ -508,13 +521,279 @@ public class FilterServiceImpl implements FilterService{
 		return arResultEntitites;
 	}
 
-	private Map<String, String> getEntityMapForJson(ArithmeticExpressionResultEntity entity) {
-		Map<String, String> entityMap = new HashMap<>();
-		entityMap.put("hash",entity.getHash().toString());
-		entityMap.put("marketTime",entity.getMarketTimeAsOffsetDateTime());
-		entityMap.put("scripName",entity.getScripName());
-		entityMap.put("status",entity.getStatus());
-		return entityMap;
+//	private Map<String, String> getEntityMapForJson(ArithmeticExpressionResultEntity entity) {
+//		Map<String, String> entityMap = new HashMap<>();
+//		entityMap.put("hash",entity.getHash().toString());
+//		entityMap.put("marketTime",entity.getMarketTimeAsOffsetDateTime());
+//		entityMap.put("scripName",entity.getScripName());
+//		entityMap.put("status",entity.getStatus());
+//		return entityMap;
+//	}
+
+	@Override
+	public boolean updateFilterResult(ArithmeticExpressionResult arResult) {
+		String hash = arResult.getHash();
+		Date marketTime = arResult.getMarketTime();
+		String scripName = arResult.getScripName();
+		String status = arResult.getStatus();
+		updateARexpressionResultEntity(hash,marketTime, scripName, status);
+		List<UUID> filterIds = getAllFilterIdsWhichRequireResultUpdate(hash);
+		if(filterIds.isEmpty()) {
+			throw new IllegalStateException("There is no filter to use AR exp result :"+arResult);
+		}
+		List<FilterResultEntity> filterResults = getAllFilterResultEntitiesWhichRequireResultUpdate(filterIds, marketTime, scripName);
+		Set<CompareExpressionResultEntity> cmpExpResults = getAllCMPexpressionResultsWhichRequireResultUpdate(filterResults, marketTime, scripName);
+		updateCMPexpressionResultEntity(cmpExpResults);
+		List<FilterResultEntity> filterResultEntities =  updateFilterResultEntities(filterResults);
+		if(sendMessage(filterResultEntities)) {
+			return true;
+		}
+		//TODO:log info/debug : at-least one of filter`s result msg is not sent to CS from FS
+		return false;
+	}
+
+	
+	private boolean sendMessage(List<FilterResultEntity> filterResultEntities) {
+		boolean msgSentStatus = true;
+		for(FilterResultEntity fResult : filterResultEntities) {
+			String message = getFilterExecutionResponseMessage(fResult);
+			if(messageProducer.sendMessage(message, MessageType.EXECUTION_RESPONSE)) {
+				//TODO: log debug : message successfully send from FS to CS
+			}else {
+				//TODO: log debug : message failed to send from FS to CS.
+				msgSentStatus = false;
+			}
+		}
+		return msgSentStatus;
+	}
+
+	private String getFilterExecutionResponseMessage(FilterResultEntity fResult) {
+		Map<String, String> msgMap = new HashMap<>();
+		msgMap.put("filterId", fResult.getFilterId().toString());
+		msgMap.put("marketTime", fResult.getMarketTimeAsOffsetDateTime().toString());
+		msgMap.put("scripName", fResult.getScripName());
+		msgMap.put("status", fResult.getStatus());
+		return new JSONObject(msgMap).toString();
+	}
+
+	private List<FilterResultEntity> updateFilterResultEntities(List<FilterResultEntity> filterResults) {
+		List<FilterResultEntity> filterResultsToBeUpdated = getAllFilterReadyForResultUpdate(filterResults);
+		List<FilterResultEntity> filterResultsToBePersisted = new ArrayList<>();
+		for(FilterResultEntity fResult : filterResultsToBeUpdated) {
+			String operation = getFilterOperation(fResult.getFilterId());
+			String result = deriveFilterResult(operation, fResult.getCompareExpressionResultEntities());
+			fResult.setStatus(result);
+			filterResultsToBePersisted.add(fResult);
+		}
+		return entityWriter.saveFilterResultEntities(filterResultsToBePersisted);
+	}
+
+	private String deriveFilterResult(String operation,
+			List<CompareExpressionResultEntity> compareExpressionResultEntities) {
+		List<String> cmpResults = compareExpressionResultEntities.stream().map(c -> c.getStatus())
+				.collect(Collectors.toList());
+		String result = StringUtils.EMPTY;
+		if (cmpResults.contains(ExecutionStatus.ERROR.name())) {
+			result = ExecutionStatus.ERROR.name();
+		} else if (StringUtils.equals(operation, OperationType.AND.name())) {
+			if (cmpResults.contains(ExecutionStatus.FAIL.name())) {
+				result = ExecutionStatus.FAIL.name();
+			} else {
+				result = ExecutionStatus.PASS.name();
+			}
+		} else if (StringUtils.equals(operation, OperationType.OR.name())) {
+			if (cmpResults.contains(ExecutionStatus.PASS.name())) {
+				result = ExecutionStatus.PASS.name();
+			} else {
+				result = ExecutionStatus.FAIL.name();
+			}
+		} else {
+			throw new IllegalArgumentException(operation + " is not a valid filter operation");
+		}
+		return result;
+	}
+
+	private String getFilterOperation(UUID filterId) {
+		String operation = StringUtils.EMPTY;
+		FilterEntity filterEntity = entityReader.getFilterEntity(filterId);
+		if(filterEntity != null) {
+			operation = converter.getOperationFromParseTree(filterEntity.getParseTree());
+		}
+		if(isValidFilterOperation(operation)) {
+			return operation;
+		}
+		throw new IllegalArgumentException("No valid filter operation found for filter id = "+filterId);
+	}
+
+	private boolean isValidFilterOperation(String operation) {
+		switch (operation) {
+		case "AND":
+		case "OR":
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	private List<FilterResultEntity> getAllFilterReadyForResultUpdate(List<FilterResultEntity> filterResults) {
+		List<FilterResultEntity> filterResultsToBeUpdated = new ArrayList<>();
+		for(FilterResultEntity fResult : filterResults) {
+			if(isFilterReadyForResultDerivation(fResult)) {
+				filterResultsToBeUpdated.add(fResult);
+			}
+		}
+		return filterResultsToBeUpdated;
+	}
+
+	private boolean isFilterReadyForResultDerivation(FilterResultEntity filterResultEntity) {
+		for(CompareExpressionResultEntity cmpResult : filterResultEntity.getCompareExpressionResultEntities()) {
+			String cmpStatus = cmpResult.getStatus();
+			if (StringUtils.equals(ExecutionStatus.QUEUED.name(), cmpStatus)
+					|| StringUtils.equals(ExecutionStatus.RUNNING.name(), cmpStatus)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private List<CompareExpressionResultEntity> updateCMPexpressionResultEntity(Set<CompareExpressionResultEntity> cmpExpResults) {
+		List<CompareExpressionResultEntity> cmpExpResultsToBeUpdated = getAllCMPexpReadyForResultUpdate(cmpExpResults);
+		List<CompareExpressionResultEntity> cmpExpResultsToBePersisted = new ArrayList<>();
+		for(CompareExpressionResultEntity cmpResult : cmpExpResultsToBeUpdated) {
+			String operation = getCMPexpOperation(cmpResult.getHash());
+			List<ArithmeticExpressionResultEntity> arExpResults = cmpResult.getArithmeticExpressionResultEntities();
+			if(deriveCMPexpResult(operation, arExpResults.get(0).getStatus(), arExpResults.get(1).getStatus())) {
+				cmpResult.setStatus(ExecutionStatus.PASS.name());
+			}else {
+				cmpResult.setStatus(ExecutionStatus.FAIL.name());
+			}
+			cmpExpResultsToBePersisted.add(cmpResult);
+		}
+		return entityWriter.saveCompareExpressionResultEntities(cmpExpResultsToBePersisted);
+	}
+
+	private String getCMPexpOperation(String cmpHash) {
+		ExpressionEntity expressionEntity = entityReader.getExpressionEntity(cmpHash);
+		expressionEntity.getParseTree();
+		String operation = converter.getOperationFromParseTree(expressionEntity.getParseTree());
+		if(isValidCMPoperation(operation)) {
+			return operation;
+		}
+		throw new IllegalArgumentException("No valid compare operation found for hash = "+cmpHash);
+	}
+
+	private boolean isValidCMPoperation(String operation) {
+		switch (operation) {
+		case "=":
+		case ">":
+		case "<":
+		case ">=":
+		case "<=":
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	private boolean deriveCMPexpResult(String operation, String leftARStatus, String rightARstatus) {
+		Double leftArg = null;
+		Double rightArg = null;
+		try {
+			leftArg = Double.valueOf(leftARStatus);
+			rightArg = Double.valueOf(rightARstatus);
+		} catch (NumberFormatException ex) {
+			throw new IllegalArgumentException(
+					"One of AR expression do not have valid result :" + leftARStatus + "::" + rightARstatus);
+		}
+
+		boolean result = false;
+		switch (operation) {
+		case "=":
+			result = leftArg == rightArg;
+			break;
+		case ">":
+			result = leftArg > rightArg;
+			break;
+		case "<":
+			result = leftArg < rightArg;
+			break;
+		case ">=":
+			result = leftArg >= rightArg;
+			break;
+		case "<=":
+			result = leftArg <= rightArg;
+			break;
+		default:
+			throw new IllegalArgumentException(operation + " is not a valid compare expression operation");
+		}
+		return result;
+	}
+
+	private List<CompareExpressionResultEntity> getAllCMPexpReadyForResultUpdate(Set<CompareExpressionResultEntity> cmpExpResults) {
+		List<CompareExpressionResultEntity> cmpExpToBeUpdated = new ArrayList<>();
+		for(CompareExpressionResultEntity cmpResult : cmpExpResults) {
+			List<ArithmeticExpressionResultEntity> arExpResults = cmpResult.getArithmeticExpressionResultEntities();
+			if(arExpResults.size() != 2) {
+				throw new IllegalStateException("Compare expression should have two AR expression results. cmpHash =  "+cmpResult.getHash());
+			}
+			int numberOfARexpResultsAvailable = 0;
+			for(ArithmeticExpressionResultEntity arResult : arExpResults) {
+				if(isARexpResultAvailable(arResult)) {
+					numberOfARexpResultsAvailable++;
+				}
+			}
+			if(numberOfARexpResultsAvailable == 2) {
+				cmpExpToBeUpdated.add(cmpResult);
+			}
+		}
+		return cmpExpToBeUpdated;
+	}
+
+	private boolean isARexpResultAvailable(ArithmeticExpressionResultEntity arResult) {
+		String status = arResult.getStatus();
+		if(StringUtils.equals(ExecutionStatus.QUEUED.name(), status) || StringUtils.equals(ExecutionStatus.RUNNING.name(), status) ) {
+			return false;
+		}
+		return true;
+	}
+
+	
+	private List<FilterResultEntity> getAllFilterResultEntitiesWhichRequireResultUpdate(List<UUID> filterIds, Date marketTime, String scripName) {
+		return entityReader.getAllFilterResultEntities(filterIds, marketTime, scripName);
+	}
+	
+	
+	private Set<CompareExpressionResultEntity> getAllCMPexpressionResultsWhichRequireResultUpdate(List<FilterResultEntity> filterResults, Date marketTime, String scripName) {
+		Set<CompareExpressionResultEntity> compareExpresionResults = new HashSet<>();
+		for(FilterResultEntity fResult : filterResults) {
+			compareExpresionResults.addAll(fResult.getCompareExpressionResultEntities());
+		}
+		return compareExpresionResults;
+	}
+
+	private List<UUID> getAllFilterIdsWhichRequireResultUpdate(String arExpHash) {
+		List<UUID> ids = new ArrayList<>();
+		ExpressionEntity expressionEntity = entityReader.getExpressionEntity(arExpHash);
+		if(expressionEntity == null) {
+			return ids;
+		}
+		List<FilterEntity> filters = expressionEntity.getFilters();
+		if(filters == null || filters.isEmpty()) {
+			return ids;
+		}
+		ids = filters.stream().map( f -> f.getId()).collect(Collectors.toList());
+		return ids;
+	}
+
+	private boolean updateARexpressionResultEntity(String hash, Date marketTime, String scripName, String status) {
+		ArithmeticExpressionResultEntity arResultEntity = entityReader.getArithmeticExpressionResultEntity(hash, marketTime, scripName);
+		if(arResultEntity == null) {
+			//log error
+			throw new IllegalStateException("ArithmeticExpressionResultEntity to which result is recevied from ES is not found.");
+		}
+		arResultEntity.setStatus(status);
+		entityWriter.saveArithmeticExpressionResultEntity(arResultEntity);
+		return true;
 	}
 
 }

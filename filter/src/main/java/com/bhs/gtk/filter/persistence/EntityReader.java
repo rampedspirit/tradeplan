@@ -31,6 +31,23 @@ public class EntityReader {
 	private EntityObjectCreator entityObjectCreator;
 	
 	
+	public List<FilterResultEntity> getAllFilterResultEntities(List<FilterResultId> filterResultIds) {
+		Iterable<FilterResultEntity> resultsContainer = filterResultRepository.findAllById(filterResultIds);
+		List<FilterResultEntity> filterResults = new ArrayList<>();
+		for(FilterResultEntity result : resultsContainer) {
+			filterResults.add(result);
+		}
+		return filterResults;
+	}
+	
+	public List<FilterResultEntity> getAllFilterResultEntities(List<UUID> filterIds, Date marketTime, String scripName) {
+		List<FilterResultId> filterResultIds = new ArrayList<>();
+		for(UUID id : filterIds) {
+			filterResultIds.add(entityObjectCreator.createFilterResultIdObject(id,marketTime,scripName));
+		}
+		return getAllFilterResultEntities(filterResultIds);
+	}
+	
 	public FilterResultEntity getFilterResultEntity(FilterResultId filterResultId) {
 		Optional<FilterResultEntity> filterResultContainer = filterResultRepository.findById(filterResultId);
 		if(filterResultContainer.isPresent()) {
@@ -38,6 +55,13 @@ public class EntityReader {
 		}
 		return null;
 	}
+	
+	public FilterResultEntity getFilterResultEntity(UUID filterId, Date marketTime, String scripName) {
+		FilterResultId filterResultId = entityObjectCreator.createFilterResultIdObject(filterId,marketTime,scripName);
+		FilterResultEntity filterResultEntity = getFilterResultEntity(filterResultId);
+		return filterResultEntity;
+	}
+	
 	
 	public ExpressionEntity getExpressionEntity(String hash) {
 		Optional<ExpressionEntity> expressionContainer = expressionEntityRepository.findById(hash);
@@ -86,12 +110,6 @@ public class EntityReader {
 			return null;
 		}
 		return filterEntity.getExpressions();
-	}
-	
-	public FilterResultEntity getFilterResultEntity(UUID filterId, Date marketTime, String scripName) {
-		FilterResultId filterResultId = entityObjectCreator.createFilterResultIdObject(filterId,marketTime,scripName);
-		FilterResultEntity filterResultEntity = getFilterResultEntity(filterResultId);
-		return filterResultEntity;
 	}
 	
 	public ArithmeticExpressionResultEntity getArithmeticExpressionResultEntity(String hash, Date marketTime, String scripName) {

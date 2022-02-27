@@ -75,6 +75,16 @@ public class EntityWriter {
 		return filterResultRepository.save(filterEntity);
 	}
 
+	public List<FilterResultEntity> saveFilterResultEntities(List<FilterResultEntity> filterResults) {
+		Iterable<FilterResultEntity> savedFilterResults = filterResultRepository.saveAll(filterResults);
+		List<FilterResultEntity> filterResultEntities = new ArrayList<>();
+		for(FilterResultEntity fResult : savedFilterResults) {
+			filterResultEntities.add(fResult);
+		}
+		return filterResultEntities;
+	}
+	
+	
 	public List<CompareExpressionResultEntity> saveCompareExpressionResultEntities(
 			List<CompareExpressionResultEntity> compareResults) {
 		Iterable<CompareExpressionResultEntity> savedCmpResults = compareExpressionResultRepository
@@ -86,6 +96,10 @@ public class EntityWriter {
 		return cmpResults;
 	}
 
+	public ArithmeticExpressionResultEntity saveArithmeticExpressionResultEntity(ArithmeticExpressionResultEntity arExpResult) {
+		return arithmeticExpressionResultRepository.save(arExpResult);
+	}
+	
 	public List<ArithmeticExpressionResultEntity> saveArithmeticExpressionResultEntities(
 			List<ArithmeticExpressionResultEntity> arResultEntities) {
 		Iterable<ArithmeticExpressionResultEntity> savedARresults = arithmeticExpressionResultRepository

@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.OneToMany;
@@ -38,7 +39,7 @@ public class FilterResultEntity {
 	@Column
 	private String status;
 	
-	@OneToMany
+	@OneToMany(fetch = FetchType.EAGER)
 	private List<CompareExpressionResultEntity> compareExpressionResultEntities;
 	
 	protected FilterResultEntity() {};

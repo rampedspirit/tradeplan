@@ -30,6 +30,7 @@ public class MessageConsumer {
 	public boolean receiveExpressionExecutionResponse(String message) {
 		System.err.println("FS <-: expression execution response:"+message);
 		ArithmeticExpressionResult arResult = converter.convertToARexpressionResult(message);
+		filterServiceImpl.updateFilterResult(arResult);
 		return true;
 	}
 	

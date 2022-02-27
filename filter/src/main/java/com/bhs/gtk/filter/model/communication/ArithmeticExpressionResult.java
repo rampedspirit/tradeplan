@@ -1,5 +1,7 @@
 package com.bhs.gtk.filter.model.communication;
 
+import java.util.Date;
+
 import org.springframework.stereotype.Component;
 
 @Component
@@ -7,12 +9,12 @@ public class ArithmeticExpressionResult {
 	
 	private String hash;
 	private String scripName;
-	private String marketTime;
+	private Date marketTime;
 	private String status;
 	
 	protected ArithmeticExpressionResult() {}
 	
-	public ArithmeticExpressionResult(String hash, String scripName, String marketTime, String status) {
+	public ArithmeticExpressionResult(String hash, String scripName, Date marketTime, String status) {
 		this.hash = hash;
 		this.scripName = scripName;
 		this.marketTime = marketTime;
@@ -35,11 +37,11 @@ public class ArithmeticExpressionResult {
 		this.scripName = scripName;
 	}
 
-	public String getMarketTime() {
+	public Date getMarketTime() {
 		return marketTime;
 	}
 
-	public void setMarketTime(String marketTime) {
+	public void setMarketTime(Date marketTime) {
 		this.marketTime = marketTime;
 	}
 
