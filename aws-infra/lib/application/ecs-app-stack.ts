@@ -157,7 +157,8 @@ export class EcsAppStack extends Stack {
                 "KAFKA_LISTENERS": "INTERNAL://:9092,EXTERNAL://:19092",
                 "KAFKA_ADVERTISED_LISTENERS": "INTERNAL://localhost:9092,EXTERNAL://kafka.gtk.com:19092",
                 "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP": "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT",
-                "KAFKA_INTER_BROKER_LISTENER_NAME": "INTERNAL"
+                "KAFKA_INTER_BROKER_LISTENER_NAME": "INTERNAL",
+                "KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR":"1"
             },
             portMappings: [{
                 hostPort: 19092,
