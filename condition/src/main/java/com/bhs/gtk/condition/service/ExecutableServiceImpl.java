@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import com.bhs.gtk.condition.messaging.MessageProducer;
 import com.bhs.gtk.condition.messaging.MessageType;
 import com.bhs.gtk.condition.model.ConditionResultResponse.ConditionResultEnum;
-import com.bhs.gtk.condition.model.ExecutableCondition;
+import com.bhs.gtk.condition.model.communication.ExecutableCondition;
 import com.bhs.gtk.condition.model.FilterResult;
 import com.bhs.gtk.condition.persistence.ConditionEntity;
 import com.bhs.gtk.condition.persistence.ConditionResultEntity;

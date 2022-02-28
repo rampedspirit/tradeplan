@@ -55,10 +55,24 @@ public class EntityReader {
 		return null;
 	}
 	
+	public List<ConditionResultEntity> getConditionResultEntity(List<UUID> conditionIds, String scripName,
+			Date marketTime) {
+		List<ConditionResultEntity> conditionResultEntities = new ArrayList<>();
+		List<ConditionResultId> conditionResultIds = new ArrayList<>();
+		for (UUID id : conditionIds) {
+			conditionResultIds.add(new ConditionResultId(id, marketTime, scripName));
+		}
+		Iterable<ConditionResultEntity> cResults = conditionResultRepository.findAllById(conditionResultIds);
+		for (ConditionResultEntity cr : cResults) {
+			conditionResultEntities.add(cr);
+		}
+		return conditionResultEntities;
+	}
+
 	public ConditionResultEntity getConditionResultEntity(UUID id, Date marketTime, String scripName) {
 		ConditionResultId conditionResultId = new ConditionResultId(id, marketTime, scripName);
-		Optional<ConditionResultEntity> entityContainer = conditionResultRepository.findById(conditionResultId); 
-		if(entityContainer.isPresent()) {
+		Optional<ConditionResultEntity> entityContainer = conditionResultRepository.findById(conditionResultId);
+		if (entityContainer.isPresent()) {
 			return entityContainer.get();
 		}
 		return null;

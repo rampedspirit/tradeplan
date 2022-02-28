@@ -2,7 +2,7 @@ package com.bhs.gtk.condition.service;
 
 import java.util.List;
 
-import com.bhs.gtk.condition.model.ExecutableCondition;
+import com.bhs.gtk.condition.model.communication.ExecutableCondition;
 import com.bhs.gtk.condition.persistence.FilterResultEntity;
 
 public interface ExecutableService {

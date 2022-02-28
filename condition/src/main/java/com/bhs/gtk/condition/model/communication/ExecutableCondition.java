@@ -1,4 +1,4 @@
-package com.bhs.gtk.condition.model;
+package com.bhs.gtk.condition.model.communication;
 
 import java.util.Date;
 import java.util.UUID;

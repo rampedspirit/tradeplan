@@ -123,6 +123,18 @@ public class EntityWriter {
 		return conditionRepository.save(entity);
 	}
 	
+	public List<ConditionResultEntity> saveConditionResultEntities(List<ConditionResultEntity> conditionResultEntities) {
+		List<ConditionResultEntity> conditionResults = new ArrayList<>();
+		if(conditionResultEntities != null) {
+			conditionResultRepository.saveAll(conditionResultEntities).forEach( c -> conditionResults.add(c));
+		}
+		return conditionResults;
+	}
+	
+	public FilterResultEntity saveFilterResultEntity(FilterResultEntity filterResultEntity) {
+		return filterResultRepository.save(filterResultEntity);
+	}
+	
 	public List<FilterResultEntity> saveFilterResultEntities(List<FilterResultEntity> filterResultEntities) {
 		List<FilterResultEntity> filters = new ArrayList<>();
 		if(filterResultEntities != null) {
