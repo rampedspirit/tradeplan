@@ -18,7 +18,7 @@ import org.threeten.bp.ZoneId;
 public class ArithmeticExpressionResultEntity {
 
 	@Id
-	@Column
+	@Column(length = PersistenceConstants.SMALL_TEXT_LIMIT)
 	private String hash;
 	
 	@Id
@@ -30,7 +30,7 @@ public class ArithmeticExpressionResultEntity {
 	@Column(length = PersistenceConstants.SMALL_TEXT_LIMIT)
 	private String scripName;
 	
-	@Column
+	@Column(length = PersistenceConstants.SMALL_TEXT_LIMIT)
 	private String status;
 	
 	protected ArithmeticExpressionResultEntity() {};

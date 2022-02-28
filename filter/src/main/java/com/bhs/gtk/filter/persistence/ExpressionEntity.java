@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 
@@ -20,7 +21,7 @@ public class ExpressionEntity {
 	@Column(length = PersistenceConstants.SMALL_TEXT_LIMIT)
 	private String type;
 	
-	@ManyToMany (mappedBy = "expressions")
+	@ManyToMany (mappedBy = "expressions", fetch = FetchType.EAGER)
 	private List<FilterEntity> filters;
 	
 	protected ExpressionEntity() {}

@@ -1,17 +1,15 @@
-package com.bhs.gtk.filter.model;
+package com.bhs.gtk.expression.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum OperationType {
 	
-    AND("AND"),
-    OR ("OR"),
-    EQUAL("="),
-    GREATER_THAN(">"),
-    LESS_THAN("<"),
-    GREATER_THAN_OR_EQUAL(">="),
-    LESS_THAN_OR_EQUAL("<=");
+    ADD("+"),
+    SUBTRACT("-"),
+    MULTIPLY("*"),
+    DIVIDE("/"),
+    POWER("^");
 
     private String value;
 

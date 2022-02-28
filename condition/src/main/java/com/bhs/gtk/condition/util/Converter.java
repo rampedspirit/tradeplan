@@ -20,18 +20,37 @@ import com.bhs.gtk.condition.messaging.ChangeNotification.ChangeStatusEnum;
 import com.bhs.gtk.condition.model.BooleanExpression;
 import com.bhs.gtk.condition.model.ConditionExpression;
 import com.bhs.gtk.condition.model.ConditionResultResponse;
-import com.bhs.gtk.condition.model.ExecutableCondition;
 import com.bhs.gtk.condition.model.FilterExpression;
 import com.bhs.gtk.condition.model.FilterLocation;
 import com.bhs.gtk.condition.model.FilterPosition;
+import com.bhs.gtk.condition.model.communication.ExecutableCondition;
+import com.bhs.gtk.condition.model.communication.FilterResult;
 
 @Component
 public class Converter {
+	
+	public FilterResult convertToFilterResult(String message) {
+		try {
+			JSONObject jsonObject = new JSONObject(message);
+			UUID filterId = UUID.fromString(jsonObject.getString("filterId"));
+			String scripName = jsonObject.getString("scripName");
+			String status = jsonObject.getString("status");
+			String marketTimeAsString = jsonObject.getString("marketTime");
+			Date marketTime = DateTimeUtils.toDate(OffsetDateTime.parse(marketTimeAsString).toInstant());
+			return new FilterResult(filterId, marketTime, scripName, status);
+		} catch (JSONException jsonEx) {
+			// handle JSON exception
+			throw new JSONException(jsonEx.getMessage());
+		} catch (IllegalArgumentException illegalArgEx) {
+			// handle wrong UUID exception.
+			throw new IllegalArgumentException(illegalArgEx.getMessage());
+		}
+	}
 
 	public ChangeNotification convertToChangeNotification(String message) {
 		JSONObject jsonObject = new JSONObject(message);
-		String id = (String) jsonObject.get("id");
-		String status = (String) jsonObject.get("status");
+		String id = jsonObject.getString("id");
+		String status = jsonObject.getString("status");
 		ChangeNotification changeNotification = new ChangeNotification(UUID.fromString(id),
 				ChangeStatusEnum.fromValue(status));
 		return changeNotification;
@@ -40,10 +59,10 @@ public class Converter {
 	public ExecutableCondition convertToExecutableCondition(String message) {
 		try {
 			JSONObject jsonObject = new JSONObject(message);
-			UUID conditionId = UUID.fromString((String) jsonObject.get("conditionId"));
-			String scripName = (String) jsonObject.get("scripName");
+			UUID conditionId = UUID.fromString(jsonObject.getString("conditionId"));
+			String scripName = jsonObject.getString("scripName");
 			String status = ConditionResultResponse.ConditionResultEnum.QUEUED.name();
-			String marketTimeAsString = (String) jsonObject.get("marketTime");
+			String marketTimeAsString = jsonObject.getString("marketTime");
 			Date marketTime = DateTimeUtils.toDate(OffsetDateTime.parse(marketTimeAsString).toInstant());
 			return new ExecutableCondition(conditionId, marketTime, scripName, status);
 		} catch (JSONException jsonEx) {

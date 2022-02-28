@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.bhs.gtk</groupId>
 	<artifactId>expression</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>expression</name>
 	<description>expression service</description>
 	<properties>
@@ -21,6 +21,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		
+	    <dependency>
+    		<groupId>org.springframework.boot</groupId>
+    		<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
 	    <dependency>

@@ -4,7 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
-import com.bhs.gtk.filter.model.ExecutableFilter;
+import com.bhs.gtk.filter.model.communication.ArithmeticExpressionResult;
+import com.bhs.gtk.filter.model.communication.ExecutableFilter;
 import com.bhs.gtk.filter.service.FilterServiceImpl;
 import com.bhs.gtk.filter.util.Converter;
 
@@ -20,7 +21,6 @@ public class MessageConsumer {
 	
 	@KafkaListener(topics = TopicNames.INPUT_EXECUTION_REQUEST)
 	public boolean receiveFilterExecutionRequest(String message) {
-		System.err.println("FS:<-"+message);
 		ExecutableFilter executableFilter =  converter.convertToExecutableFilter(message);
 		filterServiceImpl.executeFilter(executableFilter);
 		return true;
@@ -28,7 +28,9 @@ public class MessageConsumer {
 	
 	@KafkaListener(topics = TopicNames.INPUT_EXECUTION_RESPONSE)
 	public boolean receiveExpressionExecutionResponse(String message) {
-		System.out.println("FS: expression execution response:"+message);
+		System.err.println("FS <-: expression execution response:"+message);
+		ArithmeticExpressionResult arResult = converter.convertToARexpressionResult(message);
+		filterServiceImpl.updateFilterResult(arResult);
 		return true;
 	}
 	

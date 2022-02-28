@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import org.threeten.bp.DateTimeUtils;
@@ -14,20 +15,41 @@ import org.threeten.bp.OffsetDateTime;
 import com.bhs.gtk.filter.model.ArithmeticExpression;
 import com.bhs.gtk.filter.model.BooleanExpression;
 import com.bhs.gtk.filter.model.CompareExpression;
-import com.bhs.gtk.filter.model.ExecutableFilter;
 import com.bhs.gtk.filter.model.ExpressionLocation;
 import com.bhs.gtk.filter.model.ExpressionPosition;
 import com.bhs.gtk.filter.model.FilterResultResponse;
 import com.bhs.gtk.filter.model.LogicalExpression;
+import com.bhs.gtk.filter.model.communication.ArithmeticExpressionResult;
+import com.bhs.gtk.filter.model.communication.ExecutableFilter;
 
 @Component
 public class Converter {
 	
+	public ArithmeticExpressionResult convertToARexpressionResult(String message) {
+		try {
+			JSONObject jsonObject = new JSONObject(message);
+			String hash = jsonObject.getString("hash");
+			String scripName = jsonObject.getString("scripName");
+			String marketTimeAsString = jsonObject.getString("marketTime");
+			Date marketTime = DateTimeUtils.toDate(OffsetDateTime.parse(marketTimeAsString).toInstant());
+			String status = jsonObject.getString("status");
+			return new ArithmeticExpressionResult(hash, scripName, marketTime, status);
+		}catch (JSONException jsonException) {
+			//log exception
+			throw new IllegalStateException("Convertion of message from ES in FS failed with JSONexception. Message = "+ message);
+		}
+	}
 	
+	/**
+	 * @param parseTree
+	 * @return value of key  'operation' in the json (parseTree), EMPTY string if the no operation found.
+	 */
 	public String getOperationFromParseTree(String parseTree) {
 		JSONObject jsonObject = new JSONObject(parseTree);
-		String operation = (String) jsonObject.get("operation");
-		return operation;
+		if (jsonObject.isNull("operation")) {
+			throw new IllegalArgumentException("No operation found in parseTree = "+parseTree);
+		}
+		return jsonObject.getString("operation");
 	}
 	
 	public String getARexpHashFromCompareParseTree(String parseTree, boolean leftAR) {
@@ -43,9 +65,6 @@ public class Converter {
 	
 	
 	public ExecutableFilter convertToExecutableFilter(String message) {
-		// {"filterId":"1116b21a-fb3c-4dc7-9764-5f182c3769cc",
-		//"scripName":"BETA","marketTime":"2022-02-05T22:40:24.357+05:30",
-		//"status":"QUEUED"}
 		JSONObject jsonObject = new JSONObject(message);
 		UUID filterId = UUID.fromString((String)jsonObject.get("filterId"));
 		String scripName = (String)jsonObject.get("scripName");
@@ -71,9 +90,6 @@ public class Converter {
 		case "AND":
 		case "OR":
 			return createLogicalExpression(operation, jsonObject);
-		case"+":
-		case "-":
-		case "^":
 		case "=":
 		case ">":
 		case "<":

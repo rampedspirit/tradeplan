@@ -1,50 +1,61 @@
 package com.bhs.gtk.expression.persistence;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import org.threeten.bp.Instant;
+import org.threeten.bp.OffsetDateTime;
+import org.threeten.bp.ZoneId;
 
 @Entity
+@IdClass(ExpressionResultId.class)
 public class ExpressionResultEntity {
 	
 	@Id
+	@Column(length = PersistenceConstants.SMALL_TEXT_LIMIT)
+	private String hash;
+	
+	@Id
+	@Temporal(TemporalType.TIMESTAMP)
 	@Column
-	private long checksum;
+	private Date marketTime;
+	
+	@Id
+	@Column(length = PersistenceConstants.SMALL_TEXT_LIMIT)
+	private String scripName;
 	
 	@Column(length = PersistenceConstants.SMALL_TEXT_LIMIT)
-	private String expression;
-	
-	@Column
-	private double result;
-	
-    @Column(length = PersistenceConstants.SMALL_TEXT_LIMIT)
 	private String status;
-
-//    public ExpressionResultEntity() {
-//    }
-    
-    public ExpressionResultEntity(long checksum, String expression, double result, String status) {
-    	this.checksum = checksum;
-    	this.expression = expression;
-    	this.result = result;
-    	this.status = status;
-    }
-    
-	public String getExpression() {
-		return expression;
-	}
-
 	
-//	public void setExpression(String expression) {
-//		this.expression = expression;
-//	}
-
-	public double getResult() {
-		return result;
+	protected ExpressionResultEntity() {};
+	
+	public ExpressionResultEntity(String hash, Date marketTime, String scripName, String status) {
+		this.setHash(hash);
+		this.setMarketTime(marketTime);
+		this.setScripName(scripName);
+		this.setStatus(status);
 	}
 
-	public void setResult(double result) {
-		this.result = result;
+	public Date getMarketTime() {
+		return marketTime;
+	}
+
+	public void setMarketTime(Date marketTime) {
+		this.marketTime = marketTime;
+	}
+
+	public String getScripName() {
+		return scripName;
+	}
+
+	public void setScripName(String scripName) {
+		this.scripName = scripName;
 	}
 
 	public String getStatus() {
@@ -55,12 +66,16 @@ public class ExpressionResultEntity {
 		this.status = status;
 	}
 
-	public long getChecksum() {
-		return checksum;
+	public String getHash() {
+		return hash;
 	}
 
-//	public void setChecksum(long checksum) {
-//		this.checksum = checksum;
-//	}
-
+	public void setHash(String hash) {
+		this.hash = hash;
+	}
+	
+	public OffsetDateTime getMarketTimeAsOffsetDateTime() {
+		return OffsetDateTime.ofInstant(Instant.ofEpochMilli(marketTime.getTime()), ZoneId.systemDefault());
+	}
+	
 }

@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>com.bhscloudtech.greentick</groupId>
 	<artifactId>screener</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>screener</name>
 	<description>screener service</description>
 	<properties>
