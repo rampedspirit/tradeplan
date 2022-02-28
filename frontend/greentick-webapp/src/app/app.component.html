@@ -4,6 +4,20 @@
       <img src="assets/icons/small_new.png">
     </div>
     <div>
+      <!--Modules-->
+      <button mat-flat-button [routerLink]="['/screener']">
+        <mat-icon color="primary">tv</mat-icon>
+        Screener
+      </button>
+      <button mat-flat-button>
+        <mat-icon color="primary">bubble_chart</mat-icon>
+        Back Test
+      </button>
+      <button mat-flat-button>
+        <mat-icon color="primary">multiline_chart</mat-icon>
+        Paper Trade
+      </button>
+
       <!--User Menu-->
       <button mat-icon-button *ngIf="(authService.currentUser | async)" [matMenuTriggerFor]="userMenu">
         <mat-icon>person</mat-icon>

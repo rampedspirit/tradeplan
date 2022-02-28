@@ -1,5 +1,12 @@
 /* You can add global styles to this file, and also import other style files */
 
+//Variables
+$color-status-queued:#71818E;
+$color-status-running:#71818E;
+$color-status-pass:#25DA9F;
+$color-status-fail:#DA2560;
+$color-status-error:#BADA25;
+
 html, body { 
   height: 100%;
   background-color: #f9f9f9;
@@ -26,7 +33,7 @@ body {
   background: #3f51b5;
 }
 
-/*MONACO editor related styling*/
+/*MONACO editor related styling START*/
 
 // .monaco-hover-content{
 //     font-size: 16px !important;
@@ -36,6 +43,61 @@ body {
 div.hover-row.status-bar {
   display: none !important;
 }
+
+// Styling for status in monaco editor
+//Filter Results
+@mixin  filter-status-marker($color) {
+  cursor: pointer;
+  background-color: rgba($color,0.3);
+}
+
+.filter-result-QUEUED{
+  @include filter-status-marker($color-status-queued);
+}
+
+.filter-result-RUNNING{
+  @include filter-status-marker($color-status-running);
+}
+
+.filter-result-PASS{
+  @include filter-status-marker($color-status-pass);
+}
+
+.filter-result-FAIL{
+  @include filter-status-marker($color-status-fail);
+}
+
+.filter-result-ERROR{
+  @include filter-status-marker($color-status-error);
+}
+
+//Expression Results
+@mixin  expression-status-marker($color) {
+  cursor: pointer;
+  background-color: rgba($color,0.2);
+}
+
+.expression-result-COMPARE-QUEUED{
+  @include expression-status-marker($color-status-queued);
+}
+
+.expression-result-COMPARE-RUNNING{
+  @include expression-status-marker($color-status-running);
+}
+
+.expression-result-COMPARE-PASS{
+  @include expression-status-marker($color-status-pass);
+}
+
+.expression-result-COMPARE-FAIL{
+  @include expression-status-marker($color-status-fail);
+}
+
+.expression-result-COMPARE-ERROR{
+  @include expression-status-marker($color-status-error);
+}
+
+/*MONACO editor related styling END*/
 
 //MAT Button
 .mat-button.mat-success,

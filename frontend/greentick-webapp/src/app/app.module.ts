@@ -70,6 +70,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { DatePipe } from '@angular/common';
 import { ScreenerExecutableResultComponent } from './components/screener/screener-executable-result/screener-executable-result.component';
 import { ConditionResultComponent } from './components/condition/condition-result/condition-result.component';
+import { FilterResultComponent } from './components/filter/filter-result/filter-result.component';
 
 Amplify.configure({
   Auth: {
@@ -107,7 +108,8 @@ Amplify.configure({
     DocumentComponent,
     ScreenerExecutableCreateComponent,
     ScreenerExecutableResultComponent,
-    ConditionResultComponent
+    ConditionResultComponent,
+    FilterResultComponent
   ],
   imports: [
     BrowserModule,
