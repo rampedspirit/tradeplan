@@ -62,6 +62,7 @@ export class EcsAppStack extends Stack {
         this.createFilterService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
         this.createConditionService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
         this.createScreenerService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
+        this.createExpressionService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
     }
 
     /**
@@ -390,6 +391,64 @@ export class EcsAppStack extends Stack {
         });
 
         let service = new Ec2Service(this, stackName + "-screener-service", {
+            cluster: cluster,
+            desiredCount: 1,
+            taskDefinition: taskDefinition
+        });
+        service.attachToApplicationTargetGroup(targetGroup);
+    }
+
+    /**
+     * Creates the expression service
+     * @param stackName 
+     * @param vpc 
+     * @param logGroup 
+     * @param applicationLoadbalancer 
+     * @param cluster 
+     * @param dbCredentials 
+     * @param databaseUrl
+     */
+     private createExpressionService(stackName: string, vpc: IVpc, logGroup: LogGroup, applicationListener: ApplicationListener,
+        cluster: Cluster, dbCredentials: ISecret, databaseUrl: string) {
+
+        //Load Balancer Config
+        let targetGroup = new ApplicationTargetGroup(this, stackName + "-expression-service-target-group", {
+            vpc: vpc,
+            port: 5003,
+            protocol: ApplicationProtocol.HTTP,
+            healthCheck: {
+                path: "/actuator/health"
+            }
+        });
+
+        //Service Config
+        let taskDefinition = new Ec2TaskDefinition(this, stackName + '-expression-service-taskdef');
+
+        taskDefinition.addContainer(stackName + "-expression-service-container", {
+            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-expression-service", "gtk-expression-service")),
+            cpu: 50,
+            memoryLimitMiB: 512,
+            essential: true,
+            environment: {
+                "SERVER_PORT": "5003",
+                "DB_HOST": databaseUrl,
+                "DB_PORT": "5000",
+                "DB_NAME": "appdb",
+                "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
+                "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
+                "KAFKA_BOOTSTRAP_ADDRESS": "kafka.gtk.com:19092",
+                "ACTIVE_PROFILE":"dev"
+            },
+            portMappings: [{
+                containerPort: 5003
+            }],
+            logging: LogDriver.awsLogs({
+                logGroup: logGroup,
+                streamPrefix: logGroup.logGroupName
+            }),
+        });
+
+        let service = new Ec2Service(this, stackName + "-expression-service", {
             cluster: cluster,
             desiredCount: 1,
             taskDefinition: taskDefinition
