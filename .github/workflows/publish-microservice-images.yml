@@ -73,3 +73,14 @@ jobs:
       run: |
         docker build screener/ -f screener/Dockerfile -t $ECR_REGISTRY/gtk-screener-service:$IMAGE_TAG
         docker push $ECR_REGISTRY/gtk-screener-service:$IMAGE_TAG
+      
+    - name: Build expression-service
+      run: mvn -B package --file arithmeticexp/pom.xml
+
+    - name: Push expression-service Image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.event.inputs.ImageVersion }}
+      run: |
+        docker build arithmeticexp/ -f arithmeticexp/Dockerfile -t $ECR_REGISTRY/gtk-expression-service:$IMAGE_TAG
+        docker push $ECR_REGISTRY/gtk-expression-service:$IMAGE_TAG
