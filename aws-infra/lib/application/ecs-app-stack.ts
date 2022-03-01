@@ -421,6 +421,15 @@ export class EcsAppStack extends Stack {
             }
         });
 
+        new ApplicationListenerRule(this, "expressionservice-listener-rule", {
+            listener: applicationListener,
+            priority: 4,
+            conditions: [
+                ListenerCondition.pathPatterns(["/v1/expression"])
+            ],
+            action: ListenerAction.forward([targetGroup])
+        });
+
         //Service Config
         let taskDefinition = new Ec2TaskDefinition(this, stackName + '-expression-service-taskdef');
 
