@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
@@ -16,14 +18,15 @@ import javax.validation.constraints.*;
  * FilterResult
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-02-18T13:27:13.752501500+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-03-03T21:44:42.753523200+05:30[Asia/Calcutta]")
 
 public class FilterResult   {
   @JsonProperty("filterId")
   private UUID filterId = null;
 
   @JsonProperty("location")
-  private Location location = null;
+  @Valid
+  private List<Location> location = new ArrayList<Location>();
 
   /**
    * Gets or Sets status
@@ -87,25 +90,30 @@ public class FilterResult   {
     this.filterId = filterId;
   }
 
-  public FilterResult location(Location location) {
+  public FilterResult location(List<Location> location) {
     this.location = location;
     return this;
   }
 
+  public FilterResult addLocationItem(Location locationItem) {
+    this.location.add(locationItem);
+    return this;
+  }
+
   /**
-   * Get location
+   * one filter is found in one or more locations in a condition.
    * @return location
   **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "one filter is found in one or more locations in a condition.")
   @NotNull
 
   @Valid
 
-  public Location getLocation() {
+  public List<Location> getLocation() {
     return location;
   }
 
-  public void setLocation(Location location) {
+  public void setLocation(List<Location> location) {
     this.location = location;
   }
 
