@@ -266,14 +266,14 @@ components:
         expressionResults:
           type: array
           items:
-            $ref: '#/components/schemas/ExpressionResult'
+            $ref: '#/components/schemas/ExpressionResultResponse'
  
-    ExpressionResult:
+    ExpressionResultResponse:
       type: object
       properties:
         type:
           type: string
-          enum: [COMPARE, ARITHMETIC]
+          enum: [COMPARE_EXPRESSION, ARITHEMETIC_EXPRESSION]
         location:
           $ref : '#/components/schemas/Location'
         result:

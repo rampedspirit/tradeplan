@@ -28,7 +28,7 @@ import com.bhs.gtk.filter.model.BooleanExpression;
 import com.bhs.gtk.filter.model.CompareExpression;
 import com.bhs.gtk.filter.model.ExecutionStatus;
 import com.bhs.gtk.filter.model.ExpressionLocation;
-import com.bhs.gtk.filter.model.ExpressionResult;
+import com.bhs.gtk.filter.model.ExpressionResultResponse;
 import com.bhs.gtk.filter.model.ExpressionType;
 import com.bhs.gtk.filter.model.FilterRequest;
 import com.bhs.gtk.filter.model.FilterResponse;
@@ -239,13 +239,14 @@ public class FilterServiceImpl implements FilterService{
 	}
 	
 	
-	private List<ExpressionResult> getExpressionResults(FilterResultEntity filterResultEntity) {
+	private List<ExpressionResultResponse> getExpressionResults(FilterResultEntity filterResultEntity) {
 		HashMap<String, String> resultMap = getExpressionsResultMap(filterResultEntity);
 		HashMap<String, ExpressionLocation> locationMap = getExpressionsLocationMap(filterResultEntity.getFilterId());
 
-		List<ExpressionResult> expressionResults = new ArrayList<>();
+		List<ExpressionResultResponse> expressionResults = new ArrayList<>();
 		for (String expHash : resultMap.keySet()) {
-			ExpressionResult result = new ExpressionResult();
+			ExpressionResultResponse result = new ExpressionResultResponse();
+			
 			result.setResult(resultMap.get(expHash));
 			result.setLocation(mapper.getLocation(locationMap.get(expHash)));
 			expressionResults.add(result);
