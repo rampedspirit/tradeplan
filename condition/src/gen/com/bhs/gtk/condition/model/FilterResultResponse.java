@@ -15,12 +15,12 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * FilterResult
+ * FilterResultResponse
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-03-03T21:44:42.753523200+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-03-03T22:03:47.873640300+05:30[Asia/Calcutta]")
 
-public class FilterResult   {
+public class FilterResultResponse   {
   @JsonProperty("filterId")
   private UUID filterId = null;
 
@@ -68,7 +68,7 @@ public class FilterResult   {
   @JsonProperty("status")
   private StatusEnum status = null;
 
-  public FilterResult filterId(UUID filterId) {
+  public FilterResultResponse filterId(UUID filterId) {
     this.filterId = filterId;
     return this;
   }
@@ -90,12 +90,12 @@ public class FilterResult   {
     this.filterId = filterId;
   }
 
-  public FilterResult location(List<Location> location) {
+  public FilterResultResponse location(List<Location> location) {
     this.location = location;
     return this;
   }
 
-  public FilterResult addLocationItem(Location locationItem) {
+  public FilterResultResponse addLocationItem(Location locationItem) {
     this.location.add(locationItem);
     return this;
   }
@@ -117,7 +117,7 @@ public class FilterResult   {
     this.location = location;
   }
 
-  public FilterResult status(StatusEnum status) {
+  public FilterResultResponse status(StatusEnum status) {
     this.status = status;
     return this;
   }
@@ -147,10 +147,10 @@ public class FilterResult   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    FilterResult filterResult = (FilterResult) o;
-    return Objects.equals(this.filterId, filterResult.filterId) &&
-        Objects.equals(this.location, filterResult.location) &&
-        Objects.equals(this.status, filterResult.status);
+    FilterResultResponse filterResultResponse = (FilterResultResponse) o;
+    return Objects.equals(this.filterId, filterResultResponse.filterId) &&
+        Objects.equals(this.location, filterResultResponse.location) &&
+        Objects.equals(this.status, filterResultResponse.status);
   }
 
   @Override
@@ -161,7 +161,7 @@ public class FilterResult   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class FilterResult {\n");
+    sb.append("class FilterResultResponse {\n");
     
     sb.append("    filterId: ").append(toIndentedString(filterId)).append("\n");
     sb.append("    location: ").append(toIndentedString(location)).append("\n");

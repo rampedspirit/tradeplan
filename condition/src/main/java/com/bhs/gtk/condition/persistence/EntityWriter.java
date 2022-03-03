@@ -18,7 +18,7 @@ import com.bhs.gtk.condition.messaging.MessageProducer;
 import com.bhs.gtk.condition.model.ConditionRequest;
 import com.bhs.gtk.condition.model.ConditionResultResponse.ConditionResultEnum;
 import com.bhs.gtk.condition.model.Filter.StatusEnum;
-import com.bhs.gtk.condition.model.FilterResult;
+import com.bhs.gtk.condition.model.FilterResultResponse;
 import com.bhs.gtk.condition.util.Converter;
 
 @Component
@@ -159,7 +159,7 @@ public class EntityWriter {
 		for( UUID id : filterIds) {
 			FilterResultEntity entity =  entityReader.getFilterResultEntity(id, marketTime, scripName);
 			if(entity == null) {
-				newlyCreatedFilterResults.add(new FilterResultEntity(id, marketTime, scripName, FilterResult.StatusEnum.QUEUED.name()));
+				newlyCreatedFilterResults.add(new FilterResultEntity(id, marketTime, scripName, FilterResultResponse.StatusEnum.QUEUED.name()));
 			}else {
 				availableFilterResults.add(entity);
 			}

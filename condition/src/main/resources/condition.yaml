@@ -312,9 +312,9 @@ components:
           type: array
           description: associated filters.
           items:
-            $ref: '#/components/schemas/FilterResult'           
+            $ref: '#/components/schemas/FilterResultResponse'           
 
-    FilterResult:
+    FilterResultResponse:
       required:
        - filterId
        - status

@@ -20,7 +20,7 @@ import com.bhs.gtk.condition.model.Filter.StatusEnum;
 import com.bhs.gtk.condition.model.FilterExpression;
 import com.bhs.gtk.condition.model.FilterLocation;
 import com.bhs.gtk.condition.model.FilterPosition;
-import com.bhs.gtk.condition.model.FilterResult;
+import com.bhs.gtk.condition.model.FilterResultResponse;
 import com.bhs.gtk.condition.model.Location;
 import com.bhs.gtk.condition.model.Position;
 import com.bhs.gtk.condition.persistence.ConditionEntity;
@@ -50,20 +50,20 @@ public class Mapper {
 		conditionResultResponse.setCode(condition.getCode());
 		conditionResultResponse.setConditionResult(ConditionResultEnum.valueOf(conditionResult.getStatus()));
 		conditionResultResponse.setMarketTime(conditionResult.getMarketTimeAsOffsetDateTime());
-		conditionResultResponse.setFiltersResult(getFilterResults(conditionResult));
+		conditionResultResponse.setFiltersResult(getFilterResultResponses(conditionResult));
 		return conditionResultResponse;
 	}
 
-	private List<FilterResult> getFilterResults(ConditionResultEntity conditionResult) {
+	private List<FilterResultResponse> getFilterResultResponses(ConditionResultEntity conditionResult) {
 		ConditionExpression conditionExpression = getConditionExpression(conditionResult);
 		Map<String, List<FilterLocation>> filterLocations = getFilterLocations(conditionExpression);
-		List<FilterResult> filterResults = new ArrayList<>();
+		List<FilterResultResponse> filterResults = new ArrayList<>();
 		for (FilterResultEntity filter : conditionResult.getFilterResultEntities()) {
 			UUID filterId = filter.getFilterId();
-			FilterResult fResult = new FilterResult();
+			FilterResultResponse fResult = new FilterResultResponse();
 			fResult.setFilterId(filterId);
 			fResult.setLocation(getLocationResponses(filterLocations.get(filterId.toString())));
-			fResult.setStatus(com.bhs.gtk.condition.model.FilterResult.StatusEnum.fromValue(filter.getStatus()));
+			fResult.setStatus(FilterResultResponse.StatusEnum.fromValue(filter.getStatus()));
 			filterResults.add(fResult);
 		}
 		return filterResults;

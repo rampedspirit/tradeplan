@@ -16,8 +16,8 @@ import org.springframework.stereotype.Service;
 import com.bhs.gtk.condition.messaging.MessageProducer;
 import com.bhs.gtk.condition.messaging.MessageType;
 import com.bhs.gtk.condition.model.ConditionResultResponse.ConditionResultEnum;
+import com.bhs.gtk.condition.model.FilterResultResponse;
 import com.bhs.gtk.condition.model.communication.ExecutableCondition;
-import com.bhs.gtk.condition.model.FilterResult;
 import com.bhs.gtk.condition.persistence.ConditionEntity;
 import com.bhs.gtk.condition.persistence.ConditionResultEntity;
 import com.bhs.gtk.condition.persistence.EntityReader;
@@ -88,7 +88,7 @@ public class ExecutableServiceImpl implements ExecutableService{
 			Map<String, String> entityMap = getEntityMapForJson(filter);
 			JSONObject entityAsJson = new JSONObject(entityMap);
 			if(messageProducer.sendMessage(entityAsJson.toString(), MessageType.EXECUTION_REQUEST)) {
-				filter.setStatus(FilterResult.StatusEnum.RUNNING.name());
+				filter.setStatus(FilterResultResponse.StatusEnum.RUNNING.name());
 				filtersSuccessfullySentForExecution.add(filter);
 			}else {
 				System.err.println(" failed to request "+ entityAsJson);
