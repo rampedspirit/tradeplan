@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -243,42 +244,73 @@ public class FilterServiceImpl implements FilterService{
 	
 	private List<ExpressionResultResponse> getExpressionResults(FilterResultEntity filterResultEntity) {
 		List<ExpressionResult> expressionResults = getExpressionsResultMap(filterResultEntity);
-		HashMap<String, ExpressionLocation> locationMap = getExpressionsLocationMap(filterResultEntity.getFilterId());
+		HashMap<String, List<ExpressionLocation>> locationMap = getExpressionsLocationMap(filterResultEntity.getFilterId());
 		List<ExpressionResultResponse> expressionResultsResponse = new ArrayList<>();
 		for ( ExpressionResult result : expressionResults) {
 			ExpressionResultResponse response = new ExpressionResultResponse();
 			response.setResult(result.getStatus());
-			Location location = mapper.getLocation(locationMap.get(result.getHash()));
-			response.setLocation(location);
+			response.setLocation(getLocationResponses(result.getHash(), locationMap));
 			response.setType(ExpressionResultResponse.TypeEnum.valueOf(result.getType()));
 			expressionResultsResponse.add(response);
 		}
 		return expressionResultsResponse;
 	}
 
-	private HashMap<String, ExpressionLocation> getExpressionsLocationMap(UUID filterId) {
-		HashMap<String, ExpressionLocation> locationMap = new HashMap<>();
-		
+	private List<Location> getLocationResponses(String hash, HashMap<String, List<ExpressionLocation>> locationMap) {
+		if(locationMap == null || locationMap.isEmpty()) {
+			return new ArrayList<>();
+		}
+		List<ExpressionLocation> expLocations = locationMap.get(hash);
+		if(expLocations == null) {
+			expLocations = new ArrayList<>();
+		}
+		List<Location> locationResponses = new ArrayList<>();
+		for(ExpressionLocation expLoc : expLocations) {
+			locationResponses.add(mapper.getLocation(expLoc));
+		}
+		return locationResponses;
+	}
+
+	private HashMap<String, List<ExpressionLocation>> getExpressionsLocationMap(UUID filterId) {
 		FilterEntity filterEntity = entityReader.getFilterEntity(filterId);
 		if(filterEntity == null) {
-			return locationMap;
+			return new HashMap<>();
 		}
 		BooleanExpression booleanExpression = converter.convertToBooleanExpression(filterEntity.getParseTree());
-		locationMap.putAll(getExpressionsLocationMap(booleanExpression));
-		return locationMap;
+		return getExpressionsLocationMap(booleanExpression);
 	}
 	
-	private HashMap<String, ExpressionLocation> getExpressionsLocationMap(BooleanExpression expression) {
-		HashMap<String, ExpressionLocation> locationMap = new HashMap<>();
+	private HashMap<String, List<ExpressionLocation>> getExpressionsLocationMap(BooleanExpression expression) {
+		HashMap<String, List<ExpressionLocation>> locationMap = new HashMap<>();
 		
 		if(expression instanceof LogicalExpression) {
 			LogicalExpression logicalExpression = (LogicalExpression) expression;
 			for(BooleanExpression exp : logicalExpression.getBooleanExpressions()) {
-				locationMap.putAll(getExpressionsLocationMap(exp));
+				HashMap<String, List<ExpressionLocation>> booleanExpressionLocations = getExpressionsLocationMap(exp);
+				for(Entry<String, List<ExpressionLocation>> entry : booleanExpressionLocations.entrySet()) {
+					String hash = entry.getKey();
+					List<ExpressionLocation> expLocs = entry.getValue();
+					List<ExpressionLocation> expLocations = locationMap.get(hash);
+					if(expLocations == null || expLocations.isEmpty()) {
+						expLocations = new ArrayList<>();
+					}
+					expLocations.addAll(expLocs);
+					locationMap.put(hash, expLocations);
+				}
 			}
 		}else if(expression instanceof CompareExpression) {
 			CompareExpression compareExpression = (CompareExpression) expression;
-			locationMap.putAll(getExpressionsLocationMap(compareExpression));
+			HashMap<String, ExpressionLocation> compareExpressionLocations = getExpressionsLocationMap(compareExpression);
+			for(Entry<String, ExpressionLocation> entry : compareExpressionLocations.entrySet()) {
+				String hash = entry.getKey();
+				ExpressionLocation expLoc = entry.getValue();
+				List<ExpressionLocation> expLocations = locationMap.get(hash);
+				if(expLocations == null || expLocations.isEmpty()) {
+					expLocations = new ArrayList<>();
+				}
+				expLocations.add(expLoc);
+				locationMap.put(hash, expLocations);
+			}
 		}
 		return locationMap;
 	}

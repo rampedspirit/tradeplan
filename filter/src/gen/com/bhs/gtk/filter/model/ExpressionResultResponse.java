@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -15,7 +17,7 @@ import javax.validation.constraints.*;
  * ExpressionResultResponse
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-03-03T22:39:08.045949100+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-03-04T16:17:22.540152200+05:30[Asia/Calcutta]")
 
 public class ExpressionResultResponse   {
   /**
@@ -53,7 +55,8 @@ public class ExpressionResultResponse   {
   private TypeEnum type = null;
 
   @JsonProperty("location")
-  private Location location = null;
+  @Valid
+  private List<Location> location = null;
 
   @JsonProperty("result")
   private Object result = null;
@@ -78,8 +81,16 @@ public class ExpressionResultResponse   {
     this.type = type;
   }
 
-  public ExpressionResultResponse location(Location location) {
+  public ExpressionResultResponse location(List<Location> location) {
     this.location = location;
+    return this;
+  }
+
+  public ExpressionResultResponse addLocationItem(Location locationItem) {
+    if (this.location == null) {
+      this.location = new ArrayList<Location>();
+    }
+    this.location.add(locationItem);
     return this;
   }
 
@@ -91,11 +102,11 @@ public class ExpressionResultResponse   {
 
   @Valid
 
-  public Location getLocation() {
+  public List<Location> getLocation() {
     return location;
   }
 
-  public void setLocation(Location location) {
+  public void setLocation(List<Location> location) {
     this.location = location;
   }
 
