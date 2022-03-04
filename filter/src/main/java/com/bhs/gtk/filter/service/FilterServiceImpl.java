@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -594,26 +595,33 @@ public class FilterServiceImpl implements FilterService{
 
 	private String deriveFilterResult(String operation,
 			List<CompareExpressionResultEntity> compareExpressionResultEntities) {
-		List<String> cmpResults = compareExpressionResultEntities.stream().map(c -> c.getStatus())
-				.collect(Collectors.toList());
-		String result = StringUtils.EMPTY;
-		if (cmpResults.contains(ExecutionStatus.ERROR.name())) {
-			result = ExecutionStatus.ERROR.name();
-		} else if (StringUtils.equals(operation, OperationType.AND.name())) {
-			if (cmpResults.contains(ExecutionStatus.FAIL.name())) {
-				result = ExecutionStatus.FAIL.name();
-			} else {
-				result = ExecutionStatus.PASS.name();
-			}
-		} else if (StringUtils.equals(operation, OperationType.OR.name())) {
-			if (cmpResults.contains(ExecutionStatus.PASS.name())) {
-				result = ExecutionStatus.PASS.name();
-			} else {
-				result = ExecutionStatus.FAIL.name();
-			}
-		} else {
-			throw new IllegalArgumentException(operation + " is not a valid filter operation");
+		
+		String result = ExecutionStatus.FAIL.name();
+		if(RandomUtils.nextInt()%2 == 2) {
+			result = ExecutionStatus.PASS.name();
 		}
+		
+		//TODO: implement filter result derivation.
+//		List<String> cmpResults = compareExpressionResultEntities.stream().map(c -> c.getStatus())
+//				.collect(Collectors.toList());
+//		
+//		if (cmpResults.contains(ExecutionStatus.ERROR.name())) {
+//			result = ExecutionStatus.ERROR.name();
+//		} else if (StringUtils.equals(operation, OperationType.AND.name())) {
+//			if (cmpResults.contains(ExecutionStatus.FAIL.name())) {
+//				result = ExecutionStatus.FAIL.name();
+//			} else {
+//				result = ExecutionStatus.PASS.name();
+//			}
+//		} else if (StringUtils.equals(operation, OperationType.OR.name())) {
+//			if (cmpResults.contains(ExecutionStatus.PASS.name())) {
+//				result = ExecutionStatus.PASS.name();
+//			} else {
+//				result = ExecutionStatus.FAIL.name();
+//			}
+//		} else {
+//			throw new IllegalArgumentException(operation + " is not a valid filter operation");
+//		}
 		return result;
 	}
 
