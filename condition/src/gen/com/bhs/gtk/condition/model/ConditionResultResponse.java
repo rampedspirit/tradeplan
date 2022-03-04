@@ -1,7 +1,7 @@
 package com.bhs.gtk.condition.model;
 
 import java.util.Objects;
-import com.bhs.gtk.condition.model.FilterResult;
+import com.bhs.gtk.condition.model.FilterResultResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -19,7 +19,7 @@ import javax.validation.constraints.*;
  * ConditionResultResponse
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-02-18T13:27:13.752501500+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-03-03T22:03:47.873640300+05:30[Asia/Calcutta]")
 
 public class ConditionResultResponse   {
   @JsonProperty("id")
@@ -82,7 +82,7 @@ public class ConditionResultResponse   {
 
   @JsonProperty("filtersResult")
   @Valid
-  private List<FilterResult> filtersResult = null;
+  private List<FilterResultResponse> filtersResult = null;
 
   public ConditionResultResponse id(UUID id) {
     this.id = id;
@@ -228,14 +228,14 @@ public class ConditionResultResponse   {
     this.conditionResult = conditionResult;
   }
 
-  public ConditionResultResponse filtersResult(List<FilterResult> filtersResult) {
+  public ConditionResultResponse filtersResult(List<FilterResultResponse> filtersResult) {
     this.filtersResult = filtersResult;
     return this;
   }
 
-  public ConditionResultResponse addFiltersResultItem(FilterResult filtersResultItem) {
+  public ConditionResultResponse addFiltersResultItem(FilterResultResponse filtersResultItem) {
     if (this.filtersResult == null) {
-      this.filtersResult = new ArrayList<FilterResult>();
+      this.filtersResult = new ArrayList<FilterResultResponse>();
     }
     this.filtersResult.add(filtersResultItem);
     return this;
@@ -249,11 +249,11 @@ public class ConditionResultResponse   {
 
   @Valid
 
-  public List<FilterResult> getFiltersResult() {
+  public List<FilterResultResponse> getFiltersResult() {
     return filtersResult;
   }
 
-  public void setFiltersResult(List<FilterResult> filtersResult) {
+  public void setFiltersResult(List<FilterResultResponse> filtersResult) {
     this.filtersResult = filtersResult;
   }
 

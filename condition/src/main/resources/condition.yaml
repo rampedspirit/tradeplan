@@ -312,9 +312,9 @@ components:
           type: array
           description: associated filters.
           items:
-            $ref: '#/components/schemas/FilterResult'           
+            $ref: '#/components/schemas/FilterResultResponse'           
 
-    FilterResult:
+    FilterResultResponse:
       required:
        - filterId
        - status
@@ -325,7 +325,10 @@ components:
           type: string
           format: uuid
         location:
-           $ref : '#/components/schemas/Location'
+           type: array
+           description: one filter is found in one or more locations in a condition.
+           items:
+            $ref : '#/components/schemas/Location'
         status:
           type: string
           enum: [QUEUED, RUNNING, PASS, FAIL, ERROR]          

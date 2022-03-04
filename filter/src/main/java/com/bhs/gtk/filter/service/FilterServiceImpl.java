@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,11 +30,12 @@ import com.bhs.gtk.filter.model.CompareExpression;
 import com.bhs.gtk.filter.model.ExecutionStatus;
 import com.bhs.gtk.filter.model.ExpressionLocation;
 import com.bhs.gtk.filter.model.ExpressionResult;
-import com.bhs.gtk.filter.model.ExpressionType;
+import com.bhs.gtk.filter.model.ExpressionResultResponse;
 import com.bhs.gtk.filter.model.FilterRequest;
 import com.bhs.gtk.filter.model.FilterResponse;
 import com.bhs.gtk.filter.model.FilterResultResponse;
 import com.bhs.gtk.filter.model.FilterResultResponse.FilterResultEnum;
+import com.bhs.gtk.filter.model.Location;
 import com.bhs.gtk.filter.model.LogicalExpression;
 import com.bhs.gtk.filter.model.OperationType;
 import com.bhs.gtk.filter.model.PatchData;
@@ -239,18 +241,19 @@ public class FilterServiceImpl implements FilterService{
 	}
 	
 	
-	private List<ExpressionResult> getExpressionResults(FilterResultEntity filterResultEntity) {
-		HashMap<String, String> resultMap = getExpressionsResultMap(filterResultEntity);
+	private List<ExpressionResultResponse> getExpressionResults(FilterResultEntity filterResultEntity) {
+		List<ExpressionResult> expressionResults = getExpressionsResultMap(filterResultEntity);
 		HashMap<String, ExpressionLocation> locationMap = getExpressionsLocationMap(filterResultEntity.getFilterId());
-
-		List<ExpressionResult> expressionResults = new ArrayList<>();
-		for (String expHash : resultMap.keySet()) {
-			ExpressionResult result = new ExpressionResult();
-			result.setResult(resultMap.get(expHash));
-			result.setLocation(mapper.getLocation(locationMap.get(expHash)));
-			expressionResults.add(result);
+		List<ExpressionResultResponse> expressionResultsResponse = new ArrayList<>();
+		for ( ExpressionResult result : expressionResults) {
+			ExpressionResultResponse response = new ExpressionResultResponse();
+			response.setResult(result.getStatus());
+			Location location = mapper.getLocation(locationMap.get(result.getHash()));
+			response.setLocation(location);
+			response.setType(ExpressionResultResponse.TypeEnum.valueOf(result.getType()));
+			expressionResultsResponse.add(response);
 		}
-		return expressionResults;
+		return expressionResultsResponse;
 	}
 
 	private HashMap<String, ExpressionLocation> getExpressionsLocationMap(UUID filterId) {
@@ -291,15 +294,17 @@ public class FilterServiceImpl implements FilterService{
 		return locationMap;
 	}
 
-	private HashMap<String, String> getExpressionsResultMap(FilterResultEntity filterResultEntity) {
-		HashMap<String, String> resultMap = new HashMap<>();
+	private List<ExpressionResult> getExpressionsResultMap(FilterResultEntity filterResultEntity) {
+		List<ExpressionResult> expressionResult = new ArrayList<>();
 		for(CompareExpressionResultEntity cmp : filterResultEntity.getCompareExpressionResultEntities()) {
-			resultMap.put(cmp.getHash(), cmp.getStatus());
+			expressionResult.add(new ExpressionResult(cmp.getHash(), cmp.getStatus(),
+					ExpressionResultResponse.TypeEnum.COMPARE_EXPRESSION.name()));
 			for(ArithmeticExpressionResultEntity arExp : cmp.getArithmeticExpressionResultEntities()) {
-				resultMap.put(arExp.getHash(), arExp.getStatus());
+				expressionResult.add(new ExpressionResult(arExp.getHash(), arExp.getStatus(),
+						ExpressionResultResponse.TypeEnum.ARITHEMETIC_EXPRESSION.name()));
 			}
 		}
-		return resultMap;
+		return expressionResult;
 	}
 
 	private FilterResultEntity createFilterResultEntity(UUID filterId, Date marketTime, String scripName) {
@@ -377,13 +382,13 @@ public class FilterServiceImpl implements FilterService{
 		List<ExpressionEntity> expressions = entityReader.getExpressionEntities(filterId);
 		
 		//TODO: handle empty expressions
-		List<ExpressionEntity> arExpressions = expressions.stream().filter(e -> StringUtils.equals(e.getType(), ExpressionType.ARITHEMETIC_EXPRESSION.name()))
+		List<ExpressionEntity> arExpressions = expressions.stream().filter(e -> StringUtils.equals(e.getType(), ExpressionResultResponse.TypeEnum.ARITHEMETIC_EXPRESSION.name()))
 				.collect(Collectors.toList());
 		
 		List<ArithmeticExpressionResultEntity> arResults = executeArtithmeticExpressions(arExpressions, marketTime,
 				scripName);
 		
-		List<ExpressionEntity> compareExpressions = expressions.stream().filter(e -> StringUtils.equals(e.getType(), ExpressionType.COMPARE_EXPRESSION.name()))
+		List<ExpressionEntity> compareExpressions = expressions.stream().filter(e -> StringUtils.equals(e.getType(), ExpressionResultResponse.TypeEnum.COMPARE_EXPRESSION.name()))
 		.collect(Collectors.toList());
 		
 		return  executeCompareExpressions(compareExpressions, arResults, marketTime, scripName);
@@ -590,26 +595,33 @@ public class FilterServiceImpl implements FilterService{
 
 	private String deriveFilterResult(String operation,
 			List<CompareExpressionResultEntity> compareExpressionResultEntities) {
-		List<String> cmpResults = compareExpressionResultEntities.stream().map(c -> c.getStatus())
-				.collect(Collectors.toList());
-		String result = StringUtils.EMPTY;
-		if (cmpResults.contains(ExecutionStatus.ERROR.name())) {
-			result = ExecutionStatus.ERROR.name();
-		} else if (StringUtils.equals(operation, OperationType.AND.name())) {
-			if (cmpResults.contains(ExecutionStatus.FAIL.name())) {
-				result = ExecutionStatus.FAIL.name();
-			} else {
-				result = ExecutionStatus.PASS.name();
-			}
-		} else if (StringUtils.equals(operation, OperationType.OR.name())) {
-			if (cmpResults.contains(ExecutionStatus.PASS.name())) {
-				result = ExecutionStatus.PASS.name();
-			} else {
-				result = ExecutionStatus.FAIL.name();
-			}
-		} else {
-			throw new IllegalArgumentException(operation + " is not a valid filter operation");
+		
+		String result = ExecutionStatus.FAIL.name();
+		if(RandomUtils.nextInt()%2 == 2) {
+			result = ExecutionStatus.PASS.name();
 		}
+		
+		//TODO: implement filter result derivation.
+//		List<String> cmpResults = compareExpressionResultEntities.stream().map(c -> c.getStatus())
+//				.collect(Collectors.toList());
+//		
+//		if (cmpResults.contains(ExecutionStatus.ERROR.name())) {
+//			result = ExecutionStatus.ERROR.name();
+//		} else if (StringUtils.equals(operation, OperationType.AND.name())) {
+//			if (cmpResults.contains(ExecutionStatus.FAIL.name())) {
+//				result = ExecutionStatus.FAIL.name();
+//			} else {
+//				result = ExecutionStatus.PASS.name();
+//			}
+//		} else if (StringUtils.equals(operation, OperationType.OR.name())) {
+//			if (cmpResults.contains(ExecutionStatus.PASS.name())) {
+//				result = ExecutionStatus.PASS.name();
+//			} else {
+//				result = ExecutionStatus.FAIL.name();
+//			}
+//		} else {
+//			throw new IllegalArgumentException(operation + " is not a valid filter operation");
+//		}
 		return result;
 	}
 

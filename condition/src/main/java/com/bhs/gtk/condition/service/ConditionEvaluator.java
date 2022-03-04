@@ -13,7 +13,7 @@ import com.bhs.gtk.condition.model.BooleanExpression;
 import com.bhs.gtk.condition.model.ConditionExpression;
 import com.bhs.gtk.condition.model.ConditionResultResponse.ConditionResultEnum;
 import com.bhs.gtk.condition.model.FilterExpression;
-import com.bhs.gtk.condition.model.FilterResult;
+import com.bhs.gtk.condition.model.FilterResultResponse;
 import com.bhs.gtk.condition.persistence.ConditionEntity;
 import com.bhs.gtk.condition.persistence.ConditionResultEntity;
 import com.bhs.gtk.condition.persistence.EntityReader;
@@ -39,11 +39,11 @@ public class ConditionEvaluator {
 			return ConditionResultEnum.ERROR.name();
 		}
 		String conditionStatus;
-		if(filterStatuses.contains(FilterResult.StatusEnum.RUNNING.name())) {
+		if(filterStatuses.contains(FilterResultResponse.StatusEnum.RUNNING.name())) {
 			conditionStatus =  ConditionResultEnum.RUNNING.name();
-		}else if(filterStatuses.contains(FilterResult.StatusEnum.QUEUED.name())) {
+		}else if(filterStatuses.contains(FilterResultResponse.StatusEnum.QUEUED.name())) {
 			conditionStatus = ConditionResultEnum.QUEUED.name();
-		}else if(filterStatuses.contains(FilterResult.StatusEnum.ERROR.name())) {
+		}else if(filterStatuses.contains(FilterResultResponse.StatusEnum.ERROR.name())) {
 			conditionStatus = ConditionResultEnum.ERROR.name();
 		}else {
 			conditionStatus = evaluateConditionResult(conditionId,marketTime,scripName,filterStatuses);
@@ -99,20 +99,20 @@ public class ConditionEvaluator {
 		if(results.isEmpty()) {
 			throw new IllegalArgumentException("invalid results");
 		}
-		if(results.contains(FilterResult.StatusEnum.PASS.name())) {
-			return FilterResult.StatusEnum.PASS.name();
+		if(results.contains(FilterResultResponse.StatusEnum.PASS.name())) {
+			return FilterResultResponse.StatusEnum.PASS.name();
 		}
-		return FilterResult.StatusEnum.FAIL.name();
+		return FilterResultResponse.StatusEnum.FAIL.name();
 	}
 
 	private String evaluateANDoperation(List<String> results) {
 		if(results.isEmpty()) {
 			throw new IllegalArgumentException("invalid results");
 		}
-		if(results.contains(FilterResult.StatusEnum.FAIL.name())) {
-			return FilterResult.StatusEnum.FAIL.name();
+		if(results.contains(FilterResultResponse.StatusEnum.FAIL.name())) {
+			return FilterResultResponse.StatusEnum.FAIL.name();
 		}
-		return FilterResult.StatusEnum.PASS.name();
+		return FilterResultResponse.StatusEnum.PASS.name();
 	}
 
 }

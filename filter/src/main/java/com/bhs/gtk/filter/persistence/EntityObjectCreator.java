@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import com.bhs.gtk.filter.model.ArithmeticExpression;
 import com.bhs.gtk.filter.model.BooleanExpression;
 import com.bhs.gtk.filter.model.CompareExpression;
-import com.bhs.gtk.filter.model.ExpressionType;
+import com.bhs.gtk.filter.model.ExpressionResultResponse;
 import com.bhs.gtk.filter.model.LogicalExpression;
 
 @Component
@@ -55,7 +55,7 @@ public class EntityObjectCreator {
 		ExpressionEntity compareExp = entityReader.getExpressionEntity(cmpHash);
 		if(compareExp == null) {
 			compareExp = createExpressionEntityObject(cmpHash, cmpExp.getParseTree(),
-					ExpressionType.COMPARE_EXPRESSION.name());
+					ExpressionResultResponse.TypeEnum.COMPARE_EXPRESSION.name());
 		}
 		
 		ArithmeticExpression leftExpObject = cmpExp.getLeftArithmeticExpression();
@@ -63,7 +63,7 @@ public class EntityObjectCreator {
 		ExpressionEntity leftARexp = entityReader.getExpressionEntity(leftARhash);
 		if(leftARexp == null) {
 			leftARexp = createExpressionEntityObject(leftARhash, leftExpObject.getParseTree(),
-					ExpressionType.ARITHEMETIC_EXPRESSION.name());
+					ExpressionResultResponse.TypeEnum.ARITHEMETIC_EXPRESSION.name());
 		}
 		
 		ArithmeticExpression rightExpObject = cmpExp.getRightArithmeticExpression();
@@ -71,7 +71,7 @@ public class EntityObjectCreator {
 		ExpressionEntity rightARexp = entityReader.getExpressionEntity(rightHash);
 		if(rightARexp == null) {
 			rightARexp = createExpressionEntityObject(rightHash, rightExpObject.getParseTree(),
-					ExpressionType.ARITHEMETIC_EXPRESSION.name());
+					ExpressionResultResponse.TypeEnum.ARITHEMETIC_EXPRESSION.name());
 		}
 		
 		expressions.add(compareExp);

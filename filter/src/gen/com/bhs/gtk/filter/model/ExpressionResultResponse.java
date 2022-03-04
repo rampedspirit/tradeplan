@@ -12,19 +12,19 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * ExpressionResult
+ * ExpressionResultResponse
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-02-24T19:27:38.390873600+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-03-03T22:39:08.045949100+05:30[Asia/Calcutta]")
 
-public class ExpressionResult   {
+public class ExpressionResultResponse   {
   /**
    * Gets or Sets type
    */
   public enum TypeEnum {
-    COMPARE("COMPARE"),
+    COMPARE_EXPRESSION("COMPARE_EXPRESSION"),
     
-    ARITHMETIC("ARITHMETIC");
+    ARITHEMETIC_EXPRESSION("ARITHEMETIC_EXPRESSION");
 
     private String value;
 
@@ -58,7 +58,7 @@ public class ExpressionResult   {
   @JsonProperty("result")
   private Object result = null;
 
-  public ExpressionResult type(TypeEnum type) {
+  public ExpressionResultResponse type(TypeEnum type) {
     this.type = type;
     return this;
   }
@@ -78,7 +78,7 @@ public class ExpressionResult   {
     this.type = type;
   }
 
-  public ExpressionResult location(Location location) {
+  public ExpressionResultResponse location(Location location) {
     this.location = location;
     return this;
   }
@@ -99,7 +99,7 @@ public class ExpressionResult   {
     this.location = location;
   }
 
-  public ExpressionResult result(Object result) {
+  public ExpressionResultResponse result(Object result) {
     this.result = result;
     return this;
   }
@@ -128,10 +128,10 @@ public class ExpressionResult   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ExpressionResult expressionResult = (ExpressionResult) o;
-    return Objects.equals(this.type, expressionResult.type) &&
-        Objects.equals(this.location, expressionResult.location) &&
-        Objects.equals(this.result, expressionResult.result);
+    ExpressionResultResponse expressionResultResponse = (ExpressionResultResponse) o;
+    return Objects.equals(this.type, expressionResultResponse.type) &&
+        Objects.equals(this.location, expressionResultResponse.location) &&
+        Objects.equals(this.result, expressionResultResponse.result);
   }
 
   @Override
@@ -142,7 +142,7 @@ public class ExpressionResult   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ExpressionResult {\n");
+    sb.append("class ExpressionResultResponse {\n");
     
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    location: ").append(toIndentedString(location)).append("\n");

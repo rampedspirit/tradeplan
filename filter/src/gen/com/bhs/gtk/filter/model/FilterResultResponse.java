@@ -1,7 +1,7 @@
 package com.bhs.gtk.filter.model;
 
 import java.util.Objects;
-import com.bhs.gtk.filter.model.ExpressionResult;
+import com.bhs.gtk.filter.model.ExpressionResultResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -19,7 +19,7 @@ import javax.validation.constraints.*;
  * FilterResultResponse
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-02-24T19:27:38.390873600+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-03-03T22:39:08.045949100+05:30[Asia/Calcutta]")
 
 public class FilterResultResponse   {
   @JsonProperty("filterId")
@@ -73,7 +73,7 @@ public class FilterResultResponse   {
 
   @JsonProperty("expressionResults")
   @Valid
-  private List<ExpressionResult> expressionResults = null;
+  private List<ExpressionResultResponse> expressionResults = null;
 
   public FilterResultResponse filterId(UUID filterId) {
     this.filterId = filterId;
@@ -157,14 +157,14 @@ public class FilterResultResponse   {
     this.filterResult = filterResult;
   }
 
-  public FilterResultResponse expressionResults(List<ExpressionResult> expressionResults) {
+  public FilterResultResponse expressionResults(List<ExpressionResultResponse> expressionResults) {
     this.expressionResults = expressionResults;
     return this;
   }
 
-  public FilterResultResponse addExpressionResultsItem(ExpressionResult expressionResultsItem) {
+  public FilterResultResponse addExpressionResultsItem(ExpressionResultResponse expressionResultsItem) {
     if (this.expressionResults == null) {
-      this.expressionResults = new ArrayList<ExpressionResult>();
+      this.expressionResults = new ArrayList<ExpressionResultResponse>();
     }
     this.expressionResults.add(expressionResultsItem);
     return this;
@@ -178,11 +178,11 @@ public class FilterResultResponse   {
 
   @Valid
 
-  public List<ExpressionResult> getExpressionResults() {
+  public List<ExpressionResultResponse> getExpressionResults() {
     return expressionResults;
   }
 
-  public void setExpressionResults(List<ExpressionResult> expressionResults) {
+  public void setExpressionResults(List<ExpressionResultResponse> expressionResults) {
     this.expressionResults = expressionResults;
   }
 
