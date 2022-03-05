@@ -85,22 +85,15 @@ export class ConditionResultComponent implements OnChanges {
     }
   }
   private getModelDeltaDecoration(filterResult: FilterResult): monaco.editor.IModelDeltaDecoration {
-    let status = this.getRandomStatus();
     return {
       range: new monaco.Range(filterResult.location.start.line, filterResult.location.start.column,
         filterResult.location.end.line, filterResult.location.end.column),
       options: {
-        inlineClassName: "filter-result-" + status,
+        inlineClassName: "filter-result-" + filterResult.status,
         hoverMessage: {
-          value: status
+          value: filterResult.status
         }
       }
     } as monaco.editor.IModelDeltaDecoration;
-  }
-
-  private getRandomStatus(): string {
-    let statuses = ["QUEUED", "RUNNING", "PASS", "FAIL", "ERROR"];
-    const random = Math.floor(Math.random() * statuses.length);
-    return statuses[random];
   }
 }

@@ -56,6 +56,16 @@ export class FilterResultComponent implements OnChanges {
       return this.getDecorationForArithmeticExp(expressionResult);
     } else if (expressionResult.type == ExpressionResult.TypeEnum.COMPARE) {
       return this.getDecorationForCompareExp(expressionResult);
+    }else{
+      return {
+        range: new monaco.Range(expressionResult.location.start.line, expressionResult.location.start.column,
+          expressionResult.location.end.line, expressionResult.location.end.column),
+        options: {
+          hoverMessage: {
+            value: expressionResult.result
+          }
+        }
+      } as monaco.editor.IModelDeltaDecoration;
     }
     return null;
   }
