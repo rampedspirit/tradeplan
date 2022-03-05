@@ -8,8 +8,6 @@ public class ExpressionApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ExpressionApplication.class, args);
-		
-		System.err.println("Spring boot applicatin started!!");
 	}
 
 }

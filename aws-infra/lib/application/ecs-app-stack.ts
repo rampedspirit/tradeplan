@@ -427,10 +427,7 @@ export class EcsAppStack extends Stack {
             conditions: [
                 ListenerCondition.pathPatterns(["/v1/expression"])
             ],
-            action: ListenerAction.fixedResponse(200, {
-                contentType: "text/plain",
-                messageBody: "Hello There! Looks like you have hit a wrong end point."
-            })
+            action: ListenerAction.forward([targetGroup])
         });
 
         //Service Config
