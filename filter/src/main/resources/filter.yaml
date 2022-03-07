@@ -275,9 +275,7 @@ components:
           type: string
           enum: [COMPARE_EXPRESSION, ARITHEMETIC_EXPRESSION]
         location:
-          type: array
-          items:
-           $ref : '#/components/schemas/Location'
+          $ref : '#/components/schemas/Location'
         result:
           oneOf:
            - type: string
