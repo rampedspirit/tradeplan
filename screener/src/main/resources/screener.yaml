@@ -430,7 +430,7 @@ components:
         note:
           type: string
           description: note related to execution
-        ScripNames:
+        scripNames:
           type: array
           items : 
             type: string

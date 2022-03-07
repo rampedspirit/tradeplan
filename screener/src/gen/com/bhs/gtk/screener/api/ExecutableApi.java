@@ -26,7 +26,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.List;
 import java.util.Map;
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-01-05T19:25:05.070620300+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2022-03-07T11:51:10.308924500+05:30[Asia/Calcutta]")
 
 @Api(value = "Executable", description = "the Executable API")
 public interface ExecutableApi {
