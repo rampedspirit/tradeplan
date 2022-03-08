@@ -1,4 +1,4 @@
-export * from './expressionResult';
+export * from './expressionResultResponse';
 export * from './filterRequest';
 export * from './filterResponse';
 export * from './filterResultResponse';

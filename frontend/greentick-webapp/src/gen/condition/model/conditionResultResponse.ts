@@ -9,7 +9,7 @@
  * https://github.com/swagger-api/swagger-codegen.git
  * Do not edit the class manually.
  */
-import { FilterResult } from './filterResult';
+import { FilterResultResponse } from './filterResultResponse';
 
 export interface ConditionResultResponse { 
     /**
@@ -37,7 +37,7 @@ export interface ConditionResultResponse {
     /**
      * associated filters.
      */
-    filtersResult?: Array<FilterResult>;
+    filtersResult?: Array<FilterResultResponse>;
 }
 export namespace ConditionResultResponse {
     export type ConditionResultEnum = 'QUEUED' | 'RUNNING' | 'PASS' | 'FAIL' | 'ERROR';
