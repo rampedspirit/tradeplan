@@ -1,17 +1,14 @@
 package com.bhs.gtk.filter.persistence;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
-import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -42,7 +39,7 @@ public class FilterResultEntity {
 	@Column
 	private String status;
 	
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@OneToMany(fetch = FetchType.EAGER)
 	private List<CompareExpressionResultEntity> compareExpressionResultEntities;
 	
 	protected FilterResultEntity() {};
@@ -52,7 +49,6 @@ public class FilterResultEntity {
 		this.setMarketTime(marketTime);
 		this.setScripName(scripName);
 		this.setStatus(status);
-		this.setCompareExpressionResultEntities(new ArrayList<>());
 	}
 
 	public Date getMarketTime() {
@@ -98,4 +94,5 @@ public class FilterResultEntity {
 	public OffsetDateTime getMarketTimeAsOffsetDateTime() {
 		return OffsetDateTime.ofInstant(Instant.ofEpochMilli(marketTime.getTime()), ZoneId.systemDefault());
 	}
+	
 }

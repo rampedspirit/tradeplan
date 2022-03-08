@@ -1,15 +1,11 @@
 package com.bhs.gtk.filter.persistence;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
-import javax.persistence.ManyToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -37,9 +33,6 @@ public class ArithmeticExpressionResultEntity {
 	@Column(length = PersistenceConstants.SMALL_TEXT_LIMIT)
 	private String status;
 	
-	@ManyToMany (mappedBy = "arithmeticExpressionResultEntities", fetch = FetchType.EAGER)
-	private List<CompareExpressionResultEntity> compareExpressions;
-	
 	protected ArithmeticExpressionResultEntity() {};
 	
 	public ArithmeticExpressionResultEntity(String hash, Date marketTime, String scripName, String status) {
@@ -47,7 +40,6 @@ public class ArithmeticExpressionResultEntity {
 		this.setMarketTime(marketTime);
 		this.setScripName(scripName);
 		this.setStatus(status);
-		this.setCompareExpressions(new ArrayList<>());
 	}
 
 	public Date getMarketTime() {
@@ -82,17 +74,8 @@ public class ArithmeticExpressionResultEntity {
 		this.hash = hash;
 	}
 	
-	public List<CompareExpressionResultEntity> getCompareExpressions() {
-		return compareExpressions;
-	}
-
-	public void setCompareExpressions(List<CompareExpressionResultEntity> compareExpressions) {
-		this.compareExpressions = compareExpressions;
-	}
-	
 	public String getMarketTimeAsOffsetDateTime() {
 		return OffsetDateTime.ofInstant(Instant.ofEpochMilli(marketTime.getTime()), ZoneId.systemDefault()).toString();
 	}
-
 	
 }
