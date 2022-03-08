@@ -3,10 +3,10 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: true,
-  filterApiBasePath: "http://GTK-Demo-ECS-APP-Stack-alb-582390407.ap-south-1.elb.amazonaws.com",
-  conditionApiBasePath: "http://GTK-Demo-ECS-APP-Stack-alb-582390407.ap-south-1.elb.amazonaws.com",
-  screenerApiBasePath: "http://GTK-Demo-ECS-APP-Stack-alb-582390407.ap-south-1.elb.amazonaws.com"
+  production: false,
+  filterApiBasePath: "http://localhost:5000/",
+  conditionApiBasePath: "http://localhost:5001/",
+  screenerApiBasePath: "http://localhost:5002/"
 };
 
 /*
