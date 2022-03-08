@@ -9,14 +9,14 @@
  * https://github.com/swagger-api/swagger-codegen.git
  * Do not edit the class manually.
  */
-import { ExpressionResult } from './expressionResult';
+import { ExpressionResultResponse } from './expressionResultResponse';
 
 export interface FilterResultResponse { 
     filterId?: string;
     marketTime?: Date;
     scripName?: string;
     filterResult?: FilterResultResponse.FilterResultEnum;
-    expressionResults?: Array<ExpressionResult>;
+    expressionResults?: Array<ExpressionResultResponse>;
 }
 export namespace FilterResultResponse {
     export type FilterResultEnum = 'QUEUED' | 'RUNNING' | 'PASS' | 'FAIL' | 'ERROR';

@@ -77,26 +77,29 @@ div.hover-row.status-bar {
   background-color: rgba($color,0.2);
 }
 
-.expression-result-COMPARE-QUEUED{
+.expression-result-compare-QUEUED{
   @include expression-status-marker($color-status-queued);
 }
 
-.expression-result-COMPARE-RUNNING{
+.expression-result-compare-RUNNING{
   @include expression-status-marker($color-status-running);
 }
 
-.expression-result-COMPARE-PASS{
+.expression-result-compare-PASS{
   @include expression-status-marker($color-status-pass);
 }
 
-.expression-result-COMPARE-FAIL{
+.expression-result-compare-FAIL{
   @include expression-status-marker($color-status-fail);
 }
 
-.expression-result-COMPARE-ERROR{
+.expression-result-compare-ERROR{
   @include expression-status-marker($color-status-error);
 }
 
+.expression-result-arithmetic{
+  cursor: pointer;
+}m
 /*MONACO editor related styling END*/
 
 //MAT Button

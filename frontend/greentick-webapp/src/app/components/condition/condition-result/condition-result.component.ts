@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { ConditionLanguageResultEditorOptions } from 'src/app/lang/condition/condition-language-result.editor.options';
 import { ConditionLanguageIntellisense } from 'src/app/lang/condition/condition-language.intellisense';
-import { ConditionResultResponse, FilterResult } from 'src/gen/condition';
+import { ConditionResultResponse, FilterResultResponse } from 'src/gen/condition';
 import { FilterService } from 'src/gen/filter';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { filter } from 'rxjs/operators';
@@ -80,20 +80,26 @@ export class ConditionResultComponent implements OnChanges {
 
   private updateDecorations() {
     if (this.editor && this.result && this.result.filtersResult) {
-      let decorations = this.result.filtersResult.map(result => this.getModelDeltaDecoration(result));
+      let decorations = this.result.filtersResult.flatMap(result => this.getModelDeltaDecoration(result));
       this.editor.deltaDecorations([], decorations);
     }
   }
-  private getModelDeltaDecoration(filterResult: FilterResult): monaco.editor.IModelDeltaDecoration {
-    return {
-      range: new monaco.Range(filterResult.location.start.line, filterResult.location.start.column,
-        filterResult.location.end.line, filterResult.location.end.column),
-      options: {
-        inlineClassName: "filter-result-" + filterResult.status,
-        hoverMessage: {
-          value: filterResult.status
-        }
-      }
-    } as monaco.editor.IModelDeltaDecoration;
+  private getModelDeltaDecoration(filterResult: FilterResultResponse): monaco.editor.IModelDeltaDecoration[] {
+    let decorations: monaco.editor.IModelDeltaDecoration[] = [];
+    filterResult.location.forEach(location => {
+      decorations.push(
+        {
+          range: new monaco.Range(location.start.line, location.start.column,
+            location.end.line, location.end.column),
+          options: {
+            inlineClassName: "filter-result-" + filterResult.status,
+            hoverMessage: {
+              value: filterResult.status
+            }
+          }
+        } as monaco.editor.IModelDeltaDecoration
+      );
+    })
+    return decorations;
   }
 }

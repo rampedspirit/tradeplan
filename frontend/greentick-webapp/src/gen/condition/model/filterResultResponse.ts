@@ -11,12 +11,15 @@
  */
 import { Location } from './location';
 
-export interface FilterResult { 
+export interface FilterResultResponse { 
     filterId: string;
-    location: Location;
-    status: FilterResult.StatusEnum;
+    /**
+     * one filter is found in one or more locations in a condition.
+     */
+    location: Array<Location>;
+    status: FilterResultResponse.StatusEnum;
 }
-export namespace FilterResult {
+export namespace FilterResultResponse {
     export type StatusEnum = 'QUEUED' | 'RUNNING' | 'PASS' | 'FAIL' | 'ERROR';
     export const StatusEnum = {
         QUEUED: 'QUEUED' as StatusEnum,
