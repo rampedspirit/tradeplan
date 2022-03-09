@@ -9,7 +9,7 @@ import { EcsAppStack } from '../lib/application/ecs-app-stack';
 const app = new cdk.App();
 
 const stackPrefix = app.node.tryGetContext('stackPrefix');
-const imageTag = app.node.tryGetContext('stackPrefix');
+const imageTag = app.node.tryGetContext('imageTag');
 
 new EcrStack(app, stackPrefix + "-ECR-Stack", {
     stackName: stackPrefix + "-ECR-Stack"
