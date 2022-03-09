@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,10 +107,23 @@ public class Mapper {
 		} else if (expression instanceof BooleanExpression) {
 			BooleanExpression booleanExpression = (BooleanExpression) expression;
 			for (ConditionExpression exp : booleanExpression.getConditionExpressions()) {
-				filterLocations.putAll(getFilterLocations(exp));
+				addFilterLocations(filterLocations, getFilterLocations(exp));
 			}
 		}
 		return filterLocations;
+	}
+
+	private void addFilterLocations(Map<String, List<FilterLocation>> filterLocations,
+			Map<String, List<FilterLocation>> fLocations) {
+		for(Entry<String, List<FilterLocation>> entrySet : fLocations.entrySet()) {
+			String key = entrySet.getKey();
+			List<FilterLocation> value = entrySet.getValue();
+			if(filterLocations.containsKey(key)) {
+				filterLocations.get(key).addAll(value);
+			}else {
+				filterLocations.put(key, value);
+			}
+		}
 	}
 
 	private ConditionExpression getConditionExpression(ConditionResultEntity conditionResult) {
