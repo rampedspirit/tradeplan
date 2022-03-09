@@ -10,6 +10,7 @@ import { Construct } from "constructs";
 
 export interface EcsAppStackProps extends StackProps {
     vpcName: string
+    imageTag: string
     dbLoadBalancerDnsExportName: string
 }
 export class EcsAppStack extends Stack {
@@ -59,10 +60,10 @@ export class EcsAppStack extends Stack {
                 messageBody: "Hello There! Looks like you have hit a wrong end point."
             })
         });
-        this.createFilterService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
-        this.createConditionService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
-        this.createScreenerService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
-        this.createExpressionService(props.stackName!, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
+        this.createFilterService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
+        this.createConditionService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
+        this.createScreenerService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
+        this.createExpressionService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
     }
 
     /**
@@ -203,6 +204,7 @@ export class EcsAppStack extends Stack {
     /**
      * Creates the filter service
      * @param stackName 
+     * @param imageTag
      * @param vpc 
      * @param logGroup 
      * @param applicationLoadbalancer 
@@ -210,7 +212,7 @@ export class EcsAppStack extends Stack {
      * @param dbCredentials 
      * @param dbLoadBalancerUrl
      */
-    private createFilterService(stackName: string, vpc: IVpc, logGroup: LogGroup,
+    private createFilterService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
         applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string) {
 
         //Load Balancer Config
@@ -270,6 +272,7 @@ export class EcsAppStack extends Stack {
     /**
      * Creates the condition service
      * @param stackName 
+     * @param imageTag
      * @param vpc 
      * @param logGroup 
      * @param applicationLoadbalancer 
@@ -277,7 +280,7 @@ export class EcsAppStack extends Stack {
      * @param dbCredentials 
      * @param dbLoadBalancerUrl
      */
-    private createConditionService(stackName: string, vpc: IVpc, logGroup: LogGroup,
+    private createConditionService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
         applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string) {
 
         //Load Balancer Config
@@ -337,6 +340,7 @@ export class EcsAppStack extends Stack {
     /**
      * Creates the screener service
      * @param stackName 
+     * @param imageTag
      * @param vpc 
      * @param logGroup 
      * @param applicationLoadbalancer 
@@ -344,7 +348,7 @@ export class EcsAppStack extends Stack {
      * @param dbCredentials 
      * @param databaseUrl
      */
-    private createScreenerService(stackName: string, vpc: IVpc, logGroup: LogGroup, applicationListener: ApplicationListener,
+    private createScreenerService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup, applicationListener: ApplicationListener,
         cluster: Cluster, dbCredentials: ISecret, databaseUrl: string) {
 
         //Load Balancer Config
@@ -404,6 +408,7 @@ export class EcsAppStack extends Stack {
     /**
      * Creates the expression service
      * @param stackName 
+     * @param imageTag
      * @param vpc 
      * @param logGroup 
      * @param applicationLoadbalancer 
@@ -411,7 +416,7 @@ export class EcsAppStack extends Stack {
      * @param dbCredentials 
      * @param databaseUrl
      */
-    private createExpressionService(stackName: string, vpc: IVpc, logGroup: LogGroup, applicationListener: ApplicationListener,
+    private createExpressionService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup, applicationListener: ApplicationListener,
         cluster: Cluster, dbCredentials: ISecret, databaseUrl: string) {
 
         //Load Balancer Config
