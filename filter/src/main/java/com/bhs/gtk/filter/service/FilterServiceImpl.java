@@ -617,8 +617,18 @@ public class FilterServiceImpl implements FilterService{
 		List<FilterResultEntity> filterResultsToBeUpdated = getAllFilterReadyForResultUpdate(filterResults);
 		List<FilterResultEntity> filterResultsToBePersisted = new ArrayList<>();
 		for(FilterResultEntity fResult : filterResultsToBeUpdated) {
-			String operation = getFilterOperation(fResult.getFilterId());
-			String result = deriveFilterResult(operation, fResult.getCompareExpressionResultEntities());
+			List<CompareExpressionResultEntity> compareExpressionResultEntities = fResult.getCompareExpressionResultEntities();
+			String result = StringUtils.EMPTY;
+			//TODO: since we use FETCH.EAGER we get duplicate of child elements.
+			//Hence, even for single compare expression in a filter, we get two cmp expressions.
+			//FIX -> change data-type of collection to SET instead of List.
+			//Till the fix is done, using 2 in below condition.
+			if(compareExpressionResultEntities.size() == 2) {
+				result = compareExpressionResultEntities.get(0).getStatus();
+			}else {
+				String operation = getFilterOperation(fResult.getFilterId());
+				result = deriveFilterResult(operation, compareExpressionResultEntities);
+			}
 			fResult.setStatus(result);
 			filterResultsToBePersisted.add(fResult);
 		}
