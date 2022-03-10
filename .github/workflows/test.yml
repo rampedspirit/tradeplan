@@ -10,16 +10,5 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Get App Loadbalancer Url
-        uses: hannut91/aws-cli@1.18.43
-        with:
-          args: cloudformation --region ap-south-1 describe-stacks --stack-name ${{ github.event.inputs.StackNamePrefix }}-ECS-APP-Stack --query Stacks[0].Outputs[0].OutputValue
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.REPO_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.REPO_AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: "ap-south-1"
-      - name: Get version
-        id: vars
-        run: echo ::set-output name=version::$(cat filter/README.md)
-      - name: Test output
-        run: echo ${{ steps.vars.outputs.version }}
+      - name: Set ENV
+        run: echo ::set-env name=MY_VAR::$(curl https://pypi.org/pypi/awscli/json | jq -r '.info.version')
