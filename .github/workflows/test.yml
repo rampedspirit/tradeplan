@@ -10,5 +10,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Set ENV
-        run: aws help
+      - name: Get version
+        id: vars
+        run: echo ::set-output name=version::$(aws cloudformation --region ap-south-1 describe-stacks --stack-name GTK-Demo-ECS-APP-Stack)
+      - name: Test output
+        run: echo ${{ steps.vars.outputs.version }}
