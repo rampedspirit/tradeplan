@@ -1,0 +1,17 @@
+name: Test
+
+on:
+  workflow_dispatch:
+    inputs:
+     StackNamePrefix:
+      required: true
+      description: Prefix for Stack Name
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get version
+        id: vars
+        run: echo ::set-output name=version::$(cat ../filter/README.md)
+      - name: Test output
+        run: echo ${{ steps.vars.outputs.version }}
