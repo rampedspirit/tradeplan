@@ -11,4 +11,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set ENV
-        run: echo ::set-output name=MY_VAR::$(curl https://pypi.org/pypi/awscli/json | jq -r '.info.version')
+        run: awscli
