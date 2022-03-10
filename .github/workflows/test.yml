@@ -13,6 +13,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Fetch cloudformation stack info
         id: cfnStackInfo
+        shell: bash
         run: |
           appUrl = $(aws cloudformation --region ap-south-1 describe-stacks --stack-name ${{ github.event.inputs.StackNamePrefix }}-ECS-APP-Stack --query Stacks[0].Outputs[0].OutputValue)
           echo ::set-output name=appUrl::$(appUrl)
