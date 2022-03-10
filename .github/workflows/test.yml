@@ -19,11 +19,12 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: 'ap-south-1'
       - name: Create prod environment config file
-        uses: jsdaniell/create-json@1.1.2
+        uses: DamianReeves/write-file-action@1.0
         with:
-          name: "environment.prod.ts"
-          json: '{"production": true , "filterApiBasePath":"${{ steps.cfnStackInfo.outputs.appUrl }}"}'
-          dir: 'frontend/greentick-webapp/src/environments/'
+          path: ./frontend/greentick-webapp/src/environments/environment.prod.ts
+          contents: |
+            echo "Hello World!"
+          write-mode: append
       - name: Read environment.prod.ts
         id: package
         uses: juliangruber/read-file-action@v1
