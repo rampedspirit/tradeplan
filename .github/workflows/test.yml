@@ -19,7 +19,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: 'ap-south-1'
       - name: Create prod environment config file
-        uses: DamianReeves/write-file-action@1.0
+        uses: DamianReeves/write-file-action@v1.0
         with:
           path: ./frontend/greentick-webapp/src/environments/environment.prod.ts
           contents: |
