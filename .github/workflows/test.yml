@@ -14,8 +14,8 @@ jobs:
       - name: Fetch cloudformation stack info
         id: cfnStackInfo
         run: |
-          APP_URL=$(aws cloudformation --region ap-south-1 describe-stacks --stack-name ${{ github.event.inputs.StackNamePrefix }}-ECS-APP-Stack --query Stacks[0].Outputs[0].OutputValue)
-          echo ::set-output name=appUrl::$(APP_URL)
+         echo ::set-output name=appUrl::$(aws cloudformation --region ap-south-1 describe-stacks --stack-name ${{ github.event.inputs.StackNamePrefix }}-ECS-APP-Stack --query Stacks[0].Outputs[0].OutputValue)
+         APP_URL=${{ steps.cfnStackInfo.outputs.appUrl }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
