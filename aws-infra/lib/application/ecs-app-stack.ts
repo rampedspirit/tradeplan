@@ -238,7 +238,7 @@ export class EcsAppStack extends Stack {
         let taskDefinition = new Ec2TaskDefinition(this, stackName + '-filter-service-taskdef');
 
         taskDefinition.addContainer(stackName + "-filter-service-container", {
-            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-filter-service", "gtk-filter-service")),
+            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-filter-service", "gtk-filter-service"), imageTag),
             cpu: 50,
             memoryLimitMiB: 256,
             essential: true,
@@ -306,7 +306,7 @@ export class EcsAppStack extends Stack {
         let taskDefinition = new Ec2TaskDefinition(this, stackName + '-condition-service-taskdef');
 
         taskDefinition.addContainer(stackName + "-condition-service-container", {
-            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-condition-service", "gtk-condition-service")),
+            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-condition-service", "gtk-condition-service"), imageTag),
             cpu: 50,
             memoryLimitMiB: 256,
             essential: true,
@@ -374,7 +374,7 @@ export class EcsAppStack extends Stack {
         let taskDefinition = new Ec2TaskDefinition(this, stackName + '-screener-service-taskdef');
 
         taskDefinition.addContainer(stackName + "-screener-service-container", {
-            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-screener-service", "gtk-screener-service")),
+            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-screener-service", "gtk-screener-service"), imageTag),
             cpu: 50,
             memoryLimitMiB: 512,
             essential: true,
@@ -442,7 +442,7 @@ export class EcsAppStack extends Stack {
         let taskDefinition = new Ec2TaskDefinition(this, stackName + '-expression-service-taskdef');
 
         taskDefinition.addContainer(stackName + "-expression-service-container", {
-            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-expression-service", "gtk-expression-service")),
+            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-expression-service", "gtk-expression-service"), imageTag),
             cpu: 50,
             memoryLimitMiB: 512,
             essential: true,
