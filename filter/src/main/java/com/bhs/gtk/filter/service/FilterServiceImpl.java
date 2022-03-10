@@ -331,7 +331,7 @@ public class FilterServiceImpl implements FilterService{
 		for(CompareExpressionResultEntity cmp : filterResultEntity.getCompareExpressionResultEntities()) {
 			expressionResult.add(new ExpressionResult(cmp.getHash(), cmp.getStatus(),
 					ExpressionResultResponse.TypeEnum.COMPARE_EXPRESSION.name()));
-			for(ArithmeticExpressionResultEntity arExp : cmp.getArithmeticExpressionResultEntities()) {
+			for(ArithmeticExpressionResultEntity arExp : entityReader.getARexpressionResultEntities(cmp)) {
 				expressionResult.add(new ExpressionResult(arExp.getHash(), arExp.getStatus(),
 						ExpressionResultResponse.TypeEnum.ARITHEMETIC_EXPRESSION.name()));
 			}
@@ -474,10 +474,7 @@ public class FilterServiceImpl implements FilterService{
 		
 		ExecutionStatus compareStatus = calculateCompareExpressionStatus(cmpParseTree, leftARresult.getStatus(),
 				rightARresult.getStatus()); 
-		CompareExpressionResultEntity compareExpressionResultEntity=  new CompareExpressionResultEntity(cmpHash, marketTime, scripName, compareStatus.name());
-		compareExpressionResultEntity.getArithmeticExpressionResultEntities().add(leftARresult);
-		compareExpressionResultEntity.getArithmeticExpressionResultEntities().add(rightARresult);
-		return compareExpressionResultEntity;
+		return new CompareExpressionResultEntity(cmpHash, marketTime, scripName, compareStatus.name());
 	}
 
 	
@@ -715,7 +712,7 @@ public class FilterServiceImpl implements FilterService{
 		List<CompareExpressionResultEntity> cmpExpResultsToBePersisted = new ArrayList<>();
 		for(CompareExpressionResultEntity cmpResult : cmpExpResultsToBeUpdated) {
 			String operation = getCMPexpOperation(cmpResult.getHash());
-			List<ArithmeticExpressionResultEntity> arExpResults = cmpResult.getArithmeticExpressionResultEntities();
+			List<ArithmeticExpressionResultEntity> arExpResults = entityReader.getARexpressionResultEntities(cmpResult);
 			if(deriveCMPexpResult(operation, arExpResults.get(0).getStatus(), arExpResults.get(1).getStatus())) {
 				cmpResult.setStatus(ExecutionStatus.PASS.name());
 			}else {
@@ -786,7 +783,7 @@ public class FilterServiceImpl implements FilterService{
 	private List<CompareExpressionResultEntity> getAllCMPexpReadyForResultUpdate(Set<CompareExpressionResultEntity> cmpExpResults) {
 		List<CompareExpressionResultEntity> cmpExpToBeUpdated = new ArrayList<>();
 		for(CompareExpressionResultEntity cmpResult : cmpExpResults) {
-			List<ArithmeticExpressionResultEntity> arExpResults = cmpResult.getArithmeticExpressionResultEntities();
+			List<ArithmeticExpressionResultEntity> arExpResults = entityReader.getARexpressionResultEntities(cmpResult);
 			if(arExpResults.size() != 2) {
 				throw new IllegalStateException("Compare expression should have two AR expression results. cmpHash =  "+cmpResult.getHash());
 			}

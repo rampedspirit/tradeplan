@@ -9,6 +9,8 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.bhs.gtk.filter.util.Converter;
+
 @Component
 public class EntityReader {
 	
@@ -29,6 +31,40 @@ public class EntityReader {
 	
 	@Autowired
 	private EntityObjectCreator entityObjectCreator;
+	
+	@Autowired
+	private Converter converter;
+	
+	
+	
+	/**
+	 * 
+	 * @param cmpResultEntity
+	 * @return list of {@link ArithmeticExpressionResultEntity}, left of compareExpression is at 0th index, and right at 1st index. 
+	 */
+	public List<ArithmeticExpressionResultEntity> getARexpressionResultEntities(CompareExpressionResultEntity cmpResultEntity) {
+		List<ArithmeticExpressionResultEntity> arResults = new ArrayList<>();
+		String hash = cmpResultEntity.getHash();
+		Date mTime = cmpResultEntity.getMarketTime();
+		String scripName = cmpResultEntity.getScripName();
+		ExpressionEntity cmpExpression = getExpressionEntity(hash);
+		if(cmpExpression == null) {
+			return arResults;
+		}
+		String parseTree = cmpExpression.getParseTree();
+		String leftHash = converter.getARexpHashFromCompareParseTree(parseTree, true);
+		String rightHash = converter.getARexpHashFromCompareParseTree(parseTree, false);
+		
+		ArithmeticExpressionResultEntity leftResult = getArithmeticExpressionResultEntity(leftHash, mTime, scripName);
+		ArithmeticExpressionResultEntity rightResult = getArithmeticExpressionResultEntity(rightHash, mTime, scripName);
+		
+		if(leftResult == null || rightResult == null) {
+			return arResults;
+		}
+		arResults.add(leftResult);
+		arResults.add(leftResult);
+		return arResults;
+	}
 	
 	
 	public List<FilterResultEntity> getAllFilterResultEntities(List<FilterResultId> filterResultIds) {

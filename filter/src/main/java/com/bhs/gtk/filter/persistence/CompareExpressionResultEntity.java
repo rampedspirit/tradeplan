@@ -1,15 +1,11 @@
 package com.bhs.gtk.filter.persistence;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
-import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -36,9 +32,6 @@ public class CompareExpressionResultEntity {
 	@Column
 	private String status;
 	
-	@OneToMany(fetch = FetchType.EAGER)
-	private List<ArithmeticExpressionResultEntity> arithmeticExpressionResultEntities;
-	
 	protected CompareExpressionResultEntity() {};
 	
 	public CompareExpressionResultEntity(String hash, Date marketTime, String scripName, String status) {
@@ -46,7 +39,6 @@ public class CompareExpressionResultEntity {
 		this.setMarketTime(marketTime);
 		this.setScripName(scripName);
 		this.setStatus(status);
-		this.arithmeticExpressionResultEntities = new ArrayList<>();
 	}
 
 	public Date getMarketTime() {
@@ -79,14 +71,6 @@ public class CompareExpressionResultEntity {
 
 	public void setHash(String hash) {
 		this.hash = hash;
-	}
-	
-	public List<ArithmeticExpressionResultEntity> getArithmeticExpressionResultEntities() {
-		return arithmeticExpressionResultEntities;
-	}
-
-	public void setArithmeticExpressionResultEntities(List<ArithmeticExpressionResultEntity> arithmeticExpressionResultEntities) {
-		this.arithmeticExpressionResultEntities = arithmeticExpressionResultEntities;
 	}
 	
 	public String getMarketTimeAsOffsetDateTime() {
