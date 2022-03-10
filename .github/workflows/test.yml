@@ -12,6 +12,6 @@ jobs:
     steps:
       - name: Get version
         id: vars
-        run: echo ::set-output name=version::$(cat ../filter/README.md)
+        run: echo ::set-output name=version::$(cat filter/README.md)
       - name: Test output
         run: echo ${{ steps.vars.outputs.version }}
