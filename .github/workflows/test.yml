@@ -24,5 +24,10 @@ jobs:
           name: "environment.prod.ts"
           json: '{"production": true , "filterApiBasePath":"${{ steps.cfnStackInfo.outputs.appUrl }}"}'
           dir: 'frontend/greentick-webapp/src/environments/'
-      - name: Print json content
-        run: echo < frontend/greentick-webapp/src/environments/environment.prod.ts
+      - name: Read environment.prod.ts
+        id: package
+        uses: juliangruber/read-file-action@v1
+        with:
+          path: ./frontend/greentick-webapp/src/environments/environment.prod.ts
+      - name: Echoenvironment.prod.ts
+        run: echo "${{ steps.package.outputs.content }}"
