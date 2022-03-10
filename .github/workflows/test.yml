@@ -19,3 +19,9 @@ jobs:
           AWS_DEFAULT_REGION: 'ap-south-1'
       - name: Test output
         run: echo ${{ steps.vars.outputs.version }}
+      - name: create prod environment config file
+        uses: jsdaniell/create-json@1.1.2
+        with:
+          name: "environment.prod.ts"
+          json: '{"production": true , "filterApiBasePath":"${{ steps.vars.outputs.version }}"}'
+          dir: 'frontend/greentick-webapp/src/environments/'
