@@ -10,10 +10,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: S3 Sync
-        uses: ItsKarma/aws-cli@v1.70.0
+      - name: Get App Loadbalancer Url
+        uses: hannut91/aws-cli@1.18.43
         with:
-          args: aws cloudformation --region ap-south-1 describe-stacks --stack-name ${{ github.event.inputs.BucketName }}-ECS-APP-Stack
+          args: aws cloudformation --region ap-south-1 describe-stacks --stack-name ${{ github.event.inputs.StackNamePrefix }}-ECS-APP-Stack
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.REPO_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.REPO_AWS_SECRET_ACCESS_KEY }}
