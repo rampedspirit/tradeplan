@@ -18,16 +18,12 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: 'ap-south-1'
-      - name: Create prod environment config file
-        uses: DamianReeves/write-file-action@v1.0
+      - name: Replace application load balancer url
+        uses: jacobtomlinson/gha-find-replace@v2
         with:
-          path: ./frontend/greentick-webapp/src/environments/environment.prod.ts
-          contents: |
-            "export const environment = {"
-            ""production": true,"
-            ""filterApiBasePath": "http://"${{ steps.cfnStackInfo.outputs.appUrl }}""
-            };"
-          write-mode: append
+          find: "filterApiBasePath"
+          replace: "http://${{ steps.cfnStackInfo.outputs.appUrl }}"
+          include: "**environment.prod.ts"      
       - name: Read environment.prod.ts
         id: package
         uses: juliangruber/read-file-action@v1
