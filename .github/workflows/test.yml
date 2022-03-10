@@ -11,16 +11,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Get Application Load Balancer Url
-        id: vars
+      - name: Fetch cloudformation stack info
+        id: cfnStackInfo
         run: echo ::set-output name=appUrl::$(aws cloudformation --region ap-south-1 describe-stacks --stack-name ${{ github.event.inputs.StackNamePrefix }}-ECS-APP-Stack --query Stacks[0].Outputs[0].OutputValue)
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: 'ap-south-1'
-      - name: create prod environment config file
+      - name: Create prod environment config file
         uses: jsdaniell/create-json@1.1.2
         with:
           name: "environment.prod.ts"
-          json: '{"production": true , "filterApiBasePath":"${{ steps.vars.outputs.appUrl }}"}'
+          json: '{"production": true , "filterApiBasePath":"${{ steps.cfnStackInfo.outputs.appUrl }}"}'
           dir: 'frontend/greentick-webapp/src/environments/'
+      - name: Print json content
+        run: echo < frontend/greentick-webapp/src/environments/environment.prod.ts
