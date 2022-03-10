@@ -40,7 +40,7 @@ jobs:
         uses: jacobtomlinson/gha-find-replace@v2
         with:
           find: "appUrl"
-          replace: "http://${{ steps.cfnStackInfo.outputs.appUrl }}"
+          replace: http://${{ steps.cfnStackInfo.outputs.appUrl }}
           include: "**environment.prod.ts"      
           
       - name: Use Node.js
