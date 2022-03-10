@@ -21,7 +21,7 @@ jobs:
       - name: Replace application load balancer url
         uses: jacobtomlinson/gha-find-replace@v2
         with:
-          find: "filterApiBasePath"
+          find: "appUrl"
           replace: "http://${{ steps.cfnStackInfo.outputs.appUrl }}"
           include: "**environment.prod.ts"      
       - name: Read environment.prod.ts
