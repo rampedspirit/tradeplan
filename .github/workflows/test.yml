@@ -23,11 +23,9 @@ jobs:
         with:
           path: ./frontend/greentick-webapp/src/environments/environment.prod.ts
           contents: |
-            "export const environment = {
-            production: true,
-            filterApiBasePath: "http://${{ steps.cfnStackInfo.outputs.appUrl }}",
-            conditionApiBasePath: http://GTK-Demo-ECS-APP-Stack-alb-545786723.ap-south-1.elb.amazonaws.com,
-            screenerApiBasePath: http://GTK-Demo-ECS-APP-Stack-alb-545786723.ap-south-1.elb.amazonaws.com
+            "export const environment = {" |
+            "production": "true", |
+            "filterApiBasePath": "http://${{ steps.cfnStackInfo.outputs.appUrl }}"
             };"
           write-mode: append
       - name: Read environment.prod.ts
