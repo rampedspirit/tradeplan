@@ -587,16 +587,22 @@ public class FilterServiceImpl implements FilterService{
 	}
 
 	
-	private boolean sendMessage(List<FilterResultEntity> filterResultEntities) {
+	public boolean sendMessage(List<FilterResultEntity> filterResultEntities) {
 		boolean msgSentStatus = true;
 		for(FilterResultEntity fResult : filterResultEntities) {
-			String message = getFilterExecutionResponseMessage(fResult);
-			if(messageProducer.sendMessage(message, MessageType.EXECUTION_RESPONSE)) {
-				//TODO: log debug : message successfully send from FS to CS
-			}else {
-				//TODO: log debug : message failed to send from FS to CS.
-				msgSentStatus = false;
-			}
+			msgSentStatus = msgSentStatus && sendMessage(fResult);
+		}
+		return msgSentStatus;
+	}
+
+	public boolean sendMessage(FilterResultEntity fResult) {
+		boolean msgSentStatus = true;
+		String message = getFilterExecutionResponseMessage(fResult);
+		if(messageProducer.sendMessage(message, MessageType.EXECUTION_RESPONSE)) {
+			//TODO: log debug : message successfully send from FS to CS
+		}else {
+			//TODO: log debug : message failed to send from FS to CS.
+			msgSentStatus = false;
 		}
 		return msgSentStatus;
 	}
