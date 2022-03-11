@@ -5,10 +5,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.bhs.gtk.filter.model.ExpressionResultResponse;
 import com.bhs.gtk.filter.util.Converter;
 
 @Component
@@ -36,6 +39,20 @@ public class EntityReader {
 	private Converter converter;
 	
 	
+	public List<CompareExpressionResultEntity> getCmpExpResultEntities(FilterResultEntity filterResultEntity) {
+		List<CompareExpressionResultEntity> cmpExpResults = new ArrayList<>();
+		UUID filterId = filterResultEntity.getFilterId();
+		Date marketTime = filterResultEntity.getMarketTime();
+		String scripName = filterResultEntity.getScripName();
+		List<ExpressionEntity> expressions = getExpressionEntities(filterId);
+		if(expressions == null || expressions.isEmpty()) {
+			return cmpExpResults;
+		}
+		List<ExpressionEntity> compareExpressions = expressions.stream().filter(e -> StringUtils.equals(e.getType(), ExpressionResultResponse.TypeEnum.COMPARE_EXPRESSION.name()))
+		.collect(Collectors.toList());
+		List<CompareExpressionResultId> cmpExpResultIds = entityObjectCreator.createCompareExpressionResultEntityIdObjects(compareExpressions, marketTime, scripName);
+		return getCompareExpressionResultEntities(cmpExpResultIds);
+	}
 	
 	/**
 	 * 
@@ -121,6 +138,18 @@ public class EntityReader {
 			return compareExpressionResultContainer.get();
 		}
 		return null;
+	}
+	
+	public List<CompareExpressionResultEntity> getCompareExpressionResultEntities(List<CompareExpressionResultId> cmpResultIds) {
+		List<CompareExpressionResultEntity> cmpExpResultEntities = new ArrayList<>();
+		if(cmpResultIds == null || cmpResultIds.isEmpty() || cmpResultIds.contains(null)) {
+			return cmpExpResultEntities;
+		}
+		Iterable<CompareExpressionResultEntity> resultsIterator = compareExpressionResultRepository.findAllById(cmpResultIds);
+		for(CompareExpressionResultEntity cmpResult : resultsIterator) {
+			cmpExpResultEntities.add(cmpResult);
+		}
+		return cmpExpResultEntities;
 	}
 	
 	public FilterEntity getFilterEntity(UUID id) {

@@ -1,15 +1,12 @@
 package com.bhs.gtk.filter.persistence;
 
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
-import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -38,9 +35,6 @@ public class FilterResultEntity {
 	
 	@Column
 	private String status;
-	
-	@OneToMany(fetch = FetchType.EAGER)
-	private List<CompareExpressionResultEntity> compareExpressionResultEntities;
 	
 	protected FilterResultEntity() {};
 	
@@ -81,14 +75,6 @@ public class FilterResultEntity {
 
 	public void setFilterId(UUID filterId) {
 		this.filterId = filterId;
-	}
-	
-	public List<CompareExpressionResultEntity> getCompareExpressionResultEntities() {
-		return compareExpressionResultEntities;
-	}
-
-	public void setCompareExpressionResultEntities(List<CompareExpressionResultEntity> compareExpressionResultEntities) {
-		this.compareExpressionResultEntities = compareExpressionResultEntities;
 	}
 	
 	public OffsetDateTime getMarketTimeAsOffsetDateTime() {

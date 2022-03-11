@@ -328,7 +328,7 @@ public class FilterServiceImpl implements FilterService{
 
 	private List<ExpressionResult> getExpressionsResultMap(FilterResultEntity filterResultEntity) {
 		List<ExpressionResult> expressionResult = new ArrayList<>();
-		for(CompareExpressionResultEntity cmp : filterResultEntity.getCompareExpressionResultEntities()) {
+		for(CompareExpressionResultEntity cmp : entityReader.getCmpExpResultEntities(filterResultEntity)) {
 			expressionResult.add(new ExpressionResult(cmp.getHash(), cmp.getStatus(),
 					ExpressionResultResponse.TypeEnum.COMPARE_EXPRESSION.name()));
 			for(ArithmeticExpressionResultEntity arExp : entityReader.getARexpressionResultEntities(cmp)) {
@@ -614,13 +614,9 @@ public class FilterServiceImpl implements FilterService{
 		List<FilterResultEntity> filterResultsToBeUpdated = getAllFilterReadyForResultUpdate(filterResults);
 		List<FilterResultEntity> filterResultsToBePersisted = new ArrayList<>();
 		for(FilterResultEntity fResult : filterResultsToBeUpdated) {
-			List<CompareExpressionResultEntity> compareExpressionResultEntities = fResult.getCompareExpressionResultEntities();
+			List<CompareExpressionResultEntity> compareExpressionResultEntities = entityReader.getCmpExpResultEntities(fResult);
 			String result = StringUtils.EMPTY;
-			//TODO: since we use FETCH.EAGER we get duplicate of child elements.
-			//Hence, even for single compare expression in a filter, we get two cmp expressions.
-			//FIX -> change data-type of collection to SET instead of List.
-			//Till the fix is done, using 2 in below condition.
-			if(compareExpressionResultEntities.size() == 2) {
+			if(compareExpressionResultEntities.size() == 1) {
 				result = compareExpressionResultEntities.get(0).getStatus();
 			}else {
 				String operation = getFilterOperation(fResult.getFilterId());
@@ -697,7 +693,7 @@ public class FilterServiceImpl implements FilterService{
 	}
 
 	private boolean isFilterReadyForResultDerivation(FilterResultEntity filterResultEntity) {
-		for(CompareExpressionResultEntity cmpResult : filterResultEntity.getCompareExpressionResultEntities()) {
+		for(CompareExpressionResultEntity cmpResult : entityReader.getCmpExpResultEntities(filterResultEntity)) {
 			String cmpStatus = cmpResult.getStatus();
 			if (StringUtils.equals(ExecutionStatus.QUEUED.name(), cmpStatus)
 					|| StringUtils.equals(ExecutionStatus.RUNNING.name(), cmpStatus)) {
@@ -817,7 +813,7 @@ public class FilterServiceImpl implements FilterService{
 	private Set<CompareExpressionResultEntity> getAllCMPexpressionResultsWhichRequireResultUpdate(List<FilterResultEntity> filterResults, Date marketTime, String scripName) {
 		Set<CompareExpressionResultEntity> compareExpresionResults = new HashSet<>();
 		for(FilterResultEntity fResult : filterResults) {
-			compareExpresionResults.addAll(fResult.getCompareExpressionResultEntities());
+			compareExpresionResults.addAll(entityReader.getCmpExpResultEntities(fResult));
 		}
 		return compareExpresionResults;
 	}
