@@ -83,7 +83,11 @@ jobs:
         IMAGE_TAG: ${{ github.event.inputs.ImageVersion }}
       run: |
         docker build arithmeticexp/ -f arithmeticexp/Dockerfile -t $ECR_REGISTRY/gtk-expression-service:$IMAGE_TAG
-        docker push $ECR_REGISTRY/gtk-expression-service:$IMAGE_TAG        
+        docker push $ECR_REGISTRY/gtk-expression-service:$IMAGE_TAG  
+    
+    - name: Build watchlist-service
+      run: mvn -B package --file watchlist/pom.xml
+      
     - name: Push watchlist-service Image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
