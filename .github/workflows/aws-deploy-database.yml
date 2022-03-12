@@ -6,7 +6,10 @@ on:
      StackNamePrefix:
       required: true
       description: Prefix for Stack Name
- 
+     ImageTag:
+      required: true
+      description: Image Tag
+      default: 'latest'
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -18,7 +21,7 @@ jobs:
         with:
           cdk_subcommand: 'deploy'
           cdk_stack: ${{ github.event.inputs.StackNamePrefix }}-ECS-DB-Stack
-          cdk_args: '--context stackPrefix=${{ github.event.inputs.StackNamePrefix }}'
+          cdk_args: '--context stackPrefix=${{ github.event.inputs.StackNamePrefix }} --context imageTag=${{ github.event.inputs.ImageTag }}'
           working_dir: 'aws-infra'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
