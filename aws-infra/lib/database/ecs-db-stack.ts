@@ -10,6 +10,7 @@ import { Construct } from "constructs";
 
 export interface EcsDbStackProps extends StackProps {
     vpcName: string
+    imageTag: string
 }
 
 export class EcsDbStack extends Stack {
@@ -45,8 +46,8 @@ export class EcsDbStack extends Stack {
         });
 
         //Services
-        this.createApplicationDatabaseService(props.stackName!, vpc, logGroup, dbNetworkLoadbalancer, cluster, dbCredentials);
-        this.createStockDatabaseService(props.stackName!, vpc, logGroup, dbNetworkLoadbalancer, cluster, dbCredentials);
+        this.createApplicationDatabaseService(props.stackName!, props.imageTag, vpc, logGroup, dbNetworkLoadbalancer, cluster, dbCredentials);
+        this.createStockDatabaseService(props.stackName!, props.imageTag, vpc, logGroup, dbNetworkLoadbalancer, cluster, dbCredentials);
     }
 
     /**
@@ -143,13 +144,14 @@ export class EcsDbStack extends Stack {
     /**
      * Creates the application database service
      * @param stackName 
+     * @param imageTag
      * @param vpc 
      * @param logGroup 
      * @param loadbalancer 
      * @param cluster 
      * @param dbCredentials 
      */
-    private createApplicationDatabaseService(stackName: string, vpc: IVpc, logGroup: LogGroup,
+    private createApplicationDatabaseService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
         loadbalancer: NetworkLoadBalancer, cluster: Cluster, dbCredentials: ISecret) {
         //Load Balancer Config
         let appDbTargetGroup = new NetworkTargetGroup(this, stackName + "-appdb-target-group", {
@@ -181,7 +183,7 @@ export class EcsDbStack extends Stack {
         });
 
         const containerDefinition = taskDefinition.addContainer(stackName + "-appdb-container", {
-            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "appdb", "appdb")),
+            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "appdb", "appdb"), imageTag),
             cpu: 50,
             memoryLimitMiB: 1024,
             essential: true,
@@ -216,13 +218,14 @@ export class EcsDbStack extends Stack {
     /**
      * Creates the stock database service
      * @param stackName 
+     * @param imageTag
      * @param vpc 
      * @param logGroup 
      * @param loadbalancer 
      * @param cluster 
      * @param dbCredentials 
      */
-    private createStockDatabaseService(stackName: string, vpc: IVpc, logGroup: LogGroup,
+    private createStockDatabaseService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
         loadbalancer: NetworkLoadBalancer, cluster: Cluster, dbCredentials: ISecret) {
         //Load Balancer Config
         let stockDbTargetGroup = new NetworkTargetGroup(this, stackName + "-stockdb-target-group", {

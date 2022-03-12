@@ -22,6 +22,7 @@ new VpcStack(app, stackPrefix + "-VPC-Stack", {
 new EcsDbStack(app, stackPrefix + "-ECS-DB-Stack", {
     stackName: stackPrefix + "-ECS-DB-Stack",
     vpcName: stackPrefix + "-VPC-Stack",
+    imageTag: imageTag,
     env: {
         account: process.env.CDK_DEFAULT_ACCOUNT,
         region: process.env.CDK_DEFAULT_REGION
