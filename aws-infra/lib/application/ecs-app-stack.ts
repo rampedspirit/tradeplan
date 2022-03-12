@@ -516,7 +516,7 @@ export class EcsAppStack extends Stack {
             memoryLimitMiB: 256,
             essential: true,
             environment: {
-                "SERVER_PORT": "5000",
+                "SERVER_PORT": "5004",
                 "DB_HOST": dbLoadBalancerUrl,
                 "DB_PORT": "5000",
                 "DB_NAME": "appdb",
