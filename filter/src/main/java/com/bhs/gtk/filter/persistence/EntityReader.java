@@ -5,9 +5,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.bhs.gtk.filter.model.ExpressionResultResponse;
+import com.bhs.gtk.filter.util.Converter;
 
 @Component
 public class EntityReader {
@@ -29,6 +34,54 @@ public class EntityReader {
 	
 	@Autowired
 	private EntityObjectCreator entityObjectCreator;
+	
+	@Autowired
+	private Converter converter;
+	
+	
+	public List<CompareExpressionResultEntity> getCmpExpResultEntities(FilterResultEntity filterResultEntity) {
+		List<CompareExpressionResultEntity> cmpExpResults = new ArrayList<>();
+		UUID filterId = filterResultEntity.getFilterId();
+		Date marketTime = filterResultEntity.getMarketTime();
+		String scripName = filterResultEntity.getScripName();
+		List<ExpressionEntity> expressions = getExpressionEntities(filterId);
+		if(expressions == null || expressions.isEmpty()) {
+			return cmpExpResults;
+		}
+		List<ExpressionEntity> compareExpressions = expressions.stream().filter(e -> StringUtils.equals(e.getType(), ExpressionResultResponse.TypeEnum.COMPARE_EXPRESSION.name()))
+		.collect(Collectors.toList());
+		List<CompareExpressionResultId> cmpExpResultIds = entityObjectCreator.createCompareExpressionResultEntityIdObjects(compareExpressions, marketTime, scripName);
+		return getCompareExpressionResultEntities(cmpExpResultIds);
+	}
+	
+	/**
+	 * 
+	 * @param cmpResultEntity
+	 * @return list of {@link ArithmeticExpressionResultEntity}, left of compareExpression is at 0th index, and right at 1st index. 
+	 */
+	public List<ArithmeticExpressionResultEntity> getARexpressionResultEntities(CompareExpressionResultEntity cmpResultEntity) {
+		List<ArithmeticExpressionResultEntity> arResults = new ArrayList<>();
+		String hash = cmpResultEntity.getHash();
+		Date mTime = cmpResultEntity.getMarketTime();
+		String scripName = cmpResultEntity.getScripName();
+		ExpressionEntity cmpExpression = getExpressionEntity(hash);
+		if(cmpExpression == null) {
+			return arResults;
+		}
+		String parseTree = cmpExpression.getParseTree();
+		String leftHash = converter.getARexpHashFromCompareParseTree(parseTree, true);
+		String rightHash = converter.getARexpHashFromCompareParseTree(parseTree, false);
+		
+		ArithmeticExpressionResultEntity leftResult = getArithmeticExpressionResultEntity(leftHash, mTime, scripName);
+		ArithmeticExpressionResultEntity rightResult = getArithmeticExpressionResultEntity(rightHash, mTime, scripName);
+		
+		if(leftResult == null || rightResult == null) {
+			return arResults;
+		}
+		arResults.add(leftResult);
+		arResults.add(leftResult);
+		return arResults;
+	}
 	
 	
 	public List<FilterResultEntity> getAllFilterResultEntities(List<FilterResultId> filterResultIds) {
@@ -85,6 +138,18 @@ public class EntityReader {
 			return compareExpressionResultContainer.get();
 		}
 		return null;
+	}
+	
+	public List<CompareExpressionResultEntity> getCompareExpressionResultEntities(List<CompareExpressionResultId> cmpResultIds) {
+		List<CompareExpressionResultEntity> cmpExpResultEntities = new ArrayList<>();
+		if(cmpResultIds == null || cmpResultIds.isEmpty() || cmpResultIds.contains(null)) {
+			return cmpExpResultEntities;
+		}
+		Iterable<CompareExpressionResultEntity> resultsIterator = compareExpressionResultRepository.findAllById(cmpResultIds);
+		for(CompareExpressionResultEntity cmpResult : resultsIterator) {
+			cmpExpResultEntities.add(cmpResult);
+		}
+		return cmpExpResultEntities;
 	}
 	
 	public FilterEntity getFilterEntity(UUID id) {
