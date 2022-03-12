@@ -34,6 +34,15 @@ public class EntityObjectCreator {
 		return new CompareExpressionResultId(cmpHash, marketTime, scripName);
 	}
 	
+	public List<CompareExpressionResultId> createCompareExpressionResultEntityIdObjects(
+			List<ExpressionEntity> compareExpressions, Date marketTime, String scripName) {
+		List<CompareExpressionResultId> cmpExpResultIds = new ArrayList<>();
+		for(ExpressionEntity cmExp : compareExpressions) {
+			cmpExpResultIds.add(new CompareExpressionResultId(cmExp.getHash(), marketTime, scripName));
+		}
+		return cmpExpResultIds;
+	}
+	
 	public List<ExpressionEntity> createExpressionEntityObjects(BooleanExpression booleanExpression) {
 		List<ExpressionEntity> expressions = new ArrayList<>();
 		if(booleanExpression instanceof LogicalExpression) {

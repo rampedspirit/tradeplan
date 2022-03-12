@@ -106,31 +106,34 @@ public class ScreenerServiceImpl implements ScreernerService {
 			UUID watchlistId = screenerEntity.getWatchlistId();
 			String note = executableCreateRequest.getNote();
 			List<String> scripNames = executableCreateRequest.getScripNames();
-			addExecutableToScreener(screenerEntity, marketTime, conditionId, watchlistId, note, scripNames);
-			runExecutable(conditionId, marketTime, watchlistId);
+			ExecutableEntity executable = addExecutableToScreener(screenerEntity, marketTime, conditionId, watchlistId, note, scripNames);
+			runExecutable(executable);
 			return converter.convertToScreenerDetailedResponse(entityReader.getScreenerEntity(screenerId));
 		}
 		// throw exception
 		return null;
 	}
 
-	private ExecutableEntity runExecutable(UUID conditionId, Date marketTime, UUID watchlistId) {
-		ExecutableEntity executable = executableServiceImpl.getExecutable(conditionId, marketTime, watchlistId);
+	private ExecutableEntity runExecutable(ExecutableEntity executable) {
+		//ExecutableEntity executable = executableServiceImpl.getExecutable(conditionId, marketTime, watchlistId);
 		List<ConditionResultEntity> queuedConditions = executable.getConditionResultEntities().stream()
 				.filter(e -> StringUtils.equals(e.getStatus(), StatusEnum.QUEUED.name())).collect(Collectors.toList());
 		conditionResultServiceImpl.runConditions(queuedConditions);
 		return executableServiceImpl.updateStatusOfExecutable(executable);
 	}
 
-	private ScreenerEntity addExecutableToScreener(ScreenerEntity screenerEntity, Date marketTime, UUID conditionId,
+	private ExecutableEntity addExecutableToScreener(ScreenerEntity screenerEntity, Date marketTime, UUID conditionId,
 			UUID watchlistId, String note, List<String> scripNames) {
+		//TODO: refactor to createExecEntityObject
 		ExecutableEntity executable = entityWriter.createExecutableEntity(marketTime, note, watchlistId, conditionId);
 		List<ConditionResultEntity> resultEntities = entityWriter.queueConditionsToExecute(scripNames, marketTime,
 				conditionId);
 		executable.setConditionResultEntities(resultEntities);
 		executable.setNumberOfScripForExecution(resultEntities.size());
-		screenerEntity.getExecutableEntities().add(executable);
-		return entityWriter.saveScreenerEntity(screenerEntity);
+		ExecutableEntity savedExecutableEntity = entityWriter.saveExecutableEntity(executable);
+		screenerEntity.getExecutableEntities().add(savedExecutableEntity);
+		entityWriter.saveScreenerEntity(screenerEntity);
+		return savedExecutableEntity;
 	}
 
 	private boolean update(ScreenerEntity screenerEntity, PropertyEnum propertyName, String value) {
@@ -192,7 +195,8 @@ public class ScreenerServiceImpl implements ScreernerService {
 		switch (status) {
 		case UPDATED:
 		case DELETED:
-			entityWriter.adaptWatchlistModification(changeNotification.getId());
+			//TODO: verify whether it is required and then continue.
+			//entityWriter.adaptWatchlistModification(changeNotification.getId());
 			break;
 		default:
 			throw new IllegalArgumentException();

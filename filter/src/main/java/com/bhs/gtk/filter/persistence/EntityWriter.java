@@ -52,8 +52,6 @@ public class EntityWriter {
 	public boolean deleteFilterResultEntity(UUID filterId) {
 		List<FilterResultEntity> filterResults = filterResultRepository.findByFilterId(filterId);
 		if (!filterResults.isEmpty()) {
-			filterResults.stream().forEach(ft -> ft.setCompareExpressionResultEntities(new ArrayList<>()));
-			filterResultRepository.saveAll(filterResults);
 			filterResultRepository.deleteAll(filterResults);
 		}
 		return true;
@@ -71,7 +69,6 @@ public class EntityWriter {
 	public FilterResultEntity createFilterResultEntity(UUID filterId, Date marketTime, String scripName, String status,
 			List<CompareExpressionResultEntity> compareResults) {
 		FilterResultEntity filterEntity = new FilterResultEntity(filterId, marketTime, scripName, status);
-		filterEntity.setCompareExpressionResultEntities(compareResults);
 		return filterResultRepository.save(filterEntity);
 	}
 

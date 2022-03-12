@@ -10,7 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -37,7 +37,8 @@ public class ConditionResultEntity {
 	@Column
 	private String status;
 	
-	@OneToMany(fetch = FetchType.EAGER)
+	//TODO: remove many to many (unlink condition result and filter result). Similar to as in filterService.
+	@ManyToMany(fetch = FetchType.EAGER)
 	private List<FilterResultEntity> filterResultEntities;
 	
 	protected ConditionResultEntity() {};
