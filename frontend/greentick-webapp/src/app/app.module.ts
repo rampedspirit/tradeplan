@@ -52,6 +52,9 @@ import { BASE_PATH as FILTER_API_BASE_PATH } from 'src/gen/filter';
 import { ApiModule as ConditionApiModule } from 'src/gen/condition';
 import { BASE_PATH as CONDITION_API_BASE_PATH } from 'src/gen/condition';
 
+import { ApiModule as WatchlistApiModule } from 'src/gen/watchlist';
+import { BASE_PATH as WATCHLIST_API_BASE_PATH } from 'src/gen/watchlist';
+
 import { ApiModule as ScreenerApiModule } from 'src/gen/screener';
 import { BASE_PATH as SCREENER_API_BASE_PATH } from 'src/gen/screener';
 
@@ -71,6 +74,10 @@ import { DatePipe } from '@angular/common';
 import { ScreenerExecutableResultComponent } from './components/screener/screener-executable-result/screener-executable-result.component';
 import { ConditionResultComponent } from './components/condition/condition-result/condition-result.component';
 import { FilterResultComponent } from './components/filter/filter-result/filter-result.component';
+import { WatchlistListComponent } from './components/watchlist/watchlist-list/watchlist-list.component';
+import { WatchlistCreateComponent } from './components/watchlist/watchlist-create/watchlist-create.component';
+import { WatchlistEditComponent } from './components/watchlist/watchlist-edit/watchlist-edit.component';
+import { WatchlistNameSearchPipe } from './components/watchlist/watchlist-name-search.pipe';
 
 Amplify.configure({
   Auth: {
@@ -109,7 +116,11 @@ Amplify.configure({
     ScreenerExecutableCreateComponent,
     ScreenerExecutableResultComponent,
     ConditionResultComponent,
-    FilterResultComponent
+    FilterResultComponent,
+    WatchlistListComponent,
+    WatchlistCreateComponent,
+    WatchlistEditComponent,
+    WatchlistNameSearchPipe
   ],
   imports: [
     BrowserModule,
@@ -117,6 +128,7 @@ Amplify.configure({
     BrowserAnimationsModule,
     FilterApiModule,
     ConditionApiModule,
+    WatchlistApiModule,
     ScreenerApiModule,
     HttpClientModule,
     MatCardModule,
@@ -154,6 +166,10 @@ Amplify.configure({
   {
     provide: CONDITION_API_BASE_PATH,
     useValue: environment.conditionApiBasePath
+  },
+  {
+    provide: WATCHLIST_API_BASE_PATH,
+    useValue: environment.watchlistApiBasePath
   },
   {
     provide: SCREENER_API_BASE_PATH,

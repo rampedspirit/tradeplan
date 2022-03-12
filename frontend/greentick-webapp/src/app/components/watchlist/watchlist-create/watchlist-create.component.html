@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>Create New Watchlist</h2>
+<div mat-dialog-content>
+    <app-message *ngIf="createError" type="error" message="Failed to create filter." [callback]="submit"
+        callbackText="Retry">
+    </app-message>
+    <br>
+    <form fxLayout="column" fxLayoutGap="10px" [formGroup]="createWatchlistForm">
+        <mat-form-field>
+            <mat-label>Name</mat-label>
+            <input matInput [formControl]="nameControl">
+            <mat-spinner *ngIf="isValidating" matSuffix [diameter]="18" style="float: right; margin-left: 8px"></mat-spinner>
+            <mat-error *ngIf="nameControl.errors?.required">Filter name should not be blank.</mat-error>
+            <mat-error *ngIf="nameControl.errors?.hasSpace">Filter name should not have spaces.</mat-error>
+            <mat-error *ngIf="nameControl.errors?.notUnique">Filter name should be unique.</mat-error>
+            <mat-error *ngIf="nameControl.errors?.serviceNotReachable">Failed to contact our servers, please retry
+                later.</mat-error>
+        </mat-form-field>
+        <!-- <mat-form-field>
+            <mat-label>Description</mat-label>
+            <textarea matInput [formControl]="descriptionControl"> </textarea>
+            <mat-error *ngIf="descriptionControl && descriptionControl.invalid">Please enter valid description.
+            </mat-error>
+        </mat-form-field> -->
+    </form>
+</div>
+<div mat-dialog-actions align="end">    
+    <button mat-button (click)="submit()" cdkFocusInitial>OK</button>
+    <button mat-button [mat-dialog-close]="false">CANCEL</button>
+</div>

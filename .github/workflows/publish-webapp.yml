@@ -7,6 +7,9 @@ name: Publish Webapp
 on:
   workflow_dispatch:
     inputs:
+      StackNamePrefix:
+        required: true
+        description: Prefix for Stack Name
       BucketName:
         required: true
         description: Name of the S3 Bucket
@@ -24,7 +27,28 @@ jobs:
       # As you can see below we are using matrix.node-version => it means it will execute for all possible combinations
       # provided matrix keys array(in our case only one kye => node-version)
       - uses: actions/checkout@v2
-
+      
+      # patch app Url with the actual value
+      - name: Fetch cloudformation stack info
+        id: cfnStackInfo
+        run: echo ::set-output name=RAW_APP_URL::$(aws cloudformation --region ap-south-1 describe-stacks --stack-name ${{ github.event.inputs.StackNamePrefix }}-ECS-APP-Stack --query Stacks[0].Outputs[0].OutputValue)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: 'ap-south-1'
+      - name: Fix raw app url
+        id: fixUrl
+        run: |
+          APP_URL=${{ steps.cfnStackInfo.outputs.RAW_APP_URL }}
+          echo "$APP_URL" | tr -d '"'
+          echo ::set-output name=APP_URL::$APP_URL
+      - name: Replace application load balancer url
+        uses: jacobtomlinson/gha-find-replace@v2
+        with:
+          find: "appUrl"
+          replace: http://${{ steps.fixUrl.outputs.APP_URL }}
+          include: "**environment.prod.ts"      
+          
       - name: Use Node.js
         uses: actions/setup-node@v2
         with:

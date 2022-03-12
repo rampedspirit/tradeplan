@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { FilterLanguageResultEditorOptions } from 'src/app/lang/filter/filter-language-result.editor.options';
-import { ExpressionResult, FilterResultResponse, FilterService } from 'src/gen/filter';
+import { ExpressionResultResponse, FilterResultResponse, FilterService } from 'src/gen/filter';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { EditorService } from 'src/app/services/editor.service';
 import { ThisReceiver } from '@angular/compiler';
@@ -46,55 +46,61 @@ export class FilterResultComponent implements OnChanges {
 
   private updateDecorations() {
     if (this.editor && this.result) {
-      let decorations = this.result.expressionResults.map(r => this.getModelDeltaDecoration(r));
+      let decorations = this.result.expressionResults.flatMap(r => this.getModelDeltaDecoration(r));
       this.editor.deltaDecorations([], decorations);
     }
   }
 
-  private getModelDeltaDecoration(expressionResult: ExpressionResult): monaco.editor.IModelDeltaDecoration {
-    if (expressionResult.type == ExpressionResult.TypeEnum.ARITHMETIC) {
+  private getModelDeltaDecoration(expressionResult: ExpressionResultResponse): monaco.editor.IModelDeltaDecoration[] {
+    if (expressionResult.type == ExpressionResultResponse.TypeEnum.ARITHEMETICEXPRESSION) {
       return this.getDecorationForArithmeticExp(expressionResult);
-    } else if (expressionResult.type == ExpressionResult.TypeEnum.COMPARE) {
+    } else if (expressionResult.type == ExpressionResultResponse.TypeEnum.COMPAREEXPRESSION) {
       return this.getDecorationForCompareExp(expressionResult);
-    }else{
-      return {
-        range: new monaco.Range(expressionResult.location.start.line, expressionResult.location.start.column,
-          expressionResult.location.end.line, expressionResult.location.end.column),
+    }
+    return this.getDecorationForOtherExp(expressionResult);
+  }
+
+  private getDecorationForArithmeticExp(expressionResult: ExpressionResultResponse): monaco.editor.IModelDeltaDecoration[] {
+    let decorations: monaco.editor.IModelDeltaDecoration[] = [];
+    expressionResult.location.forEach(location => {
+      decorations.push({
+        range: new monaco.Range(location.start.line, location.start.column, location.end.line, location.end.column),
+        options: {
+          inlineClassName: "expression-result-arithmetic",
+          hoverMessage: {
+            value: expressionResult.result
+          }
+        }
+      } as monaco.editor.IModelDeltaDecoration);
+    });
+    return decorations;
+  }
+
+  private getDecorationForCompareExp(expressionResult: ExpressionResultResponse): monaco.editor.IModelDeltaDecoration[] {
+    let decorations: monaco.editor.IModelDeltaDecoration[] = [];
+    expressionResult.location.forEach(location => {
+      decorations.push({
+        range: new monaco.Range(location.start.line, location.start.column, location.end.line, location.end.column),
+        options: {
+          inlineClassName: "expression-result-compare-" + expressionResult.result,
+        }
+      } as monaco.editor.IModelDeltaDecoration);
+    });
+    return decorations;
+  }
+
+  private getDecorationForOtherExp(expressionResult: ExpressionResultResponse): monaco.editor.IModelDeltaDecoration[] {
+    let decorations: monaco.editor.IModelDeltaDecoration[] = [];
+    expressionResult.location.forEach(location => {
+      decorations.push({
+        range: new monaco.Range(location.start.line, location.start.column, location.end.line, location.end.column),
         options: {
           hoverMessage: {
             value: expressionResult.result
           }
         }
-      } as monaco.editor.IModelDeltaDecoration;
-    }
-    return null;
-  }
-
-  private getDecorationForArithmeticExp(expressionResult: ExpressionResult): monaco.editor.IModelDeltaDecoration {
-    return {
-      range: new monaco.Range(expressionResult.location.start.line, expressionResult.location.start.column,
-        expressionResult.location.end.line, expressionResult.location.end.column),
-      options: {
-        hoverMessage: {
-          value: expressionResult.result
-        }
-      }
-    } as monaco.editor.IModelDeltaDecoration;
-  }
-
-  private getDecorationForCompareExp(expressionResult: ExpressionResult): monaco.editor.IModelDeltaDecoration {
-    return {
-      range: new monaco.Range(expressionResult.location.start.line, expressionResult.location.start.column,
-        expressionResult.location.end.line, expressionResult.location.end.column),
-      options: {
-        inlineClassName: "expression-result-" + expressionResult.type + "-" + this.getRandomStatus(),
-      }
-    } as monaco.editor.IModelDeltaDecoration;
-  }
-
-  private getRandomStatus(): string {
-    let statuses = ["QUEUED", "RUNNING", "PASS", "FAIL", "ERROR"];
-    const random = Math.floor(Math.random() * statuses.length);
-    return statuses[random];
+      } as monaco.editor.IModelDeltaDecoration);
+    });
+    return decorations;
   }
 }

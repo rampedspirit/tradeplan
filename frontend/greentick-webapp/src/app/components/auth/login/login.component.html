@@ -1,5 +1,5 @@
 <div fxLayout="column" fxLayoutGap="10px">
-    <h2>LOGIN</h2>
+    <h2>Sign In</h2>
     <form fxLayout="column" fxLayoutGap="10px" [formGroup]="loginForm">
         <span style="color: rgb(7, 139, 7);" [innerHTML]="message"></span>
         <mat-form-field>
@@ -13,7 +13,7 @@
             <mat-error *ngIf="passwordControl && passwordControl.invalid">Please enter correct password.</mat-error>
         </mat-form-field>
         <mat-error *ngIf="submissionError">{{submissionError}}</mat-error>
-        <button mat-flat-button color="primary" (click)="onSubmit()">LOGIN</button>
+        <button mat-flat-button color="primary" (click)="onSubmit()">Sign In</button>
     </form>
     <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="10px">
         <div>

@@ -1,0 +1,34 @@
+<div fxLayout="row" fxLayoutAlign="space-between center" fxLayout.sm="column" fxLayoutAlign.sm="center start"
+    fxLayout.xs="column" fxLayoutAlign.xs="center start">
+    <div>
+        <h3><b>WATCHLISTS</b></h3>
+    </div>
+    <div>
+        <button mat-flat-button color="primary" (click)="openCreateWatchlistDialog()">NEW WATCHLIST</button>
+    </div>
+</div>
+
+<div fxLayout="column">
+    <mat-form-field>
+        <mat-label>
+            <mat-icon>search</mat-icon> Search
+        </mat-label>
+        <input matInput #watchlistSearch>
+    </mat-form-field>
+</div>
+<app-message *ngIf="watchlists!=null && watchlists.length==0" type="warn" message="No Watchlists Available."
+    [callback]="openCreateWatchlistDialog" callbackText="Create Watchlist">
+</app-message>
+
+<app-message *ngIf="fetchError" type="error" message="Failed to connect to our servers." [callback]="refresh"
+    callbackText="Refresh">
+</app-message>
+
+<mat-selection-list #watchlistList [multiple]="false" (selectionChange)="onSelectionChange($event)">
+    <mat-list-option *ngFor="let watchlist of ( watchlists | watchlistNameSearch:watchlistSearch.value)"
+        [value]="watchlist">
+        {{watchlist.name}}
+    </mat-list-option>
+</mat-selection-list>
+
+<ngx-spinner type="ball-spin-clockwise"></ngx-spinner>

@@ -3,15 +3,20 @@
     <!--Main Nav-->
     <div class="container">
         <mat-button-toggle-group [vertical]="!isSmallScreen">
-            <mat-button-toggle class="main-nav-item" matTooltip="SCREENERS" [routerLink]="['/screener/list']"> S
+            <mat-button-toggle class="main-nav-item" matTooltip="FILTERS" [routerLink]="['/filter/list']">
+                <img src="assets/icons/filter.png" style="width: 60%;">
             </mat-button-toggle>
-            <mat-button-toggle class="main-nav-item"> &nbsp; </mat-button-toggle>
-            <mat-button-toggle class="main-nav-item" matTooltip="FILTERS" [routerLink]="['/filter/list']"> F
+            <mat-button-toggle class="main-nav-item" matTooltip="CONDITIONS" [routerLink]="['/condition/list']">
+                <img src="assets/icons/condition.png" style="width: 60%;">
             </mat-button-toggle>
-            <mat-button-toggle class="main-nav-item" matTooltip="CONDITIONS" [routerLink]="['/condition/list']"> C
+            <mat-button-toggle class="main-nav-item" matTooltip="WATCHLISTS" [routerLink]="['/watchlist/list']">
+                <img src="assets/icons/watchlist.png">
+            </mat-button-toggle>
+            <mat-button-toggle class="main-nav-item" matTooltip="SCREENERS" [routerLink]="['/screener/list']">
+                <img src="assets/icons/screener.png" style="width: 60%;">
             </mat-button-toggle>
         </mat-button-toggle-group>
-    </div> 
+    </div>
 
     <!--List Area-->
     <div class="container main-list-container" fxFlex="25" fxFlex.md="40" fxFlex.sm="40" fxFlex.xs="100">
@@ -40,6 +45,9 @@
                 </div>
                 <div class="tab-container" *ngIf="tab.type == 'screener'">
                     <app-screener-edit [tab]="tab"></app-screener-edit>
+                </div>
+                <div class="tab-container" *ngIf="tab.type == 'watchlist'">
+                    <app-watchlist-edit [tab]="tab"></app-watchlist-edit>
                 </div>
             </mat-tab>
         </mat-tab-group>

@@ -4,6 +4,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ScreenerService } from 'src/gen/screener';
+import { WatchlistService } from 'src/gen/watchlist';
 
 @Component({
   selector: 'app-screener-executable-create',
@@ -23,8 +24,8 @@ export class ScreenerExecutableCreateComponent implements OnInit {
     return this.createScreenerExecutableForm.get('note') as FormControl;
   }
 
-  constructor(public dialogRef: MatDialogRef<ScreenerExecutableCreateComponent>, @Inject(MAT_DIALOG_DATA) private data: { screenerId: string },
-    private screenerService: ScreenerService, private spinner: NgxSpinnerService, private datePipe: DatePipe) { }
+  constructor(public dialogRef: MatDialogRef<ScreenerExecutableCreateComponent>, @Inject(MAT_DIALOG_DATA) private data: { screenerId: string, watchlistId: string },
+    private screenerService: ScreenerService, private spinner: NgxSpinnerService, private datePipe: DatePipe, private watchlistService: WatchlistService) { }
 
   ngOnInit(): void {
     let dateStr: string = this.datePipe.transform(new Date(), 'yyyy-MM-ddTHH:mm', "GMT+0530");
@@ -50,17 +51,22 @@ export class ScreenerExecutableCreateComponent implements OnInit {
   }
 
   private createScreenerExecutable(marketTime: string, note: string) {
-    this.spinner.show();
-    this.createError = false;
-    let date: Date = new Date(marketTime);
-    this.screenerService.runScreener({
-      marketTime: date,
-      note: note,
-      scripNames: ["INFY", "HDFC", "TCS", "TATAMOTORS"],
-    }, this.data.screenerId).subscribe(screener => {
-      this.dialogRef.close(true);
-      this.spinner.hide();
-    }, error => {
+    this.watchlistService.getWatchlist(this.data.watchlistId).subscribe(watchlist => {
+      this.spinner.show();
+      this.createError = false;
+      let date: Date = new Date(marketTime);
+      this.screenerService.runScreener({
+        marketTime: date,
+        note: note,
+        scripNames: watchlist.scripNames,
+      }, this.data.screenerId).subscribe(screener => {
+        this.dialogRef.close(true);
+        this.spinner.hide();
+      }, error => {
+        this.createError = true;
+        this.spinner.hide();
+      });
+    }, errror => {
       this.createError = true;
       this.spinner.hide();
     });

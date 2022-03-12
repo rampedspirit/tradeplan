@@ -19,23 +19,22 @@ import com.bhs.gtk.screener.service.ExecutableServiceImpl;
 @SpringBootApplication
 public class ScreenerApplication {
 
-	
 	public static void main(String[] args) {
 		SpringApplication.run(ScreenerApplication.class, args);
 	}
-	
+
 	@Autowired
 	private KafkaAdmin kafkaAdmin;
-	
+
 	@Autowired
 	private ConditionResultServiceImpl conditionResultServiceImpl;
-	
+
 	@Autowired
 	private ExecutableServiceImpl executableServiceImpl;
-	
+
 	@EventListener(ApplicationReadyEvent.class)
 	public void handleAfterStartupTasks() {
-		if(createTopicsRequiredForScreenerService()) {
+		if (createTopicsRequiredForScreenerService()) {
 			List<ConditionResultEntity> conditions = conditionResultServiceImpl.runAllQueuedConditions();
 			executableServiceImpl.updateStatusOfExecutablesBasedOnConditions(conditions);
 		}
@@ -45,15 +44,19 @@ public class ScreenerApplication {
 		try {
 			NewTopic outputExecutionRequest = new NewTopic(TopicNames.OUTPUT_EXECUTION_REQUEST, 1, (short) 1);
 			NewTopic inputExecutionResponse = new NewTopic(TopicNames.INPUT_EXECUTION_RESPONSE, 1, (short) 1);
-			NewTopic inputChangeNotification = new NewTopic(TopicNames.INPUT_CONDITION_CHANGE_NOTIFICATION, 1, (short) 1);
-			kafkaAdmin.createOrModifyTopics(outputExecutionRequest,inputExecutionResponse,inputChangeNotification);
+			NewTopic conditionChangeNotification = new NewTopic(TopicNames.INPUT_CONDITION_CHANGE_NOTIFICATION, 1,
+					(short) 1);
+			NewTopic watchlistChangeNotification = new NewTopic(TopicNames.INPUT_WATCHLIST_CHANGE_NOTIFICATION, 1,
+					(short) 1);
+			kafkaAdmin.createOrModifyTopics(outputExecutionRequest, inputExecutionResponse, conditionChangeNotification,
+					watchlistChangeNotification);
 			return true;
-		}catch (KafkaException kafkaException) {
-			//Log error
+		} catch (KafkaException kafkaException) {
+			// Log error
 			System.err.println("Kafka is not up");
 			kafkaException.printStackTrace();
-		}catch (Exception ex) {
-			//Log error
+		} catch (Exception ex) {
+			// Log error
 			System.err.println("Unknow issue");
 			ex.printStackTrace();
 		}
