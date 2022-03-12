@@ -11,6 +11,7 @@ import { DocumentComponent } from './components/document/document.component';
 import { FilterListComponent } from './components/filter/filter-list/filter-list.component';
 import { MainComponent } from './components/main/main.component';
 import { ScreenerListComponent } from './components/screener/screener-list/screener-list.component';
+import { WatchlistListComponent } from './components/watchlist/watchlist-list/watchlist-list.component';
 
 const routes: Routes = [
   {
@@ -20,7 +21,8 @@ const routes: Routes = [
     children: [
       { path: "filter/list", component: FilterListComponent },
       { path: "condition/list", component: ConditionListComponent },
-      { path: "screener/list", component: ScreenerListComponent }
+      { path: "screener/list", component: ScreenerListComponent },
+      { path: "watchlist/list", component: WatchlistListComponent }
     ]
   },
   {

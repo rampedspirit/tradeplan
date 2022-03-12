@@ -23,7 +23,6 @@
             <mat-error *ngIf="descriptionControl && descriptionControl.invalid">Please enter a valid description.
             </mat-error>
         </mat-form-field>
-
         <mat-form-field *ngIf="conditions && conditions.length>0">
             <mat-label>Condition</mat-label>
             <mat-select [formControl]="conditionControl">
@@ -37,6 +36,20 @@
         <app-message *ngIf="conditions!=null && conditions.length==0" type="error"
             message="No Conditions Available. Please create condition first." [callback]="navigateToConditionsList"
             callbackText="Create Condition">
+        </app-message>
+        <mat-form-field *ngIf="watchlists && watchlists.length>0">
+            <mat-label>Watchlist</mat-label>
+            <mat-select [formControl]="watchlistControl">
+                <mat-option *ngFor="let watchlist of watchlists" [value]="watchlist.watchlistId">
+                    {{watchlist.name}}
+                </mat-option>
+            </mat-select>
+            <mat-error *ngIf="watchlistControl && watchlistControl.invalid">Please select a valid watchlist.
+            </mat-error>`
+        </mat-form-field>
+        <app-message *ngIf="watchlists!=null && watchlists.length==0" type="error"
+            message="No Watchlists Available. Please create watchlist first." [callback]="navigateToWatchlistsList"
+            callbackText="Create Watchlist">
         </app-message>
     </form>
 

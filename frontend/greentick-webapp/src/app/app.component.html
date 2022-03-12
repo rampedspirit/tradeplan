@@ -1,11 +1,11 @@
 <div fxLayout="column" fxFlexFill>
   <mat-card fxLayout="row" fxLayoutAlign="space-between center">
     <div>
-      <img src="assets/icons/small_new.png">
+      <img src="assets/icons/tp_new_large.png">
     </div>
     <div>
       <!--Modules-->
-      <button mat-flat-button [routerLink]="['/screener']">
+      <!-- <button mat-flat-button [routerLink]="['/screener']">
         <mat-icon color="primary">tv</mat-icon>
         Screener
       </button>
@@ -16,7 +16,7 @@
       <button mat-flat-button>
         <mat-icon color="primary">multiline_chart</mat-icon>
         Paper Trade
-      </button>
+      </button> -->
 
       <!--User Menu-->
       <button mat-icon-button *ngIf="(authService.currentUser | async)" [matMenuTriggerFor]="userMenu">
@@ -45,7 +45,6 @@
     <router-outlet></router-outlet>
   </div>
   <div fxLayout="column" fxLayoutAlign="center center">
-    <b>&copy; All rights reserved 2021</b>
-    <p>BHS - Cloudtech</p>
+    <b>&copy; All rights reserved 2022</b>
   </div>
 </div>

@@ -7,11 +7,12 @@ import { Tab, TabAreaService } from 'src/app/services/tab-area.service';
 import { ConditionResponse, ConditionService } from 'src/gen/condition';
 import { ScreenerService } from 'src/gen/screener';
 import { ExecutableResponse } from 'src/gen/screener/model/executableResponse';
+import { WatchlistResponse, WatchlistService } from 'src/gen/watchlist';
 import { ConfirmationComponent } from '../../common/confirmation/confirmation.component';
 import { MessageComponent } from '../../common/message/message.component';
 import { ConditionNotificationService } from '../../condition/condition-notification.service';
+import { WatchlistNotificationService } from '../../watchlist/watchlist-notification.service';
 import { ScreenerExecutableCreateComponent } from '../screener-executable-create/screener-executable-create.component';
-import { ScreenerExecutableResultComponent } from '../screener-executable-result/screener-executable-result.component';
 import { ScreenerNotificationService } from '../screener-notification.service';
 
 @Component({
@@ -23,9 +24,11 @@ export class ScreenerEditComponent implements OnInit {
 
   fetchError: boolean;
   fetchError2: boolean;
+  fetchError3: boolean;
 
   editScreenerForm: FormGroup;
   conditions: ConditionResponse[];
+  watchlists: WatchlistResponse[];
 
   selectedExecutableId: string;
   executables: ExecutableResponse[];
@@ -46,14 +49,20 @@ export class ScreenerEditComponent implements OnInit {
     return this.editScreenerForm.get('conditionId') as FormControl;
   }
 
+  get watchlistControl(): FormControl {
+    return this.editScreenerForm.get('watchlistId') as FormControl;
+  }
+
   constructor(private screenerService: ScreenerService, private screenerNotificationService: ScreenerNotificationService,
     private conditionService: ConditionService, private conditionNotificationService: ConditionNotificationService,
+    private watchlistService: WatchlistService, private watchlistNotificationService: WatchlistNotificationService,
     private dialog: MatDialog, private spinner: NgxSpinnerService, private router: Router, private tabAreaService: TabAreaService) {
   }
 
   ngOnInit(): void {
     this.refresh();
     this.refresh2();
+    this.refresh3();
     this.updateExecutables();
 
     this.conditionNotificationService.createSubject.subscribe(condition => {
@@ -76,7 +85,8 @@ export class ScreenerEditComponent implements OnInit {
       this.editScreenerForm = new FormGroup({
         name: new FormControl(screener.name, [Validators.required]),
         description: new FormControl(screener.description, [Validators.required]),
-        conditionId: new FormControl(screener.conditionId, [Validators.required])
+        conditionId: new FormControl(screener.conditionId, [Validators.required]),
+        watchlistId: new FormControl(screener.watchListId, [Validators.required])
       });
       this.editScreenerForm.valueChanges.subscribe(change => {
         this.tab.dirtyFlag = true;
@@ -101,6 +111,19 @@ export class ScreenerEditComponent implements OnInit {
     });
   }
 
+  refresh3 = () => {
+    this.fetchError3 = false;
+    this.spinner.show();
+    this.watchlistService.getAllWatchlists().subscribe(watchlists => {
+      this.spinner.hide();
+      this.watchlists = watchlists;
+    }, error => {
+      this.fetchError2 = true;
+      this.spinner.hide();
+    });
+  }
+
+
   save = () => {
     //Validate fields
     Object.values(this.editScreenerForm.controls).forEach(control => {
@@ -111,6 +134,7 @@ export class ScreenerEditComponent implements OnInit {
       let name = this.editScreenerForm.get('name')?.value;
       let description = this.editScreenerForm.get('description')?.value;
       let conditionId = this.editScreenerForm.get('conditionId')?.value;
+      let watchlistId = this.editScreenerForm.get('watchlistId')?.value;
 
       this.spinner.show();
       this.screenerService.updateScreener(
@@ -128,7 +152,13 @@ export class ScreenerEditComponent implements OnInit {
           operation: 'REPLACE',
           property: 'CONDITION_ID',
           value: conditionId
-        }]
+        },
+        {
+          operation: 'REPLACE',
+          property: 'WATCHLIST_ID',
+          value: watchlistId
+        }
+        ]
         , this.tab.id).subscribe(screener => {
           this.tab.title = screener.name;
           this.tab.dirtyFlag = false;
@@ -183,10 +213,16 @@ export class ScreenerEditComponent implements OnInit {
     this.tabAreaService.closeTab(this.tab.id);
   }
 
+  navigateToWatchlistsList = () => {
+    this.router.navigate(["/watchlist/list"]);
+    this.tabAreaService.closeTab(this.tab.id);
+  }
+
   openCreateScreenerExecutableDialog = () => {
     const dialogRef = this.dialog.open(ScreenerExecutableCreateComponent, {
       data: {
-        screenerId: this.tab.id
+        screenerId: this.tab.id,
+        watchlistId: this.editScreenerForm.get('watchlistId')?.value
       },
       minWidth: "30%"
     });

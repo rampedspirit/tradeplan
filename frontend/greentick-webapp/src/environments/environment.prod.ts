@@ -5,5 +5,6 @@ export const environment = {
   production: true,
   filterApiBasePath: "appUrl",
   conditionApiBasePath: "appUrl",
-  screenerApiBasePath: "appUrl"
+  screenerApiBasePath: "appUrl",
+  watchlistApiBasePath: "appurl"
 };

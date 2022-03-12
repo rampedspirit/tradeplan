@@ -6,7 +6,8 @@ export const environment = {
   production: false,
   filterApiBasePath: "http://localhost:5000/",
   conditionApiBasePath: "http://localhost:5001/",
-  screenerApiBasePath: "http://localhost:5002/"
+  screenerApiBasePath: "http://localhost:5002/",
+  watchlistApiBasePath: "http://localhost:5004/"
 };
 
 /*
