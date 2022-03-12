@@ -500,7 +500,7 @@ export class EcsAppStack extends Stack {
 
         new ApplicationListenerRule(this, "watchlistservice-listener-rule", {
             listener: applicationListener,
-            priority: 1,
+            priority: 5,
             conditions: [
                 ListenerCondition.pathPatterns(["/actuator/watchlist-health", "/v1/watchlist", "/v1/watchlist/*"])
             ],
