@@ -6,12 +6,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.bhs.gtk.screener.model.ScreenerCreateRequest;
 import com.bhs.gtk.screener.model.ScripResult;
+import com.bhs.gtk.screener.model.ScripResult.StatusEnum;
 
 @Component
 public class EntityWriter {
@@ -34,26 +37,52 @@ public class EntityWriter {
 	
 	public List<ConditionResultEntity> queueConditionsToExecute(List<String> scripNames,Date marketTime, UUID conditionId) {
 		List<ConditionResultEntity> conditionsToBeExecuted = deriveConditionsToBeExecuted(scripNames, marketTime, conditionId);
-		List<ConditionResultEntity> queuedConditions = new ArrayList<>();
-		if(!conditionsToBeExecuted.isEmpty()) {
-			Iterable<ConditionResultEntity> savedEntities = conditionResultRepository.saveAll(conditionsToBeExecuted);
-			savedEntities.forEach(e -> queuedConditions.add(e));
+		List<ConditionResultEntity> queuedConditions = conditionsToBeExecuted.stream()
+				.filter(e -> StringUtils.equals(e.getStatus(), StatusEnum.QUEUED.name())).collect(Collectors.toList());
+		List<ConditionResultEntity> conditionsAvailableInDatabase = conditionsToBeExecuted.stream()
+				.filter(e -> !StringUtils.equals(e.getStatus(), StatusEnum.QUEUED.name())).collect(Collectors.toList());
+		if(!queuedConditions.isEmpty()) {
+			Iterable<ConditionResultEntity> savedEntities = conditionResultRepository.saveAll(queuedConditions);
+			savedEntities.forEach(e -> conditionsAvailableInDatabase.add(e));
 		}
-		return  queuedConditions;
+		return conditionsAvailableInDatabase;
 	}
 
+	
 	private List<ConditionResultEntity> deriveConditionsToBeExecuted(List<String> scripNames, Date marketTime, UUID conditionId) {
+		List<String> requestedScripNames = new ArrayList<>(scripNames);
+		List<String> existingScripNames = new ArrayList<>();
+		List<ConditionResultEntity> existingConditionResults = new ArrayList<>();
 		Set<ConditionResultId> conditionIDsRequestedToExecute = new HashSet<>();
-		Set<ConditionResultId> reUsableConditionIDs = new HashSet<>();
-		for(String name : scripNames) {
+		for(String name : requestedScripNames) {
 			 conditionIDsRequestedToExecute.add(new ConditionResultId(conditionId, marketTime, name));
 		}
-		for(ConditionResultEntity cn : conditionResultRepository.findAllById(conditionIDsRequestedToExecute)) {
-			reUsableConditionIDs.add(new ConditionResultId(cn.getConditionId(), cn.getMarketTime(), cn.getScripName()));
+		for(ConditionResultEntity cr : conditionResultRepository.findAllById(conditionIDsRequestedToExecute)) {
+			existingScripNames.add(cr.getScripName());
+			existingConditionResults.add(cr);
 		}
-		conditionIDsRequestedToExecute.removeAll(reUsableConditionIDs);
-		return createConditions(conditionIDsRequestedToExecute);
+		requestedScripNames.removeAll(existingScripNames);
+		Set<ConditionResultId> conditionIDsToBeExecuted = new HashSet<>();
+		for(String name : requestedScripNames) {
+			conditionIDsToBeExecuted.add(new ConditionResultId(conditionId, marketTime, name));
+		}
+		existingConditionResults.addAll(createConditions(conditionIDsToBeExecuted));
+		return existingConditionResults;
 	}
+	
+	
+//	private List<ConditionResultEntity> deriveConditionsToBeExecuted(List<String> scripNames, Date marketTime, UUID conditionId) {
+//		Set<ConditionResultId> conditionIDsRequestedToExecute = new HashSet<>();
+//		Set<ConditionResultId> reUsableConditionIDs = new HashSet<>();
+//		for(String name : scripNames) {
+//			 conditionIDsRequestedToExecute.add(new ConditionResultId(conditionId, marketTime, name));
+//		}
+//		for(ConditionResultEntity cn : conditionResultRepository.findAllById(conditionIDsRequestedToExecute)) {
+//			reUsableConditionIDs.add(new ConditionResultId(cn.getConditionId(), cn.getMarketTime(), cn.getScripName()));
+//		}
+//		conditionIDsRequestedToExecute.removeAll(reUsableConditionIDs);
+//		return createConditions(conditionIDsRequestedToExecute);
+//	}
 
 	private List<ConditionResultEntity> createConditions(Set<ConditionResultId> conditionIDs) {
 		List<ConditionResultEntity> conditions = new ArrayList<>();
@@ -76,6 +105,11 @@ public class EntityWriter {
 			screenerRepository.delete(screenerEntity);
 		}
 		return screenerEntity;
+	}
+	
+	
+	public ExecutableEntity saveExecutableEntity(ExecutableEntity executable) {
+		return executableRespository.save(executable);
 	}
 	
 	public ScreenerEntity saveScreenerEntity(ScreenerEntity entity) {

@@ -5,11 +5,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -21,7 +23,7 @@ import org.hibernate.annotations.GenericGenerator;
 import com.bhs.gtk.screener.model.ExecutableStatus;
 
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "marketTime", "watchlistId","conditionId" }) })
+//@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "marketTime", "watchlistId","conditionId" }) })
 public class ExecutableEntity {
 	
 	@Id
@@ -51,7 +53,7 @@ public class ExecutableEntity {
 	@Column
 	private int numberOfScripWithResultAvailable;  
 	
-	@OneToMany(fetch = FetchType.EAGER)
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private List<ConditionResultEntity> conditionResultEntities;
 	
 	protected ExecutableEntity() {}
