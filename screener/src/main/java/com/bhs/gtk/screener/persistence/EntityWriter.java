@@ -15,40 +15,43 @@ import com.bhs.gtk.screener.model.ScripResult;
 
 @Component
 public class EntityWriter {
-	
+
 	@Autowired
 	private EntityReader entityReader;
-	
+
 	@Autowired
-	private ConditionResultRepository  conditionResultRepository;
-	
+	private ConditionResultRepository conditionResultRepository;
+
 	@Autowired
 	private ExecutableRespository executableRespository;
-	
+
 	@Autowired
 	private ScreenerRepository screenerRepository;
-	
-	public ExecutableEntity createExecutableEntity(Date marketTime,String note, UUID watchlistId,UUID conditionId) {
-		return  new ExecutableEntity(note, marketTime, watchlistId, conditionId);
+
+	public ExecutableEntity createExecutableEntity(Date marketTime, String note, UUID watchlistId, UUID conditionId) {
+		return new ExecutableEntity(note, marketTime, watchlistId, conditionId);
 	}
-	
-	public List<ConditionResultEntity> queueConditionsToExecute(List<String> scripNames,Date marketTime, UUID conditionId) {
-		List<ConditionResultEntity> conditionsToBeExecuted = deriveConditionsToBeExecuted(scripNames, marketTime, conditionId);
+
+	public List<ConditionResultEntity> queueConditionsToExecute(List<String> scripNames, Date marketTime,
+			UUID conditionId) {
+		List<ConditionResultEntity> conditionsToBeExecuted = deriveConditionsToBeExecuted(scripNames, marketTime,
+				conditionId);
 		List<ConditionResultEntity> queuedConditions = new ArrayList<>();
-		if(!conditionsToBeExecuted.isEmpty()) {
+		if (!conditionsToBeExecuted.isEmpty()) {
 			Iterable<ConditionResultEntity> savedEntities = conditionResultRepository.saveAll(conditionsToBeExecuted);
 			savedEntities.forEach(e -> queuedConditions.add(e));
 		}
-		return  queuedConditions;
+		return queuedConditions;
 	}
 
-	private List<ConditionResultEntity> deriveConditionsToBeExecuted(List<String> scripNames, Date marketTime, UUID conditionId) {
+	private List<ConditionResultEntity> deriveConditionsToBeExecuted(List<String> scripNames, Date marketTime,
+			UUID conditionId) {
 		Set<ConditionResultId> conditionIDsRequestedToExecute = new HashSet<>();
 		Set<ConditionResultId> reUsableConditionIDs = new HashSet<>();
-		for(String name : scripNames) {
-			 conditionIDsRequestedToExecute.add(new ConditionResultId(conditionId, marketTime, name));
+		for (String name : scripNames) {
+			conditionIDsRequestedToExecute.add(new ConditionResultId(conditionId, marketTime, name));
 		}
-		for(ConditionResultEntity cn : conditionResultRepository.findAllById(conditionIDsRequestedToExecute)) {
+		for (ConditionResultEntity cn : conditionResultRepository.findAllById(conditionIDsRequestedToExecute)) {
 			reUsableConditionIDs.add(new ConditionResultId(cn.getConditionId(), cn.getMarketTime(), cn.getScripName()));
 		}
 		conditionIDsRequestedToExecute.removeAll(reUsableConditionIDs);
@@ -63,32 +66,32 @@ public class EntityWriter {
 		}
 		return conditions;
 	}
-	
+
 	public ScreenerEntity createScreenerEntity(ScreenerCreateRequest screenerRequest) {
 		ScreenerEntity entity = new ScreenerEntity(screenerRequest.getName(), screenerRequest.getDescription(),
 				screenerRequest.getWatchListId(), screenerRequest.getConditionId());
 		return screenerRepository.save(entity);
 	}
-	
+
 	public ScreenerEntity deleteScreener(UUID screenerId) {
 		ScreenerEntity screenerEntity = entityReader.getScreenerEntity(screenerId);
-		if(screenerEntity != null) {
+		if (screenerEntity != null) {
 			screenerRepository.delete(screenerEntity);
 		}
 		return screenerEntity;
 	}
-	
+
 	public ScreenerEntity saveScreenerEntity(ScreenerEntity entity) {
 		return screenerRepository.save(entity);
 	}
-
 
 	/**
 	 * @param conditionId
 	 * @param scripName
 	 * @param marketTime
 	 * @param status
-	 * @return true if status of {@link ConditionResultEntity} associated to above parameters is changed, false otherwise.
+	 * @return true if status of {@link ConditionResultEntity} associated to above
+	 *         parameters is changed, false otherwise.
 	 */
 	public boolean adaptConditionResultEntity(UUID conditionId, String scripName, Date marketTime, String status) {
 		ConditionResultEntity conditionResult = conditionResultRepository
@@ -101,7 +104,7 @@ public class EntityWriter {
 		switch (ScripResult.StatusEnum.valueOf(status)) {
 		case RUNNING:
 		case QUEUED:
-			  break;
+			break;
 		case ERROR:
 		case FAIL:
 		case PASS:
@@ -111,27 +114,25 @@ public class EntityWriter {
 		default:
 			throw new IllegalArgumentException(status + " is not a valid filter result status");
 		}
-		
-		if(saveResultRequired) {
+
+		if (saveResultRequired) {
 			conditionResultRepository.save(conditionResult);
 			return true;
 		}
 		return false;
 	}
-	
-	
+
 	public boolean adaptConditionDelete(UUID conditionId) {
-		//detachExecutablesOfConditionFromScreeners(conditionId);
+		// detachExecutablesOfConditionFromScreeners(conditionId);
 		removeConditionFromScreener(conditionId);
 		removeExecutablesOfCondition(conditionId);
 		removeConditionResults(conditionId);
 		return true;
 	}
-	
-	
+
 	private void removeConditionFromScreener(UUID conditionId) {
 		List<ScreenerEntity> screenersAssociatedToCondition = screenerRepository.findByConditionId(conditionId);
-		for(ScreenerEntity screener : screenersAssociatedToCondition) {
+		for (ScreenerEntity screener : screenersAssociatedToCondition) {
 			screener.setConditionId(null);
 			screener.setExecutableEntities(new ArrayList<>());
 		}
@@ -147,20 +148,20 @@ public class EntityWriter {
 
 	private void detachExecutablesOfConditionFromScreeners(UUID conditionId) {
 		List<ScreenerEntity> screenersAssociatedToCondition = screenerRepository.findByConditionId(conditionId);
-		for(ScreenerEntity screener : screenersAssociatedToCondition) {
+		for (ScreenerEntity screener : screenersAssociatedToCondition) {
 			screener.setExecutableEntities(new ArrayList<>());
 		}
 		screenerRepository.saveAll(screenersAssociatedToCondition);
 	}
-	
+
 	private void removeExecutablesOfCondition(UUID conditionId) {
 		List<ExecutableEntity> executables = executableRespository.findByConditionId(conditionId);
-		for(ExecutableEntity entity : executables) {
+		for (ExecutableEntity entity : executables) {
 			entity.setConditionResultEntities(new ArrayList<>());
 		}
 		List<ExecutableEntity> associationRemovedExecutables = new ArrayList<>();
 		Iterable<ExecutableEntity> savedExecutables = executableRespository.saveAll(executables);
-		for(ExecutableEntity entity : savedExecutables) {
+		for (ExecutableEntity entity : savedExecutables) {
 			associationRemovedExecutables.add(entity);
 		}
 		executableRespository.deleteAll(associationRemovedExecutables);
@@ -171,5 +172,8 @@ public class EntityWriter {
 		conditionResultRepository.deleteAll(conditionResults);
 	}
 
-	
+	public void adaptWatchlistModification(UUID id) {
+		// What to delete here?
+	}
+
 }

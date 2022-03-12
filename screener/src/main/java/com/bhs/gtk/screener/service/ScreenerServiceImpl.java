@@ -187,4 +187,17 @@ public class ScreenerServiceImpl implements ScreernerService {
 		return false;
 	}
 
+	public boolean adaptChangeInWatchlist(ChangeNotification changeNotification) {
+		ChangeStatusEnum status = ChangeStatusEnum.fromValue(changeNotification.getStatus());
+		switch (status) {
+		case UPDATED:
+		case DELETED:
+			entityWriter.adaptWatchlistModification(changeNotification.getId());
+			break;
+		default:
+			throw new IllegalArgumentException();
+		}
+		return false;
+	}
+
 }

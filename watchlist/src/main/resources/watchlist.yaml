@@ -1,0 +1,230 @@
+openapi: 3.0.0
+info:
+  description: These are Watchlist service APIs
+  version: 1.0.0
+  title: Watchlist
+servers:
+  - url: 'http://localhost:5004/'
+  - url: 'https://localhost:5004/'
+paths:
+  /v1/watchlist:
+    post:
+      tags:
+        - watchlist
+      summary: create new watchlist
+      description: create new watchlist
+      operationId: createWatchlist
+      requestBody:
+        description: payload to create watchlist
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WatchlistCreateRequest'
+        required: true
+      responses:
+        '201':
+          description: watchlist created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WatchlistResponse'
+        '400':
+          description: Request is not understood.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      tags:
+        - watchlist
+      summary: get all watchlist
+      description: get watchlist
+      operationId: getAllWatchlists
+      responses:
+        '200':
+          description: >-
+            Request sucessfully processed.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WatchlistResponse'
+        '400':
+          description: Request is not understood.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  '/v1/watchlist/{watchlistId}':
+    get:
+      tags:
+        - watchlist
+      summary: get watchlist of given id
+      description: get watchlist
+      operationId: getWatchlist
+      parameters:
+        - in: path
+          name: watchlistId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '206':
+          description: >-
+            Request sucessfully processed.
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/WatchlistResponse'
+        '400':
+          description: Request is not understood.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Requested watchlist not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags:
+        - watchlist
+      summary: update watchlist
+      description: update watchlist of given id
+      operationId: updateWatchlist
+      parameters:
+        - in: path
+          name: watchlistId
+          schema:
+            type: string
+            format: uuid
+          required: true
+      requestBody:
+        description: >- 
+         Payload to change watchlist of given Id.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+               $ref: '#/components/schemas/WatchlistPatchData'
+        required: true
+      responses:
+        '200':
+          description: Watchlist with give id is updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WatchlistResponse'
+        '400':
+          description: Request is not understood.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Requested watchlist not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - watchlist
+      summary: delete
+      description: delete watchlist of given id
+      operationId: deleteWatchlist
+      parameters:
+        - in: path
+          name: watchlistId
+          schema:
+            type: string
+            format: uuid
+          required: true
+      responses:
+        '204':
+          description: delete watchlist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WatchlistResponse'
+        '404':
+          description: Requested watchlist not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    WatchlistCreateRequest:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: name of watchlist
+        description:
+          type: string
+          description: description of watchlist
+    WatchlistResponse:
+      required:
+        - name
+      type: object
+      properties:
+        watchlistId:
+          type: string
+          format: uuid
+          description: watchlist identifier
+        name:
+          type: string
+          description: name of watchlist
+        description:
+          type: string
+          description: description of watchlist
+        scripNames:
+          type: array
+          items : 
+            type: string
+          description: scrip names.
+    WatchlistPatchData:
+      type: object
+      required:
+        - operation
+        - property
+        - value
+      properties:
+        operation:
+          type: string
+          description: 'Action to be performed on given resource. '
+          example: REPLACE
+          enum:
+            - REPLACE
+        property:
+          type: string
+          description: The property of the json attribute to be replaced.
+          example: NAME
+          enum:
+           - NAME
+           - DESCRIPTION
+           - SCRIP_NAMES
+        value:
+          type: string
+          description: The new value of the json attribute to be patched.
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: brief information about error
+        resolution:
+          type: string
+          description: possibly hints to solve the error
+        errorCode:
+          type: string
+          description: pattern to unqiuely identify error root cause and origin.
+          

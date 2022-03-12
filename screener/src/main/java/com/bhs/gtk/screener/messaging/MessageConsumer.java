@@ -12,29 +12,34 @@ import com.bhs.gtk.screener.service.ScreenerServiceImpl;
 
 @Service
 public class MessageConsumer {
-	
+
 	@Autowired
 	private ScreenerServiceImpl screenerServiceImpl;
-	
+
 	@KafkaListener(topics = TopicNames.INPUT_EXECUTION_RESPONSE)
 	public boolean receiveExecutionResponse(String message) {
 		return screenerServiceImpl.adaptExecutionResponse(message);
 	}
-	
+
 	@KafkaListener(topics = TopicNames.INPUT_CONDITION_CHANGE_NOTIFICATION)
-	public boolean receiveChangeNotification(String message) {
-		//TODO: similar to this handle changeInWatchList
+	public boolean receiveConditionChangeNotification(String message) {
 		ChangeNotification changeNotification = createChangeNotificationObject(message);
 		return screenerServiceImpl.adaptChangeInCondition(changeNotification);
 	}
 
+	@KafkaListener(topics = TopicNames.INPUT_WATCHLIST_CHANGE_NOTIFICATION)
+	public boolean receiveWatchlistChangeNotification(String message) {
+		ChangeNotification changeNotification = createChangeNotificationObject(message);
+		return screenerServiceImpl.adaptChangeInWatchlist(changeNotification);
+	}
+
 	private ChangeNotification createChangeNotificationObject(String message) {
 		JSONObject jsonObject = new JSONObject(message);
-		String id = (String)jsonObject.get("id");
-		String status = (String)jsonObject.get("status");
-		ChangeNotification changeNotification = new ChangeNotification(UUID.fromString(id), ChangeStatusEnum.fromValue(status));
+		String id = (String) jsonObject.get("id");
+		String status = (String) jsonObject.get("status");
+		ChangeNotification changeNotification = new ChangeNotification(UUID.fromString(id),
+				ChangeStatusEnum.fromValue(status));
 		return changeNotification;
 	}
-	
 
 }
