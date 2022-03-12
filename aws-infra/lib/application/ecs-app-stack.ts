@@ -64,6 +64,7 @@ export class EcsAppStack extends Stack {
         this.createConditionService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
         this.createScreenerService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
         this.createExpressionService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
+        this.createWatchlistService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
     }
 
     /**
@@ -466,6 +467,74 @@ export class EcsAppStack extends Stack {
         });
 
         let service = new Ec2Service(this, stackName + "-expression-service", {
+            cluster: cluster,
+            desiredCount: 1,
+            taskDefinition: taskDefinition
+        });
+        service.attachToApplicationTargetGroup(targetGroup);
+    }
+
+    /**
+     * Creates the watchlist service
+     * @param stackName 
+     * @param imageTag
+     * @param vpc 
+     * @param logGroup 
+     * @param applicationLoadbalancer 
+     * @param cluster 
+     * @param dbCredentials 
+     * @param dbLoadBalancerUrl
+     */
+     private createWatchlistService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
+        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string) {
+
+        //Load Balancer Config
+        let targetGroup = new ApplicationTargetGroup(this, stackName + "-watchlist-service-target-group", {
+            vpc: vpc,
+            port: 5004,
+            protocol: ApplicationProtocol.HTTP,
+            healthCheck: {
+                path: "/actuator/watchlist-health"
+            }
+        });
+
+        new ApplicationListenerRule(this, "watchlistservice-listener-rule", {
+            listener: applicationListener,
+            priority: 1,
+            conditions: [
+                ListenerCondition.pathPatterns(["/actuator/watchlist-health", "/v1/watchlist", "/v1/watchlist/*"])
+            ],
+            action: ListenerAction.forward([targetGroup])
+        });
+
+        //Service Config
+        let taskDefinition = new Ec2TaskDefinition(this, stackName + '-watchlist-service-taskdef');
+
+        taskDefinition.addContainer(stackName + "-watchlist-service-container", {
+            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-watchlist-service", "gtk-watchlist-service"), imageTag),
+            cpu: 50,
+            memoryLimitMiB: 256,
+            essential: true,
+            environment: {
+                "SERVER_PORT": "5000",
+                "DB_HOST": dbLoadBalancerUrl,
+                "DB_PORT": "5000",
+                "DB_NAME": "appdb",
+                "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
+                "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
+                "KAFKA_BOOTSTRAP_ADDRESS": "kafka.gtk.com:19092",
+                "ACTIVE_PROFILE": "dev"
+            },
+            portMappings: [{
+                containerPort: 5004
+            }],
+            logging: LogDriver.awsLogs({
+                logGroup: logGroup,
+                streamPrefix: logGroup.logGroupName
+            }),
+        });
+
+        let service = new Ec2Service(this, stackName + "-watchlist-service", {
             cluster: cluster,
             desiredCount: 1,
             taskDefinition: taskDefinition
