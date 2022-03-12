@@ -18,7 +18,7 @@ import { WatchlistNotificationService } from '../watchlist-notification.service'
 })
 export class WatchlistEditComponent implements OnInit {
 
-  NIFTY_50_SCRIPS: string[] = ["INFY", "HDFC", "TATAMOTORS"];
+  NIFTY_50_SCRIPS: string[] = ["CIPLA", "BPCL", "SUNPHARMA", "JSWSTEEL", "IOC", "DRREDDY", "POWERGRID", "COALINDIA", "ITC", "TITAN", "DIVISLAB", "SHREECEM", "GRASIM", "ASIANPAINT", "ONGC", "BAJAJFINSV", "SBIN", "BAJFINANCE", "HEROMOTOCO", "SBILIFE", "KOTAKBANK", "HDFCBANK", "ICICIBANK", "TECHM", "HCLTECH", "BAJAJ-AUTO", "RELIANCE", "UPL", "LT", "INFY", "HDFC", "HINDUNILVR", "EICHERMOT", "WIPRO", "TATAMOTORS", "INDUSINDBK", "BHARTIARTL", "TCS", "AXISBANK", "ULTRACEMCO", "HDFCLIFE", "ADANIPORTS", "M&M", "BRITANNIA", "TATASTEEL", "NTPC", "HINDALCO", "TATACONSUM", "MARUTI", "NESTLEIND"];
 
   fetchError: boolean;
   editWatchlistForm: FormGroup;

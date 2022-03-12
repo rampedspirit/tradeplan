@@ -239,4 +239,8 @@ export class ScreenerEditComponent implements OnInit {
       this.executables = screener.executables;
     })
   }
+
+  isRunDisabled() {
+    return !this.conditions || this.conditions.length == 0 || !this.watchlists || this.watchlists.length == 0;
+  }
 }

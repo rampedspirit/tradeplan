@@ -11,7 +11,8 @@
                 <mat-error *ngIf="nameControl && nameControl.invalid">Please enter valid name.</mat-error>
             </mat-form-field>
             <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
-                <button mat-flat-button color="success" (click)="openCreateScreenerExecutableDialog()">RUN</button>
+                <button mat-flat-button color="success" (click)="openCreateScreenerExecutableDialog()"
+                    [disabled]="isRunDisabled()">RUN</button>
                 <button mat-flat-button color="primary" (click)="save()">SAVE</button>
                 <button mat-flat-button color="warn" (click)="delete()">DELETE</button>
             </div>
