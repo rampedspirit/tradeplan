@@ -46,7 +46,7 @@ operand
   / filter_name
 
 filter_name "filter_name"
-    = name:[a-zA-Z1-9]+ 
+    = name:[a-zA-Z1-9_]+ 
     {
         return {
             filter: name.join(""),
