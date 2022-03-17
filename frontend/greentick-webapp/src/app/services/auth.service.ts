@@ -1,10 +1,12 @@
+import { formatDate } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { CognitoUser, ISignUpResult } from 'amazon-cognito-identity-js';
 import { Auth } from 'aws-amplify';
 import { BehaviorSubject } from 'rxjs';
 import { User } from '../model/User';
 
-const LOGGED_IN_USER: string = "GREENTICK_LOGGED_IN_USER";
+const LOGGED_IN_USER: string = "TRADEPLAN_LOGGED_IN_USER";
+const LOGGED_IN_TIME: string = "TRADEPLAN_LOGGED_IN_TIME";
 
 @Injectable({
   providedIn: 'root'
@@ -19,9 +21,15 @@ export class AuthService {
   }
 
   public getUserFromLocalStorage(): User {
-    let userStr = localStorage.getItem(LOGGED_IN_USER);
-    if (userStr) {
-      return JSON.parse(userStr);
+    let lastLoginDateStr = localStorage.getItem(LOGGED_IN_TIME);
+    let currentDateStr = formatDate(new Date(), 'dd-MM-yyyy', 'en_US');
+    if (lastLoginDateStr == currentDateStr) {
+      let userStr = localStorage.getItem(LOGGED_IN_USER);
+      if (userStr) {
+        return JSON.parse(userStr);
+      }
+    } else {
+      this.deleteLoginTimeFromLocalStorage();
     }
     return null;
   }
@@ -42,6 +50,7 @@ export class AuthService {
    * Performs the logout.
    */
   public logout() {
+    this.deleteUserFormLocalStorage();
     this.deleteUserFormLocalStorage();
     this.currentUser.next(null);
   }
@@ -109,6 +118,7 @@ export class AuthService {
           let email = attributes.find(attribute => attribute.Name == "email")?.Value as string;
           let user: User = new User(name, email);
           this.saveUserToLocalStorage(user);
+          this.saveLoginTimeToLocalStorage();
           this.currentUser.next(user);
           resolve(user);
         }
@@ -123,5 +133,14 @@ export class AuthService {
 
   private deleteUserFormLocalStorage(): void {
     localStorage.removeItem(LOGGED_IN_USER);
+  }
+
+  private saveLoginTimeToLocalStorage(): void {
+    let loginTimeStr = formatDate(new Date(), 'dd-MM-yyyy', 'en_US');
+    localStorage.setItem(LOGGED_IN_TIME, loginTimeStr);
+  }
+
+  private deleteLoginTimeFromLocalStorage(): void {
+    localStorage.removeItem(LOGGED_IN_TIME);
   }
 }
