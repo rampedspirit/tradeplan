@@ -226,7 +226,7 @@ public class FilterServiceImpl implements FilterService{
 	private FilterEntity updateFilterEntity(FilterEntity filterEntity) {
 		BooleanExpression booleanExpression = converter.convertToBooleanExpression(filterEntity.getParseTree());
 		List<ExpressionEntity> expressions = entityObjectCreator.createExpressionEntityObjects(booleanExpression);
-		filterEntity.setExpressions(expressions);
+		filterEntity.setExpressions(entityWriter.saveExpressionEntities(expressions));
 		FilterEntity savedFilterEntity = entityWriter.saveFilterEntity(filterEntity);
 		entityWriter.removePreviousAssociations(filterEntity);
 		return savedFilterEntity;            

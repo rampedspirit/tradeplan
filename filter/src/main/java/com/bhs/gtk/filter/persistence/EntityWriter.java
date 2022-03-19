@@ -2,8 +2,11 @@ package com.bhs.gtk.filter.persistence;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +65,37 @@ public class EntityWriter {
 		return true;
 	}
 
+	/**
+	 * save expressions which are not already available in database
+	 * @param expressions
+	 * @return all expressionEntity that are equivalent to expressions.
+	 */
+	public List<ExpressionEntity> saveExpressionEntities(List<ExpressionEntity> expressions) {
+		List<ExpressionEntity> expressionsInDatabase = new ArrayList<>();
+		if(expressions == null || expressions.isEmpty()) {
+			return expressionsInDatabase;
+		}
+		Set<String> hashes = expressions.stream().map( exp -> exp.getHash()).collect(Collectors.toSet());
+		
+		Iterable<ExpressionEntity> existingExpsContainer = expressionEntityRepository.findAllById(hashes);
+		Set<String> hashesInDataBase = new HashSet<>();
+		for(ExpressionEntity expEntity : existingExpsContainer) {
+			expressionsInDatabase.add(expEntity);
+			hashesInDataBase.add(expEntity.getHash());
+		}
+		hashes.removeAll(hashesInDataBase);
+		
+		List<ExpressionEntity> expressionsToBePersisted  = expressions.stream().filter(exp -> hashes.contains(exp.getHash())).collect(Collectors.toList());
+		
+		Iterable<ExpressionEntity> savedExpEntityContainer = expressionEntityRepository.saveAll(expressionsToBePersisted);
+		
+		for(ExpressionEntity expEnity : savedExpEntityContainer) {
+			expressionsInDatabase.add(expEnity);
+		}
+		
+		return expressionsInDatabase;
+	}
+	
 	public FilterEntity saveFilterEntity(FilterEntity filterEntity) {
 		return filterRepository.save(filterEntity);
 	}
