@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +15,11 @@ import org.springframework.stereotype.Service;
 
 import com.bhs.gtk.condition.messaging.MessageProducer;
 import com.bhs.gtk.condition.messaging.MessageType;
+import com.bhs.gtk.condition.model.BooleanExpression;
+import com.bhs.gtk.condition.model.ConditionExpression;
 import com.bhs.gtk.condition.model.ConditionResultResponse;
 import com.bhs.gtk.condition.model.ConditionResultResponse.ConditionResultEnum;
+import com.bhs.gtk.condition.model.FilterExpression;
 import com.bhs.gtk.condition.model.communication.FilterResult;
 import com.bhs.gtk.condition.persistence.ConditionEntity;
 import com.bhs.gtk.condition.persistence.ConditionResultEntity;
@@ -25,6 +27,7 @@ import com.bhs.gtk.condition.persistence.EntityReader;
 import com.bhs.gtk.condition.persistence.EntityWriter;
 import com.bhs.gtk.condition.persistence.FilterEntity;
 import com.bhs.gtk.condition.persistence.FilterResultEntity;
+import com.bhs.gtk.condition.util.Converter;
 import com.bhs.gtk.condition.util.Mapper;
 
 @Service
@@ -41,6 +44,9 @@ public class ResultServiceImpl implements ResultService{
 	
 	@Autowired
 	private Mapper mapper;
+	
+	@Autowired
+	private Converter converter;
 	
 	@Override
 	public ConditionResultResponse getResult(UUID conditionId, Date marketTime, String scripName) {
@@ -93,7 +99,7 @@ public class ResultServiceImpl implements ResultService{
 	private List<ConditionResultEntity> updateConditionResult(List<ConditionResultEntity> conditionResultEntities) {
 		List<ConditionResultEntity>  conditionResultsToBePersisted = new ArrayList<>();
 		for(ConditionResultEntity cResult : conditionResultEntities) {
-			if(deriveConditionResult(cResult.getFilterResultEntities())) {
+			if(deriveConditionResult(cResult.getConditionId(),cResult.getFilterResultEntities())) {
 				cResult.setStatus(ConditionResultEnum.PASS.name());
 			}else {
 				cResult.setStatus(ConditionResultEnum.FAIL.name());
@@ -103,9 +109,58 @@ public class ResultServiceImpl implements ResultService{
 		return entityWriter.saveConditionResultEntities(conditionResultsToBePersisted);
 	}
 
-	private boolean deriveConditionResult(List<FilterResultEntity> filterResultEntities) {
-		//TODO: logic to be implemented.
-		return RandomUtils.nextBoolean();
+	private boolean deriveConditionResult(UUID conditionId, List<FilterResultEntity> filterResultEntities) {
+		ConditionEntity conditionEntity = entityReader.getCondition(conditionId);
+		String parseTree = conditionEntity.getParseTree();
+		ConditionExpression conditionExpression = converter.convertToConditionExpression(parseTree);
+		return evaluateConditionExpression(conditionExpression, filterResultEntities);
+	}
+
+	private boolean evaluateConditionExpression(ConditionExpression expression, List<FilterResultEntity> filterResultEntities) {
+		if(expression instanceof FilterExpression) {
+			FilterExpression filterExp = (FilterExpression) expression;
+			return getFilterResult(filterExp.getFilterId(), filterResultEntities);
+		}else if(expression instanceof BooleanExpression) {
+			BooleanExpression booleanExpression = (BooleanExpression) expression;
+			String operation = booleanExpression.getOperation();
+			List<Boolean> expResults = new ArrayList<>();
+			for(ConditionExpression cExp : booleanExpression.getConditionExpressions()) {
+				expResults.add(evaluateConditionExpression(cExp, filterResultEntities));
+			}
+			return deriveConditionResult(operation,expResults);
+		}
+		throw new IllegalStateException(expression + " is not a valid condition expression");
+	}
+
+	private boolean deriveConditionResult(String operation, List<Boolean> expResults) {
+		boolean conditionResult = true;
+		if(StringUtils.equals(operation, "AND")) {
+			if(expResults.contains(Boolean.FALSE)) {
+				conditionResult = false;
+			}
+		}else if(StringUtils.equals(operation, "OR")) {
+			if(!expResults.contains(Boolean.TRUE)) {
+				conditionResult = false;
+			}
+		}
+		return conditionResult;
+	}
+
+	private boolean getFilterResult(String filterId, List<FilterResultEntity> filterResultEntities) {
+		List<FilterResultEntity> filterResults = filterResultEntities.stream()
+				.filter(ft -> StringUtils.equals(filterId, ft.getFilterId().toString())).collect(Collectors.toList());
+		if(filterResults == null || filterResults.isEmpty() || filterResults.size() > 1) {
+			throw new IllegalStateException(
+					"filterId : " + filterId + " Filter result is available more than once for given condition");
+		}
+		String status = filterResults.get(0).getStatus();
+		if(StringUtils.equals(status, "PASS")) {
+			return true;
+		}else if(StringUtils.equals(status, "FAIL")) {
+			return false;
+		}
+		throw new IllegalStateException(
+				"filterId : " + filterId + " Filter result status = " + status + " is neither PASS or FAIL");
 	}
 
 	private List<ConditionResultEntity> getConditionResultWhichAreReadyToDeriveResult(FilterResult filterResult) {
@@ -135,7 +190,7 @@ public class ResultServiceImpl implements ResultService{
 
 	private boolean isConditionReadyToDeriveResult(ConditionResultEntity cResult) {
 		for(FilterResultEntity fResult : cResult.getFilterResultEntities()) {
-			//TODO: fix it before merge... use enum from generated FilterResult
+			//TODO: fix it before merge... use enum from generated FilterResult instead of string literals.
 			String status = fResult.getStatus();
 			if (StringUtils.equals("QUEUED", status) || StringUtils.equals("RUNNING", status)) {
 				return false;
@@ -154,6 +209,7 @@ public class ResultServiceImpl implements ResultService{
 			//log debug: no such filter result found to update.
 			return false;
 		}
+		//TODO: save only when there is change in status.
 		fResultEntity.setStatus(status);
 		entityWriter.saveFilterResultEntity(fResultEntity);
 		return true;
