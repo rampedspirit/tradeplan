@@ -1,8 +1,8 @@
-package com.bhs.gtk.screener;
+package com.bhs.gtk.watchlist;
 
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ScreenerApplicationTests {
+class WatchlistApplicationTests {
 
 }
