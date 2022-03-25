@@ -124,7 +124,7 @@ public class ExpressionServiceImpl implements ExpressionService {
 	}
 
 	private double evaluateExpression(Expression expression) {
-		double result = -99999;
+		double result = Double.NEGATIVE_INFINITY;
 		if(expression instanceof ExpressionGroup) {
 			result = evaluateExpressionGroup((ExpressionGroup)expression);
 		} else if(expression instanceof FunctionChain) {
@@ -137,8 +137,8 @@ public class ExpressionServiceImpl implements ExpressionService {
 
 	private double evaluateFunctionChain(FunctionChain expression) {
 		//TODO: write logic to execute functaionChain
-		return RandomUtils.nextDouble(0.0, 100.0);
-		
+		double randomValue = RandomUtils.nextDouble(0.0, 1000.0);
+		return Math.round((randomValue * 100))/10.0;
 	}
 
 	private double evaluateExpressionGroup(ExpressionGroup expression) {

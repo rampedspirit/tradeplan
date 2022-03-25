@@ -555,15 +555,6 @@ public class FilterServiceImpl implements FilterService{
 		return arResultEntitites;
 	}
 
-//	private Map<String, String> getEntityMapForJson(ArithmeticExpressionResultEntity entity) {
-//		Map<String, String> entityMap = new HashMap<>();
-//		entityMap.put("hash",entity.getHash().toString());
-//		entityMap.put("marketTime",entity.getMarketTimeAsOffsetDateTime());
-//		entityMap.put("scripName",entity.getScripName());
-//		entityMap.put("status",entity.getStatus());
-//		return entityMap;
-//	}
-
 	@Override
 	public boolean updateFilterResult(ArithmeticExpressionResult arResult) {
 		String hash = arResult.getHash();
@@ -843,6 +834,10 @@ public class FilterServiceImpl implements FilterService{
 		if(arResultEntity == null) {
 			//log error
 			throw new IllegalStateException("ArithmeticExpressionResultEntity to which result is recevied from ES is not found.");
+		}
+		if(StringUtils.equals(arResultEntity.getStatus(), status)) {
+			//log info/debug: ar exp not updated because there is no change in the status.
+			return false;
 		}
 		arResultEntity.setStatus(status);
 		entityWriter.saveArithmeticExpressionResultEntity(arResultEntity);

@@ -125,7 +125,7 @@ public class EntityWriter {
 	
 	public List<ConditionResultEntity> saveConditionResultEntities(List<ConditionResultEntity> conditionResultEntities) {
 		List<ConditionResultEntity> conditionResults = new ArrayList<>();
-		if(conditionResultEntities != null) {
+		if(conditionResultEntities != null && !conditionResultEntities.isEmpty()) {
 			conditionResultRepository.saveAll(conditionResultEntities).forEach( c -> conditionResults.add(c));
 		}
 		return conditionResults;
