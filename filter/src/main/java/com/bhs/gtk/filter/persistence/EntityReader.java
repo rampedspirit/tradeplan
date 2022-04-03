@@ -79,7 +79,7 @@ public class EntityReader {
 			return arResults;
 		}
 		arResults.add(leftResult);
-		arResults.add(leftResult);
+		arResults.add(rightResult);
 		return arResults;
 	}
 	
