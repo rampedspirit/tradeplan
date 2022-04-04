@@ -137,8 +137,7 @@ public class ExpressionServiceImpl implements ExpressionService {
 
 	private double evaluateFunctionChain(FunctionChain expression) {
 		//TODO: write logic to execute functaionChain
-		double randomValue = RandomUtils.nextDouble(0.0, 1000.0);
-		return Math.round((randomValue * 100))/10.0;
+		return 600.5;
 	}
 
 	private double evaluateExpressionGroup(ExpressionGroup expression) {
@@ -158,8 +157,45 @@ public class ExpressionServiceImpl implements ExpressionService {
 
 	private double calculateResult(String operation, List<Double> intermediateResult) {
 		//TODO: write logic
-		return RandomUtils.nextDouble(0.0, 100.0);
+		double result = Double.NEGATIVE_INFINITY;
+		
+		if(intermediateResult == null || intermediateResult.size() != 2) {
+			throw new IllegalStateException("Operation "+operation+ " require excatly two operands");
+		}
+		
+		double leftOperand = intermediateResult.get(0);
+		double rightOperand = intermediateResult.get(1);
+		
+		switch (operation) {
+		case "+":
+			result = leftOperand + rightOperand;
+			break;
+		case "-":
+			result = leftOperand - rightOperand;
+			break;
+		case "*":
+			result = leftOperand * rightOperand;
+			break;
+		case "/":
+			result = leftOperand / rightOperand;
+			break;
+		case "^":
+			result = getPowerValue(leftOperand, rightOperand);
+			break;
+		default:
+			new IllegalArgumentException("Operation " + operation + " not supported");
+		}
+		return result;
 	}
+	
+private double getPowerValue(double leftOperand, double rightOperand) {
+		double result = 1;
+		for(int i=0; i<rightOperand; i++) {
+			result = result *leftOperand; 
+		}
+		return result;
+	}
+
 
 	private double evaluateNumericExpression(NumericValue expression) {
 		return expression.getValue();
