@@ -158,13 +158,41 @@ public class Converter {
 		}else if(StringUtils.equals(type, "expressionGroup")) {
 			JSONArray expressionObjects = (JSONArray) arExp.get("expressions");
 			int numberOfFunctions = expressionObjects.length();
-			firstFunction = expressionObjects.get(0);
-			lastFunction = expressionObjects.get(numberOfFunctions - 1);
+			firstFunction = getExpression(expressionObjects.get(0),true);			
+			lastFunction = getExpression(expressionObjects.get(numberOfFunctions - 1),false);
 		}
 		if(!(firstFunction instanceof JSONObject) || !(lastFunction instanceof JSONObject) ) {
 			return null;
 		}
 		return getArithmeticExpressionLocation((JSONObject) firstFunction, (JSONObject) lastFunction);
+	}
+
+	private JSONObject getExpression(Object expGroup, boolean start) {
+		
+		JSONObject jsonObj = null;
+		if(expGroup instanceof JSONObject) {
+			jsonObj = (JSONObject) expGroup;
+		}else {
+			throw new IllegalArgumentException(expGroup +" is not a valid JSONobject");
+		}
+		String type  = jsonObj.getString("type");
+		
+		if(StringUtils.equals(type, "functionChain") || StringUtils.equals(type, "value")) {
+			return jsonObj;
+		}else if(StringUtils.equals(type, "expressionGroup")) {
+			JSONArray expressionObjects = (JSONArray) jsonObj.get("expressions");
+			int numberOfExp = expressionObjects.length();
+			if(start) {
+				jsonObj = expressionObjects.getJSONObject(0);
+			}else {
+				jsonObj = expressionObjects.getJSONObject(numberOfExp - 1);
+			}
+			type  = jsonObj.getString("type");
+			if(StringUtils.equals(type, "expressionGroup")) {
+				return getExpression(jsonObj, start);
+			}
+		}
+		return jsonObj;
 	}
 
 	private ExpressionLocation getArithmeticExpressionLocation(JSONObject firstFunction, JSONObject lastFunction) {

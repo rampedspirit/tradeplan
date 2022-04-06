@@ -629,31 +629,26 @@ public class FilterServiceImpl implements FilterService{
 			List<CompareExpressionResultEntity> compareExpressionResultEntities) {
 		
 		String result = ExecutionStatus.FAIL.name();
-		if(RandomUtils.nextInt()%2 == 2) {
-			result = ExecutionStatus.PASS.name();
-		}
+		List<String> cmpResults = compareExpressionResultEntities.stream().map(c -> c.getStatus())
+				.collect(Collectors.toList());
 		
-		//TODO: implement filter result derivation.
-//		List<String> cmpResults = compareExpressionResultEntities.stream().map(c -> c.getStatus())
-//				.collect(Collectors.toList());
-//		
-//		if (cmpResults.contains(ExecutionStatus.ERROR.name())) {
-//			result = ExecutionStatus.ERROR.name();
-//		} else if (StringUtils.equals(operation, OperationType.AND.name())) {
-//			if (cmpResults.contains(ExecutionStatus.FAIL.name())) {
-//				result = ExecutionStatus.FAIL.name();
-//			} else {
-//				result = ExecutionStatus.PASS.name();
-//			}
-//		} else if (StringUtils.equals(operation, OperationType.OR.name())) {
-//			if (cmpResults.contains(ExecutionStatus.PASS.name())) {
-//				result = ExecutionStatus.PASS.name();
-//			} else {
-//				result = ExecutionStatus.FAIL.name();
-//			}
-//		} else {
-//			throw new IllegalArgumentException(operation + " is not a valid filter operation");
-//		}
+		if (cmpResults.contains(ExecutionStatus.ERROR.name())) {
+			result = ExecutionStatus.ERROR.name();
+		} else if (StringUtils.equals(operation, OperationType.AND.name())) {
+			if (cmpResults.contains(ExecutionStatus.FAIL.name())) {
+				result = ExecutionStatus.FAIL.name();
+			} else {
+				result = ExecutionStatus.PASS.name();
+			}
+		} else if (StringUtils.equals(operation, OperationType.OR.name())) {
+			if (cmpResults.contains(ExecutionStatus.PASS.name())) {
+				result = ExecutionStatus.PASS.name();
+			} else {
+				result = ExecutionStatus.FAIL.name();
+			}
+		} else {
+			throw new IllegalArgumentException(operation + " is not a valid filter operation");
+		}
 		return result;
 	}
 
