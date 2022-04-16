@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +51,7 @@ import com.bhs.gtk.filter.persistence.ExpressionEntity;
 import com.bhs.gtk.filter.persistence.FilterEntity;
 import com.bhs.gtk.filter.persistence.FilterResultEntity;
 import com.bhs.gtk.filter.util.Converter;
+import com.bhs.gtk.filter.util.Extractor;
 import com.bhs.gtk.filter.util.Mapper;
 
 @Service
@@ -74,6 +74,9 @@ public class FilterServiceImpl implements FilterService{
 	
 	@Autowired
 	private Converter converter;
+	
+	@Autowired
+	private Extractor extractor;
 	
 	@Override
 	public FilterResponse createFilter(@Valid FilterRequest filterRequest) {
@@ -195,11 +198,12 @@ public class FilterServiceImpl implements FilterService{
 				filterEntity.setDescription(value); 
 				break;
 			case CODE: 
-				logicChanged = true;
 				filterEntity.setCode(value);
 				break;
 			case PARSE_TREE: 
-				logicChanged = true;
+				if(isLogicChanged(filterEntity.getParseTree(), value)) {
+					logicChanged = true;
+				}
 				filterEntity.setParseTree(value);
 				break;
 			}
@@ -223,6 +227,23 @@ public class FilterServiceImpl implements FilterService{
 	}
 	
 	
+	private boolean isLogicChanged(String existingParseTree, @NotNull String newParseTree) {
+		
+		JSONObject existingFilterLogic = new JSONObject(existingParseTree);
+		JSONObject newFilterLogic = new JSONObject(newParseTree);
+		
+		JSONObject existingLogicWithoutLocation = extractor.removeLocationFromFilter(existingFilterLogic);
+		JSONObject newFilterLogicWithoutLocation = extractor.removeLocationFromFilter(newFilterLogic);
+		
+		String existigHash = converter.generateHash(existingLogicWithoutLocation.toString());
+		String newHash = converter.generateHash(newFilterLogicWithoutLocation.toString());
+		
+		if(StringUtils.equals(existigHash, newHash)) {
+			return false;
+		}
+		return true;
+	}
+
 	private FilterEntity updateFilterEntity(FilterEntity filterEntity) {
 		BooleanExpression booleanExpression = converter.convertToBooleanExpression(filterEntity.getParseTree());
 		List<ExpressionEntity> expressions = entityObjectCreator.createExpressionEntityObjects(booleanExpression);

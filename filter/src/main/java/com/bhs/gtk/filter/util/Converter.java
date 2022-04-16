@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.threeten.bp.DateTimeUtils;
 import org.threeten.bp.OffsetDateTime;
@@ -24,6 +25,8 @@ import com.bhs.gtk.filter.model.communication.ExecutableFilter;
 
 @Component
 public class Converter {
+	
+	@Autowired Extractor extractor;
 	
 	public ArithmeticExpressionResult convertToARexpressionResult(String message) {
 		try {
@@ -109,8 +112,8 @@ public class Converter {
 		ExpressionLocation rightARlocation = getLocation(rightARobj);
 		ExpressionLocation cmpExpLocation = getCompareExpressionLocation(leftARlocation, rightARlocation);
 		
-		JSONObject leftARobjWithoutLocation = getJSONobjectWithOutLocation(leftARobj);
-		JSONObject rightARobjWithoutLocation = getJSONobjectWithOutLocation(rightARobj);
+		JSONObject leftARobjWithoutLocation = extractor.removeLocationFromARexpression(leftARobj);
+		JSONObject rightARobjWithoutLocation = extractor.removeLocationFromARexpression(rightARobj);
 		
 		String leftParseTree = leftARobjWithoutLocation.toString();
 		String rightParseTree = rightARobjWithoutLocation.toString();
@@ -123,23 +126,6 @@ public class Converter {
 		ArithmeticExpression leftARexp = new ArithmeticExpression(leftParseTree, leftHash, leftARlocation);
 		ArithmeticExpression rightARexp = new ArithmeticExpression(rightParseTree, rightHash, rightARlocation);
 		return new CompareExpression(cmpExParseTree, operation, leftARexp, rightARexp, cmpHash, cmpExpLocation);
-	}
-
-	private JSONObject getJSONobjectWithOutLocation(JSONObject arObject) {
-		String type = (String)arObject.get("type");
-		if(StringUtils.equals(type, "functionChain") || StringUtils.equals(type, "value")) {
-			arObject.remove("location");
-		}else if(StringUtils.equals(type, "expressionGroup")) {
-			JSONArray expressionObjects = (JSONArray) arObject.get("expressions");
-			for(Object obj : expressionObjects) {
-				if(obj instanceof JSONObject) {
-					JSONObject jsonObject = (JSONObject) obj;
-					jsonObject.remove("location");
-				}
-			}
-			arObject.put("expressions", expressionObjects);
-		}
-		return arObject;
 	}
 
 	private ExpressionLocation getCompareExpressionLocation(ExpressionLocation leftARlocation, ExpressionLocation rightARlocation) {
