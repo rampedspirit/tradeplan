@@ -194,7 +194,7 @@ argument "argument"
     }
 
 value "value"
-    = [0-9]+((.)?[0-9]+)?
+    = [0-9]+("."[0-9]+)?
     {
         return {
         	type: "value",
