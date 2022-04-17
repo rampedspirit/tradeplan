@@ -39,7 +39,6 @@ import com.bhs.gtk.filter.model.Location;
 import com.bhs.gtk.filter.model.LogicalExpression;
 import com.bhs.gtk.filter.model.OperationType;
 import com.bhs.gtk.filter.model.PatchData;
-import com.bhs.gtk.filter.model.PatchData.PropertyEnum;
 import com.bhs.gtk.filter.model.communication.ArithmeticExpressionResult;
 import com.bhs.gtk.filter.model.communication.ExecutableFilter;
 import com.bhs.gtk.filter.persistence.ArithmeticExpressionResultEntity;
@@ -51,8 +50,8 @@ import com.bhs.gtk.filter.persistence.ExpressionEntity;
 import com.bhs.gtk.filter.persistence.FilterEntity;
 import com.bhs.gtk.filter.persistence.FilterResultEntity;
 import com.bhs.gtk.filter.util.Converter;
-import com.bhs.gtk.filter.util.Extractor;
 import com.bhs.gtk.filter.util.Mapper;
+import com.bhs.gtk.filter.util.Verifier;
 
 @Service
 public class FilterServiceImpl implements FilterService{
@@ -76,7 +75,7 @@ public class FilterServiceImpl implements FilterService{
 	private Converter converter;
 	
 	@Autowired
-	private Extractor extractor;
+	private Verifier verifier;
 	
 	@Override
 	public FilterResponse createFilter(@Valid FilterRequest filterRequest) {
@@ -103,9 +102,6 @@ public class FilterServiceImpl implements FilterService{
 		for( ArithmeticExpressionResultEntity arResult : arResultEntitites) {
 		  ExpressionEntity expression = entityReader.getExpressionEntity(arResult.getHash());
 		  String message = getARexecutionRequestMessag(arResult, expression.getParseTree());
-		// Map<String, String> entityMap = getEntityMapForJson(arResult);
-		//  entityMap.put("parseTree", expression.getParseTree());
-		//  JSONObject entityAsJson = new JSONObject(entityMap);
 			if (messageProducer.sendMessage(message, MessageType.EXECUTION_REQUEST)) {
 				arResult.setStatus(ExecutionStatus.RUNNING.name());
 				arResultEntitypSentForExecution.add(arResult);
@@ -180,7 +176,7 @@ public class FilterServiceImpl implements FilterService{
 			//throw exception if validation fails
 			return null;
 		}
-		if(!isValidatePatchData(patchData)) {
+		if(!verifier.isValidatePatchData(patchData)) {
 			return null;
 		}
 		
@@ -201,7 +197,7 @@ public class FilterServiceImpl implements FilterService{
 				filterEntity.setCode(value);
 				break;
 			case PARSE_TREE: 
-				if(isLogicChanged(filterEntity.getParseTree(), value)) {
+				if(verifier.isLogicChanged(filterEntity.getParseTree(), value)) {
 					logicChanged = true;
 				}
 				filterEntity.setParseTree(value);
@@ -227,22 +223,6 @@ public class FilterServiceImpl implements FilterService{
 	}
 	
 	
-	private boolean isLogicChanged(String existingParseTree, @NotNull String newParseTree) {
-		
-		JSONObject existingFilterLogic = new JSONObject(existingParseTree);
-		JSONObject newFilterLogic = new JSONObject(newParseTree);
-		
-		JSONObject existingLogicWithoutLocation = extractor.removeLocationFromFilter(existingFilterLogic);
-		JSONObject newFilterLogicWithoutLocation = extractor.removeLocationFromFilter(newFilterLogic);
-		
-		String existigHash = converter.generateHash(existingLogicWithoutLocation.toString());
-		String newHash = converter.generateHash(newFilterLogicWithoutLocation.toString());
-		
-		if(StringUtils.equals(existigHash, newHash)) {
-			return false;
-		}
-		return true;
-	}
 
 	private FilterEntity updateFilterEntity(FilterEntity filterEntity) {
 		BooleanExpression booleanExpression = converter.convertToBooleanExpression(filterEntity.getParseTree());
@@ -253,16 +233,6 @@ public class FilterServiceImpl implements FilterService{
 		return savedFilterEntity;            
 	}
 
-	private boolean isValidatePatchData(List<PatchData> patchData) {
-		if(patchData == null || patchData.isEmpty()) {
-			return false;
-		}
-		List<@NotNull PropertyEnum> properties = patchData.stream().map( p -> p.getProperty()).collect(Collectors.toList());
-		// ^ is XOR operation. 
-		return !(properties.contains(PropertyEnum.CODE) ^ properties.contains(PropertyEnum.PARSE_TREE));
-	}
-	
-	
 	private List<ExpressionResultResponse> getExpressionResults(FilterResultEntity filterResultEntity) {
 		List<ExpressionResult> expressionResults = getExpressionsResultMap(filterResultEntity);
 		HashMap<String, List<ExpressionLocation>> locationMap = getExpressionsLocationMap(filterResultEntity.getFilterId());
@@ -478,7 +448,7 @@ public class FilterServiceImpl implements FilterService{
 			Date mTime = ar.getMarketTime();
 			String sName = ar.getScripName();
 			String hash = ar.getHash();
-			if(isSameScripNameAndMarketTime(mTime, sName, marketTime, scripName)) {
+			if(verifier.isSameScripNameAndMarketTime(mTime, sName, marketTime, scripName)) {
 				if(StringUtils.equals(leftARexpHash, hash)) {
 					leftARresult = ar;
 				}else if(StringUtils.equals(rightARexpHash, hash)) {
@@ -552,10 +522,6 @@ public class FilterServiceImpl implements FilterService{
 			derivedExecutionStatus = ExecutionStatus.RUNNING;
 		}
 		return derivedExecutionStatus;
-	}
-
-	private boolean isSameScripNameAndMarketTime(Date mTime, String sName, Date marketTime, String scripName) {
-		return mTime.equals(marketTime) && StringUtils.equals(sName, scripName);
 	}
 
 	private List<ArithmeticExpressionResultEntity> executeArtithmeticExpressions(List<ExpressionEntity> arExpressions, Date marketTime,
@@ -679,41 +645,20 @@ public class FilterServiceImpl implements FilterService{
 		if(filterEntity != null) {
 			operation = converter.getOperationFromParseTree(filterEntity.getParseTree());
 		}
-		if(isValidFilterOperation(operation)) {
+		if(verifier.isValidFilterOperation(operation)) {
 			return operation;
 		}
 		throw new IllegalArgumentException("No valid filter operation found for filter id = "+filterId);
 	}
 
-	private boolean isValidFilterOperation(String operation) {
-		switch (operation) {
-		case "AND":
-		case "OR":
-			return true;
-		default:
-			return false;
-		}
-	}
-
 	private List<FilterResultEntity> getAllFilterReadyForResultUpdate(List<FilterResultEntity> filterResults) {
 		List<FilterResultEntity> filterResultsToBeUpdated = new ArrayList<>();
 		for(FilterResultEntity fResult : filterResults) {
-			if(isFilterReadyForResultDerivation(fResult)) {
+			if(verifier.isFilterReadyForResultDerivation(fResult)) {
 				filterResultsToBeUpdated.add(fResult);
 			}
 		}
 		return filterResultsToBeUpdated;
-	}
-
-	private boolean isFilterReadyForResultDerivation(FilterResultEntity filterResultEntity) {
-		for(CompareExpressionResultEntity cmpResult : entityReader.getCmpExpResultEntities(filterResultEntity)) {
-			String cmpStatus = cmpResult.getStatus();
-			if (StringUtils.equals(ExecutionStatus.QUEUED.name(), cmpStatus)
-					|| StringUtils.equals(ExecutionStatus.RUNNING.name(), cmpStatus)) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	private List<CompareExpressionResultEntity> updateCMPexpressionResultEntity(Set<CompareExpressionResultEntity> cmpExpResults) {
@@ -736,23 +681,10 @@ public class FilterServiceImpl implements FilterService{
 		ExpressionEntity expressionEntity = entityReader.getExpressionEntity(cmpHash);
 		expressionEntity.getParseTree();
 		String operation = converter.getOperationFromParseTree(expressionEntity.getParseTree());
-		if(isValidCMPoperation(operation)) {
+		if(verifier.isValidCMPoperation(operation)) {
 			return operation;
 		}
 		throw new IllegalArgumentException("No valid compare operation found for hash = "+cmpHash);
-	}
-
-	private boolean isValidCMPoperation(String operation) {
-		switch (operation) {
-		case "=":
-		case ">":
-		case "<":
-		case ">=":
-		case "<=":
-			return true;
-		default:
-			return false;
-		}
 	}
 
 	private boolean deriveCMPexpResult(String operation, String leftARStatus, String rightARstatus) {
@@ -798,7 +730,7 @@ public class FilterServiceImpl implements FilterService{
 			}
 			int numberOfARexpResultsAvailable = 0;
 			for(ArithmeticExpressionResultEntity arResult : arExpResults) {
-				if(isARexpResultAvailable(arResult)) {
+				if(verifier.isARexpResultAvailable(arResult)) {
 					numberOfARexpResultsAvailable++;
 				}
 			}
@@ -809,15 +741,6 @@ public class FilterServiceImpl implements FilterService{
 		return cmpExpToBeUpdated;
 	}
 
-	private boolean isARexpResultAvailable(ArithmeticExpressionResultEntity arResult) {
-		String status = arResult.getStatus();
-		if(StringUtils.equals(ExecutionStatus.QUEUED.name(), status) || StringUtils.equals(ExecutionStatus.RUNNING.name(), status) ) {
-			return false;
-		}
-		return true;
-	}
-
-	
 	private List<FilterResultEntity> getAllFilterResultEntitiesWhichRequireResultUpdate(List<UUID> filterIds, Date marketTime, String scripName) {
 		return entityReader.getAllFilterResultEntities(filterIds, marketTime, scripName);
 	}
