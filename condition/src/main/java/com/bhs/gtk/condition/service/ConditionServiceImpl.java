@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,8 @@ import com.bhs.gtk.condition.persistence.ConditionEntity;
 import com.bhs.gtk.condition.persistence.EntityReader;
 import com.bhs.gtk.condition.persistence.EntityWriter;
 import com.bhs.gtk.condition.persistence.FilterEntity;
+import com.bhs.gtk.condition.util.Converter;
+import com.bhs.gtk.condition.util.Extractor;
 import com.bhs.gtk.condition.util.Mapper;
 
 @Service
@@ -37,6 +41,12 @@ public class ConditionServiceImpl implements ConditionService{
 	
 	@Autowired
 	private MessageProducer messageProducer;
+	
+	@Autowired
+	private Extractor extractor;
+	
+	@Autowired
+	private Converter converter;
 	
 	@Override
 	public ConditionDetailedResponse createCondition(ConditionRequest condition) {
@@ -105,11 +115,12 @@ public class ConditionServiceImpl implements ConditionService{
 				conditionEntity.setDescription(value);
 				break;
 			case CODE:
-				logicChanged = true;
 				conditionEntity.setCode(value);
 				break;
 			case PARSE_TREE:
-				logicChanged = true;
+				if(isLogicChanged(conditionEntity.getParseTree(), value)) {
+					logicChanged = true;
+				}
 				conditionEntity.setParseTree(value);
 				break;
 			}
@@ -129,6 +140,28 @@ public class ConditionServiceImpl implements ConditionService{
 			changedConditionEntity = entityWriter.saveConditionEntity(conditionEntity);
 		}
 		return mapper.getConditionDetailedResponse(changedConditionEntity);
+	}
+
+	private boolean isLogicChanged(String existingParseTree, @NotNull String newParseTree) {
+		
+		if (StringUtils.isBlank(existingParseTree) && StringUtils.isBlank(newParseTree)) {
+			return false;
+		} else if (StringUtils.isBlank(existingParseTree) || StringUtils.isBlank(newParseTree)) {
+			return true;
+		}
+		
+		JSONObject existingLogic = new JSONObject(existingParseTree);
+		JSONObject newLogic = new JSONObject(newParseTree);
+		JSONObject existingLogicWithoutLocation = extractor.removeLocationFromCondition(existingLogic);
+		JSONObject newLogicWithoutLocation = extractor.removeLocationFromCondition(newLogic);
+		
+		String existigHash = converter.generateHash(existingLogicWithoutLocation.toString());
+		String newHash = converter.generateHash(newLogicWithoutLocation.toString());
+		
+		if (StringUtils.equals(existigHash, newHash)) {
+			return false;
+		}
+		return true;
 	}
 
 	private ConditionEntity saveConditionEntity(ConditionEntity conditionEntity) {
