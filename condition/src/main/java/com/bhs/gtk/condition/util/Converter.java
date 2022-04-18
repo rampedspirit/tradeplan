@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -148,6 +149,10 @@ public class Converter {
 			}
 		}
 		return filterIds;
+	}
+	
+	public String generateHash(String baseValue) {
+		return DigestUtils.sha256Hex(baseValue);
 	}
 
 }
