@@ -1,7 +1,7 @@
 <div fxLayout="column" fxFlexFill>
   <mat-card fxLayout="row" fxLayoutAlign="space-between center">
     <div>
-      <img src="assets/icons/tp_new_large.png">
+      <img src="assets/icons/logo.png">
     </div>
     <div>
       <!--Modules-->
@@ -39,6 +39,11 @@
           <a href="#/doc" target="_blank">Documentation</a>
         </div>
       </mat-menu>
+
+      <!--Feedback Menu-->
+      <button mat-flat-button (click)="openFeedback()">
+        <mat-icon>feedback</mat-icon>
+      </button>
     </div>
   </mat-card>
   <div fxFlex>

@@ -1,0 +1,24 @@
+<div fxLayout="column" fxLayoutGap="10px">
+    <h2>Feedback</h2>
+    <form fxLayout="column" fxLayoutGap="10px" [formGroup]="feedbackForm">
+        <mat-form-field>
+            <mat-label>Name</mat-label>
+            <input matInput [formControl]="nameControl">
+            <mat-error *ngIf="nameControl && nameControl.invalid">Please enter valid name.</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Email</mat-label>
+            <input type="email" matInput [formControl]="emailControl">
+            <mat-error *ngIf="emailControl && emailControl.invalid">Please enter valid email id.</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Feedback</mat-label>
+            <input matInput [formControl]="feedbackControl">
+            <mat-error *ngIf="feedbackControl && feedbackControl.invalid">Please enter feedback.</mat-error>
+        </mat-form-field>
+        <mat-error *ngIf="submissionError">{{submissionError}}</mat-error>
+        <button mat-flat-button color="primary" (click)="onSubmit()">Submit</button>
+    </form>
+</div>
+
+<ngx-spinner type="ball-spin-clockwise"></ngx-spinner>

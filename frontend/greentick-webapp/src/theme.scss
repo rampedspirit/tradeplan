@@ -1,0 +1,71 @@
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$light-primary-text: white;
+$dark-primary-text: rgba(black, 0.87);
+
+$light-secondary-text: rgba(white, 0.7);
+$dark-secondary-text: rgba(black, 0.54);
+
+$app-primary-palette : (
+    50: #95badd,
+    100: #80acd6,
+    200: #6b9ecf,
+    300: #5690c8,
+    400: #4182c1,
+    500: #2c75bb,
+    600: #2769a8,
+    700: #235d95,
+    800: #1e5182,
+    900: #1a4670,
+    contrast: (
+        50: $dark-primary-text,
+        100: $dark-primary-text,
+        200: $dark-primary-text,
+        300: $light-primary-text,
+        400: $light-primary-text,
+        500: $light-primary-text,
+        600: $light-primary-text,
+        700: $light-primary-text,
+        800: $light-primary-text,
+        900: $light-primary-text,
+    )
+);
+
+$app-accent-palette : (
+    50: #b5b8bc,
+    100: #a6aaaf,
+    200: #989ca1,
+    300: #898e94,
+    400: #7a8087,
+    500: #6c727a,
+    600: #61666d,
+    700: #565b61,
+    800: #4b4f55,
+    900: #404449,
+    contrast: (
+        50: $dark-secondary-text,
+        100: $dark-secondary-text,
+        200: $dark-secondary-text,
+        300: $light-secondary-text,
+        400: $light-secondary-text,
+        500: $light-secondary-text,
+        600: $light-secondary-text,
+        700: $light-secondary-text,
+        800: $light-secondary-text,
+        900: $light-secondary-text,
+    )
+);
+
+$app-primary: mat.define-palette($app-primary-palette);
+$app-accent: mat.define-palette($app-accent-palette);
+
+$app-theme: mat.define-light-theme((
+ color: (
+   primary: $app-primary,
+   accent: $app-accent,
+ )
+));
+
+@include mat.all-component-themes($app-theme);

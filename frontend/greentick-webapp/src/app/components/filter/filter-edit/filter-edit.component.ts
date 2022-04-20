@@ -184,7 +184,7 @@ export class FilterEditComponent implements OnInit {
       if (event.code == "Space") {
         editor.trigger(null, 'editor.action.triggerSuggest', null);
       }
-    })
+    });
   }
 
   private updateSyntaxError(model: monaco.editor.ITextModel) {

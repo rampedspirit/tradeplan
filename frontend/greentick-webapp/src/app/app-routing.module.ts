@@ -8,6 +8,7 @@ import { SignupComponent } from './components/auth/signup/signup.component';
 import { VerifyComponent } from './components/auth/verify/verify.component';
 import { ConditionListComponent } from './components/condition/condition-list/condition-list.component';
 import { DocumentComponent } from './components/document/document.component';
+import { FeedbackComponent } from './components/feedback/feedback.component';
 import { FilterListComponent } from './components/filter/filter-list/filter-list.component';
 import { MainComponent } from './components/main/main.component';
 import { ScreenerListComponent } from './components/screener/screener-list/screener-list.component';
@@ -35,6 +36,7 @@ const routes: Routes = [
       { path: "verify", component: VerifyComponent }
     ]
   },
+  { path: "feedback", component: FeedbackComponent },
   { path: "doc", component: DocumentComponent },
   { path: "doc/:name", component: DocumentComponent },
   { path: "**", redirectTo: "" }

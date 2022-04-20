@@ -22,17 +22,12 @@ export class WatchlistCreateComponent implements OnInit {
     return this.createWatchlistForm.get('name') as FormControl;
   }
 
-  get descriptionControl(): FormControl {
-    return this.createWatchlistForm.get('description') as FormControl;
-  }
-
   constructor(public dialogRef: MatDialogRef<FilterCreateComponent>, private watchlistService: WatchlistService,
     private watchlistNotificationService: WatchlistNotificationService, private spinner: NgxSpinnerService) { }
 
   ngOnInit(): void {
     this.createWatchlistForm = new FormGroup({
       name: new FormControl(null, [Validators.required]),
-     // description: new FormControl(null, [Validators.required])
     });
   }
 
@@ -40,8 +35,7 @@ export class WatchlistCreateComponent implements OnInit {
     this.validateAllFields();
     if (this.createWatchlistForm.valid) {
       let name = this.createWatchlistForm.get('name')?.value;
-      let description = this.createWatchlistForm.get('description')?.value;
-      this.createWatchlist(name, description);
+      this.createWatchlist(name);
     }
   }
 
@@ -51,12 +45,11 @@ export class WatchlistCreateComponent implements OnInit {
     });
   }
 
-  private createWatchlist(name: string, description: string) {
+  private createWatchlist(name: string) {
     this.spinner.show();
     this.createError = false;
     this.watchlistService.createWatchlist({
-      name: name,
-      description: description,
+      name: name
     }).subscribe(filter => {
       this.dialogRef.close();
       this.watchlistNotificationService.triggerCreateNotification(filter);

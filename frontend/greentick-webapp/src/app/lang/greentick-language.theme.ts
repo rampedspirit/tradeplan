@@ -5,17 +5,17 @@ export class GreentickLanguageTheme implements monaco.editor.IStandaloneThemeDat
     base = 'vs' as const;
     inherit = false;
     rules = [
-        { token: 'fl-function', foreground: '2196f3' },
-        { token: 'fl-argument', foreground: 'BB9402' },
-        { token: 'fl-logical-operator', foreground: '0ce781', fontStyle: 'bold' },
-        { token: 'fl-arithmetic-operator', foreground: '6d0370', fontStyle: 'bold' },
-        { token: 'fl-comparison-operator', foreground: '535353', fontStyle: 'bold' },
-        { token: 'fl-bracket', foreground: '2196f3' },
-        { token: 'fl-number', foreground: '000000', fontStyle: 'bold' },
+        { token: 'fl-function', foreground: '2C75BB' },
+        { token: 'fl-argument', foreground: '989CA2' },
+        { token: 'fl-logical-operator', foreground: 'CF9C6B' },
+        { token: 'fl-arithmetic-operator', foreground: 'BB722C', fontStyle: 'bold' },
+        { token: 'fl-comparison-operator', foreground: 'BB722C', fontStyle: 'bold' },
+        { token: 'fl-bracket', foreground: '989CA2', fontStyle: 'bold' },
+        { token: 'fl-number', foreground: '1F5283' },
         { token: 'fl-invalid', foreground: 'ff0000' },
-        { token: 'cl-filter', foreground: '2196f3' },
-        { token: 'cl-logical-operator', foreground: '0ce781', fontStyle: 'bold' },
-        { token: 'cl-bracket', foreground: '2196f3' },
+        { token: 'cl-filter', foreground: '2C75BB' },
+        { token: 'cl-logical-operator', foreground: 'CF9C6B' },
+        { token: 'cl-bracket', foreground: '989ca2', fontStyle: 'bold' },
         { token: 'cl-invalid', foreground: 'ff0000' }
     ]
     colors = {}

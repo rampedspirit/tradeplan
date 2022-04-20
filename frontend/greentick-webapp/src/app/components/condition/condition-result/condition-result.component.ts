@@ -63,12 +63,27 @@ export class ConditionResultComponent implements OnChanges {
     this.updateCode();
     this.updateDecorations();
 
+    let decorations: string[] = [];
     editor.onMouseDown(e => {
-      let selectedToken = editor.getModel().getWordAtPosition(e.target.position);
-      if (selectedToken != null) {
-        let filter = ConditionLanguageIntellisense.FILTERS.find(f => f.name == selectedToken.word);
-        if (filter) {
-          this.onFilterSelect.emit(filter.id);
+      if (e.target.position) {
+        let selectedToken = editor.getModel().getWordAtPosition(e.target.position);
+        if (selectedToken != null) {
+          let filter = ConditionLanguageIntellisense.FILTERS.find(f => f.name == selectedToken.word);
+          if (filter) {
+            this.onFilterSelect.emit(filter.id);
+
+            decorations = editor.deltaDecorations(decorations, [{
+              range: {
+                startLineNumber: e.target.position.lineNumber,
+                endLineNumber: e.target.position.lineNumber,
+                startColumn: selectedToken.startColumn,
+                endColumn: selectedToken.endColumn
+              },
+              options: {
+                inlineClassName: "selected"
+              }
+            }]);
+          }
         }
       }
     });
@@ -80,11 +95,16 @@ export class ConditionResultComponent implements OnChanges {
 
   private updateDecorations() {
     if (this.editor && this.result && this.result.filtersResult) {
-      let decorations = this.result.filtersResult.flatMap(result => this.getModelDeltaDecoration(result));
+      let decorations = this.result.filtersResult.flatMap(result => this.getModelDeltaDecoration(result, this.result.scripName));
       this.editor.deltaDecorations([], decorations);
     }
   }
-  private getModelDeltaDecoration(filterResult: FilterResultResponse): monaco.editor.IModelDeltaDecoration[] {
+
+  private getModelDeltaDecoration(filterResult: FilterResultResponse, scripName: string): monaco.editor.IModelDeltaDecoration[] {
+    let filterName = ConditionLanguageIntellisense.FILTERS.find(filter => filter.id == filterResult.filterId).name;
+    let hoverText = this.getHoverText(filterResult.status, scripName, filterName);
+    let backgroundColor = this.getBackgroundColor(filterResult.status);
+    let borderColor = this.getBorderColor(filterResult.status);
     let decorations: monaco.editor.IModelDeltaDecoration[] = [];
     filterResult.location.forEach(location => {
       decorations.push(
@@ -94,12 +114,56 @@ export class ConditionResultComponent implements OnChanges {
           options: {
             inlineClassName: "filter-result-" + filterResult.status,
             hoverMessage: {
-              value: filterResult.status
+              isTrusted: true,
+              supportHtml: true,
+              value: `<span style="color:#6B9ECF;background-color:` + backgroundColor + `;">` + hoverText + `</span>`
             }
           }
         } as monaco.editor.IModelDeltaDecoration
       );
     })
     return decorations;
+  }
+
+  private getBackgroundColor(status: FilterResultResponse.StatusEnum): string {
+    let backgroundColor = "";
+    if (status == FilterResultResponse.StatusEnum.QUEUED
+      || status == FilterResultResponse.StatusEnum.RUNNING) {
+      backgroundColor = "#F5F8FC";
+    } else if (status == FilterResultResponse.StatusEnum.PASS) {
+      backgroundColor = "#F8FCF5";
+    } else if (status == FilterResultResponse.StatusEnum.FAIL
+      || status == FilterResultResponse.StatusEnum.ERROR) {
+      backgroundColor = "#FCF5F8";
+    }
+    return backgroundColor;
+  }
+
+  private getBorderColor(status: FilterResultResponse.StatusEnum): string {
+    let borderColor = "";
+    if (status == FilterResultResponse.StatusEnum.QUEUED
+      || status == FilterResultResponse.StatusEnum.RUNNING) {
+      borderColor = "#EAF1F8";
+    } else if (status == FilterResultResponse.StatusEnum.PASS) {
+      borderColor = "#F1F8EA";
+    } else if (status == FilterResultResponse.StatusEnum.FAIL
+      || status == FilterResultResponse.StatusEnum.ERROR) {
+      borderColor = "#F8EAF1";
+    }
+    return borderColor;
+  }
+
+  private getHoverText(status: FilterResultResponse.StatusEnum, scripName: string, filterName: string) {
+    let hoverText = "";
+    if (status == FilterResultResponse.StatusEnum.QUEUED
+      || status == FilterResultResponse.StatusEnum.RUNNING) {
+      hoverText = scripName + " screening in progress. Click " + filterName + " for more details.";
+    } else if (status == FilterResultResponse.StatusEnum.PASS) {
+      hoverText = scripName + " screened successfully. Click " + filterName + " for more details.";
+    } else if (status == FilterResultResponse.StatusEnum.FAIL
+      || status == FilterResultResponse.StatusEnum.ERROR) {
+      hoverText = scripName + " failed to get screened. Click " + filterName + " for more details.";
+    }
+    return hoverText;
   }
 }

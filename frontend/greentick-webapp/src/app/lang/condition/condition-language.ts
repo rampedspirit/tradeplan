@@ -11,7 +11,11 @@ export class ConditionLanguage implements monaco.languages.IMonarchLanguage {
                 '@default': 'cl-filter'
             }
         }],
-        [/[\[\]]/, '@brackets']
+        [/[\[\]]/, {
+            cases: {
+                '@default' : 'cl-bracket'
+            }
+        }]
     ]
 
     ignoreCase = false;

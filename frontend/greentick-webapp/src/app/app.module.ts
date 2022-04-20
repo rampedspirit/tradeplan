@@ -78,6 +78,7 @@ import { WatchlistListComponent } from './components/watchlist/watchlist-list/wa
 import { WatchlistCreateComponent } from './components/watchlist/watchlist-create/watchlist-create.component';
 import { WatchlistEditComponent } from './components/watchlist/watchlist-edit/watchlist-edit.component';
 import { WatchlistNameSearchPipe } from './components/watchlist/watchlist-name-search.pipe';
+import { FeedbackComponent } from './components/feedback/feedback.component';
 
 Amplify.configure({
   Auth: {
@@ -120,7 +121,8 @@ Amplify.configure({
     WatchlistListComponent,
     WatchlistCreateComponent,
     WatchlistEditComponent,
-    WatchlistNameSearchPipe
+    WatchlistNameSearchPipe,
+    FeedbackComponent
   ],
   imports: [
     BrowserModule,

@@ -26,6 +26,12 @@ export class ConditionLanguageIntellisense implements monaco.languages.Completio
                     completionItems.push(this.createCompletionItem(filter.name, this.getFilterDocumentation(filter), monaco.languages.CompletionItemKind.Function)));
             }
         }
+
+        if (completionItems.length == 0) {
+            ConditionLanguageIntellisense.FILTERS.forEach(filter =>
+                completionItems.push(this.createCompletionItem(filter.name, this.getFilterDocumentation(filter), monaco.languages.CompletionItemKind.Function)));
+        }
+
         return {
             suggestions: completionItems
         }

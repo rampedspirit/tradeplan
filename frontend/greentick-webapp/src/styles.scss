@@ -1,28 +1,33 @@
 /* You can add global styles to this file, and also import other style files */
 
 //Variables
-$color-status-queued:#71818E;
-$color-status-running:#71818E;
-$color-status-pass:#25DA9F;
-$color-status-fail:#DA2560;
-$color-status-error:#BADA25;
+$color-status-queued:#EEF4F9;
+$color-status-running:#EEF4F9;
+$color-status-pass:#F4F9EE;
+$color-status-fail:#F9EEF4;
+$color-status-error:#F9EEF4;
 
-html, body { 
+$color-hover-queued:#abc8e4;
+$color-hover-running:#abc8e4;
+$color-hover-pass:#c8e4ab;
+$color-hover-fail:#E4ABC8;
+$color-hover-error:#E4ABC8;
+
+$color-select-queued:#abc8e4;
+$color-select-running:#abc8e4;
+$color-select-pass:#c8e4ab;
+$color-select-fail:#E4ABC8;
+$color-select-error:#E4ABC8;
+
+html,
+body {
   height: 100%;
-  background-color: #f9f9f9;
+  background-color: #FAFAFA;
 }
 
-body { 
+body {
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif; 
-}
-
-h3{
-  color: #565b62;
-}
-
-.mat-flat-button .mat-primary{
-  background-color: #2C75BB;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
 /*Scroll Bar Styling*/
@@ -43,92 +48,126 @@ h3{
 
 /*MONACO editor related styling START*/
 
-// .monaco-hover-content{
-//     font-size: 16px !important;
-//     line-height: 18px;
-// }
-
 div.hover-row.status-bar {
   display: none !important;
 }
 
 // Styling for status in monaco editor
 //Filter Results
-@mixin  filter-status-marker($color) {
+@mixin filter-status-marker($color) {
   cursor: pointer;
-  background-color: rgba($color,0.3);
+  background-color: $color;
 }
 
-.filter-result-QUEUED{
+@mixin filter-hover-marker($color) {
+  border: 2.25px solid $color;
+}
+
+//NORMAL
+.filter-result-QUEUED {
   @include filter-status-marker($color-status-queued);
 }
 
-.filter-result-RUNNING{
+.filter-result-RUNNING {
   @include filter-status-marker($color-status-running);
 }
 
-.filter-result-PASS{
+.filter-result-PASS {
   @include filter-status-marker($color-status-pass);
 }
 
-.filter-result-FAIL{
+.filter-result-FAIL {
   @include filter-status-marker($color-status-fail);
 }
 
-.filter-result-ERROR{
+.filter-result-ERROR {
   @include filter-status-marker($color-status-error);
 }
 
-//Expression Results
-@mixin  expression-status-marker($color) {
-  cursor: pointer;
-  background-color: rgba($color,0.2);
+//HOVER
+.filter-result-QUEUED:hover {
+  @include filter-hover-marker($color-hover-queued);
 }
 
-.expression-result-compare-QUEUED{
+.filter-result-RUNNING:hover {
+  @include filter-hover-marker($color-hover-running);
+}
+
+.filter-result-PASS:hover {
+  @include filter-hover-marker($color-hover-pass);
+}
+
+.filter-result-FAIL:hover {
+  @include filter-hover-marker($color-hover-fail);
+}
+
+.filter-result-ERROR:hover {
+  @include filter-hover-marker($color-hover-error);
+}
+
+//SELECTED
+.filter-result-QUEUED.selected {
+  @include filter-status-marker($color-select-queued);
+}
+
+.filter-result-RUNNING.selected {
+  @include filter-status-marker($color-select-running);
+}
+
+.filter-result-PASS.selected {
+  @include filter-status-marker($color-select-pass);
+}
+
+.filter-result-FAIL.selected {
+  @include filter-status-marker($color-select-fail);
+}
+
+.filter-result-ERROR.selected {
+  @include filter-status-marker($color-select-error);
+}
+
+//Expression Results
+@mixin expression-status-marker($color) {
+  cursor: pointer;
+  background-color: $color;
+}
+
+.expression-result-compare-QUEUED {
   @include expression-status-marker($color-status-queued);
 }
 
-.expression-result-compare-RUNNING{
+.expression-result-compare-RUNNING {
   @include expression-status-marker($color-status-running);
 }
 
-.expression-result-compare-PASS{
+.expression-result-compare-PASS {
   @include expression-status-marker($color-status-pass);
 }
 
-.expression-result-compare-FAIL{
+.expression-result-compare-FAIL {
   @include expression-status-marker($color-status-fail);
 }
 
-.expression-result-compare-ERROR{
+.expression-result-compare-ERROR {
   @include expression-status-marker($color-status-error);
 }
 
-.expression-result-arithmetic{
-  cursor: pointer;
-}m
+.expression-result-arithmetic {
+  //filter: brightness(80%);
+}
+
+.expression-result-value {
+  color: #6B9ECF;
+  background-color: #FAFAFA;
+}
+
 /*MONACO editor related styling END*/
 
 //MAT Button
-.mat-button.mat-success,
-.mat-stroked-button.mat-success {
-    color: #155724;
-}
-.mat-button.mat-success:hover,
-.mat-stroked-button.mat-success:hover {
-  background-color: #f0fff3;
+.mat-flat-button.mat-primary:hover {
+  filter: brightness(80%);
 }
 
-.mat-raised-button.mat-success,
-.mat-flat-button.mat-success,
-.mat-fab.mat-success,
-.mat-mini-fab.mat-success {
-  color: #f0fff3;
-  background-color: #155724;
+.mat-flat-button.mat-accent:hover {
+  filter: brightness(80%);
 }
-
-.mat-icon-button.mat-success {
-  color:#155724;
-}
-

@@ -1,9 +1,7 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { FilterLanguageResultEditorOptions } from 'src/app/lang/filter/filter-language-result.editor.options';
-import { ExpressionResultResponse, FilterResultResponse, FilterService } from 'src/gen/filter';
+import { ExpressionResultResponse, FilterResultResponse, FilterService, Location } from 'src/gen/filter';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-import { EditorService } from 'src/app/services/editor.service';
-import { ThisReceiver } from '@angular/compiler';
 
 @Component({
   selector: 'app-filter-result',
@@ -20,6 +18,10 @@ export class FilterResultComponent implements OnChanges {
   private editor: monaco.editor.IStandaloneCodeEditor;
 
   constructor(private filterService: FilterService) { }
+
+  private decorations: string[] = [];
+  private zoneIds: string[] = [];
+  private contentWidgets: monaco.editor.IContentWidget[] = [];
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.result) {
@@ -40,67 +42,97 @@ export class FilterResultComponent implements OnChanges {
     this.updateCode();
 
     editor.onDidChangeModelContent(e => {
-      this.updateDecorations();
+      this.addDecorations();
+      this.addResultLines();
+      this.addResults();
     });
   }
 
-  private updateDecorations() {
+  private addDecorations() {
     if (this.editor && this.result) {
-      let decorations = this.result.expressionResults.flatMap(r => this.getModelDeltaDecoration(r));
-      this.editor.deltaDecorations([], decorations);
+      let newDecorations: monaco.editor.IModelDeltaDecoration[] = [];
+
+      this.result.expressionResults.forEach(expResult => {
+        let classNamePrefix = "";
+        if (expResult.type == ExpressionResultResponse.TypeEnum.ARITHEMETICEXPRESSION) {
+          classNamePrefix = "expression-result-arithmetic";
+        } else if (expResult.type == ExpressionResultResponse.TypeEnum.COMPAREEXPRESSION) {
+          classNamePrefix = "expression-result-compare-" + expResult.result;
+        }
+
+        expResult.location.forEach(location => {
+          newDecorations.push({
+            range: new monaco.Range(location.start.line, location.start.column, location.end.line, location.end.column),
+            options: {
+              inlineClassName: classNamePrefix,
+            }
+          } as monaco.editor.IModelDeltaDecoration);
+        });
+      });
+
+      this.decorations = this.editor.deltaDecorations(this.decorations, newDecorations);
     }
   }
 
-  private getModelDeltaDecoration(expressionResult: ExpressionResultResponse): monaco.editor.IModelDeltaDecoration[] {
-    if (expressionResult.type == ExpressionResultResponse.TypeEnum.ARITHEMETICEXPRESSION) {
-      return this.getDecorationForArithmeticExp(expressionResult);
-    } else if (expressionResult.type == ExpressionResultResponse.TypeEnum.COMPAREEXPRESSION) {
-      return this.getDecorationForCompareExp(expressionResult);
-    }
-    return this.getDecorationForOtherExp(expressionResult);
+  private addResultLines() {
+    let locations: Location[] = this.result.expressionResults
+      .filter(expResult => expResult.type == ExpressionResultResponse.TypeEnum.ARITHEMETICEXPRESSION)
+      .flatMap(expResult => expResult.location);
+
+    this.editor.changeViewZones(accessor => {
+      this.zoneIds.forEach(zoneId => accessor.removeZone(zoneId));
+      this.zoneIds = [];
+      new Set(locations.map(location => location.start.line)).forEach(line => {
+        let domNode = document.createElement("div");
+        let zoneId = accessor.addZone({
+          afterLineNumber: line - 1,
+          heightInLines: 1,
+          domNode: domNode
+        });
+        this.zoneIds.push(zoneId);
+      });
+    });
+  }
+  private addResults() {
+    this.contentWidgets.forEach(contentWidget => this.editor.removeContentWidget(contentWidget));
+    this.contentWidgets = [];
+
+    let arithmeticExpressionResults = this.result.expressionResults
+      .filter(expResult => expResult.type == ExpressionResultResponse.TypeEnum.ARITHEMETICEXPRESSION);
+
+    arithmeticExpressionResults.forEach(expressionResult => {
+      let expressionResultIndex = arithmeticExpressionResults.indexOf(expressionResult);
+      expressionResult.location.forEach(location => {
+        let locationIndex = expressionResult.location.indexOf(location);
+        this.contentWidgets.push(this.createResultContentWidget(expressionResultIndex + "." + locationIndex, location, expressionResult.result));
+      });
+    });
+
+    this.contentWidgets.forEach(contentWidget => this.editor.addContentWidget(contentWidget));
   }
 
-  private getDecorationForArithmeticExp(expressionResult: ExpressionResultResponse): monaco.editor.IModelDeltaDecoration[] {
-    let decorations: monaco.editor.IModelDeltaDecoration[] = [];
-    expressionResult.location.forEach(location => {
-      decorations.push({
-        range: new monaco.Range(location.start.line, location.start.column, location.end.line, location.end.column),
-        options: {
-          inlineClassName: "expression-result-arithmetic",
-          hoverMessage: {
-            value: expressionResult.result
-          }
-        }
-      } as monaco.editor.IModelDeltaDecoration);
-    });
-    return decorations;
-  }
-
-  private getDecorationForCompareExp(expressionResult: ExpressionResultResponse): monaco.editor.IModelDeltaDecoration[] {
-    let decorations: monaco.editor.IModelDeltaDecoration[] = [];
-    expressionResult.location.forEach(location => {
-      decorations.push({
-        range: new monaco.Range(location.start.line, location.start.column, location.end.line, location.end.column),
-        options: {
-          inlineClassName: "expression-result-compare-" + expressionResult.result,
-        }
-      } as monaco.editor.IModelDeltaDecoration);
-    });
-    return decorations;
-  }
-
-  private getDecorationForOtherExp(expressionResult: ExpressionResultResponse): monaco.editor.IModelDeltaDecoration[] {
-    let decorations: monaco.editor.IModelDeltaDecoration[] = [];
-    expressionResult.location.forEach(location => {
-      decorations.push({
-        range: new monaco.Range(location.start.line, location.start.column, location.end.line, location.end.column),
-        options: {
-          hoverMessage: {
-            value: expressionResult.result
-          }
-        }
-      } as monaco.editor.IModelDeltaDecoration);
-    });
-    return decorations;
+  private createResultContentWidget(id: string, location: Location, result: string | number): monaco.editor.IContentWidget {
+    return {
+      getId: function () {
+        return 'result.content.widget.' + id;
+      },
+      getDomNode: function () {
+        let domNode = document.createElement('div');
+        domNode.innerHTML = result as string;
+        domNode.className = "expression-result-value";
+        return domNode;
+      },
+      getPosition: function () {
+        return {
+          position: {
+            lineNumber: location.start.line,
+            column: location.start.column
+          },
+          preference: [
+            monaco.editor.ContentWidgetPositionPreference.ABOVE
+          ]
+        };
+      }
+    } as monaco.editor.IContentWidget
   }
 }

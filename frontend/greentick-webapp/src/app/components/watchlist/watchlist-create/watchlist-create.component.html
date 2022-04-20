@@ -15,15 +15,9 @@
             <mat-error *ngIf="nameControl.errors?.serviceNotReachable">Failed to contact our servers, please retry
                 later.</mat-error>
         </mat-form-field>
-        <!-- <mat-form-field>
-            <mat-label>Description</mat-label>
-            <textarea matInput [formControl]="descriptionControl"> </textarea>
-            <mat-error *ngIf="descriptionControl && descriptionControl.invalid">Please enter valid description.
-            </mat-error>
-        </mat-form-field> -->
     </form>
 </div>
 <div mat-dialog-actions align="end">    
-    <button mat-button (click)="submit()" cdkFocusInitial>OK</button>
-    <button mat-button [mat-dialog-close]="false">CANCEL</button>
+    <button mat-flat-button color="primary" (click)="submit()" cdkFocusInitial>OK</button>
+    <button mat-flat-button color="accent" [mat-dialog-close]="false">CANCEL</button>
 </div>

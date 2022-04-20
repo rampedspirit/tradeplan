@@ -262,6 +262,18 @@ export class ConditionEditComponent implements OnInit {
       this.updateSyntaxError(model);
       this.updateLibraryError(model);
     });
+
+    editor.onMouseUp(event => {
+      if (!event.target.detail?.isAfterLines) {
+        editor.trigger(null, 'editor.action.triggerSuggest', null);
+      }
+    });
+
+    editor.onKeyUp(event => {
+      if (event.code == "Space") {
+        editor.trigger(null, 'editor.action.triggerSuggest', null);
+      }
+    });
   }
 
   private updateSyntaxError(model: monaco.editor.ITextModel) {

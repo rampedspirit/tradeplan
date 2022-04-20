@@ -24,7 +24,11 @@ export class FilterLanguage implements monaco.languages.IMonarchLanguage {
             }
         }],
         [/\(([a-zA-Z0-9-]+(,[a-zA-Z0-9-]+)*)?\)/, 'fl-argument'],
-        [/[\[\]]/, '@brackets'],
+        [/[\[\]]/,  {
+            cases: {
+                '@default' : 'fl-bracket'
+            }
+        }],
         [/[0-9]/, 'fl-number']
     ]
 
