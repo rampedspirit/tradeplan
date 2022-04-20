@@ -41,6 +41,14 @@ jobs:
         docker build database/appdb/ -f database/appdb/Dockerfile -t $ECR_REGISTRY/appdb:$IMAGE_TAG
         docker push $ECR_REGISTRY/appdb:$IMAGE_TAG
         
+    - name: Push Stock Database Image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.event.inputs.ImageVersion }}
+      run: |
+        docker build database/stockdb/ -f database/stockdb/Dockerfile -t $ECR_REGISTRY/stockdb:$IMAGE_TAG
+        docker push $ECR_REGISTRY/stockdb:$IMAGE_TAG
+  
     - name: Build filter-service
       run: mvn -B package --file filter/pom.xml
 

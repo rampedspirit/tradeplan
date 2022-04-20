@@ -257,7 +257,7 @@ export class EcsDbStack extends Stack {
         });
 
         const containerDefinition = taskDefinition.addContainer(stackName + "-stockdb-container", {
-            image: ContainerImage.fromRegistry("postgres:14"),
+            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "stockdb", "stockdb"), imageTag),,
             cpu: 50,
             memoryLimitMiB: 1024,
             essential: true,
