@@ -6,6 +6,7 @@ import { MatSelect } from '@angular/material/select';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { EditorService } from 'src/app/services/editor.service';
 import { Tab } from 'src/app/services/tab-area.service';
+import { StockResponse, StockService } from 'src/gen/stock';
 import { WatchlistService } from 'src/gen/watchlist';
 import { ConfirmationComponent } from '../../common/confirmation/confirmation.component';
 import { MessageComponent } from '../../common/message/message.component';
@@ -18,11 +19,10 @@ import { WatchlistNotificationService } from '../watchlist-notification.service'
 })
 export class WatchlistEditComponent implements OnInit {
 
-  NIFTY_50_SCRIPS: string[] = ["CIPLA", "BPCL", "SUNPHARMA", "JSWSTEEL", "IOC", "DRREDDY", "POWERGRID", "COALINDIA", "ITC", "TITAN", "DIVISLAB", "SHREECEM", "GRASIM", "ASIANPAINT", "ONGC", "BAJAJFINSV", "SBIN", "BAJFINANCE", "HEROMOTOCO", "SBILIFE", "KOTAKBANK", "HDFCBANK", "ICICIBANK", "TECHM", "HCLTECH", "BAJAJ-AUTO", "RELIANCE", "UPL", "LT", "INFY", "HDFC", "HINDUNILVR", "EICHERMOT", "WIPRO", "TATAMOTORS", "INDUSINDBK", "BHARTIARTL", "TCS", "AXISBANK", "ULTRACEMCO", "HDFCLIFE", "ADANIPORTS", "M&M", "BRITANNIA", "TATASTEEL", "NTPC", "HINDALCO", "TATACONSUM", "MARUTI", "NESTLEIND"];
-
   fetchError: boolean;
   editWatchlistForm: FormGroup;
 
+  stocks: StockResponse[];
   scripNames: string[];
 
   @Input()
@@ -36,13 +36,14 @@ export class WatchlistEditComponent implements OnInit {
     return this.editWatchlistForm.get('description') as FormControl;
   }
 
-  constructor(private editorService: EditorService, private watchlistService: WatchlistService,
+  constructor(private stockService: StockService, private watchlistService: WatchlistService,
     private watchlistNotificationService: WatchlistNotificationService, private dialog: MatDialog,
     private spinner: NgxSpinnerService) {
   }
 
   ngOnInit(): void {
     this.refresh();
+    this.refresh2();
   }
 
   refresh = () => {
@@ -57,6 +58,18 @@ export class WatchlistEditComponent implements OnInit {
       this.editWatchlistForm.valueChanges.subscribe(change => {
         this.tab.dirtyFlag = true;
       });
+      this.spinner.hide();
+    }, error => {
+      this.fetchError = true;
+      this.spinner.hide();
+    });
+  }
+
+  refresh2 = () => {
+    this.fetchError = false;
+    this.spinner.show();
+    this.stockService.getAllStocks().subscribe(allStocks => {
+      this.stocks = allStocks;
       this.spinner.hide();
     }, error => {
       this.fetchError = true;

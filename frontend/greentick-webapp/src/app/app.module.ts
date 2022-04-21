@@ -58,6 +58,9 @@ import { BASE_PATH as WATCHLIST_API_BASE_PATH } from 'src/gen/watchlist';
 import { ApiModule as ScreenerApiModule } from 'src/gen/screener';
 import { BASE_PATH as SCREENER_API_BASE_PATH } from 'src/gen/screener';
 
+import { ApiModule as StockApiModule } from 'src/gen/stock';
+import { BASE_PATH as STOCK_API_BASE_PATH } from 'src/gen/stock';
+
 import { ConditionListComponent } from './components/condition/condition-list/condition-list.component';
 import { ConditionCreateComponent } from './components/condition/condition-create/condition-create.component';
 import { ConditionEditComponent } from './components/condition/condition-edit/condition-edit.component';
@@ -79,6 +82,7 @@ import { WatchlistCreateComponent } from './components/watchlist/watchlist-creat
 import { WatchlistEditComponent } from './components/watchlist/watchlist-edit/watchlist-edit.component';
 import { WatchlistNameSearchPipe } from './components/watchlist/watchlist-name-search.pipe';
 import { FeedbackComponent } from './components/feedback/feedback.component';
+import { StockNameSearchPipe } from './components/watchlist/stock-name-search.pipe';
 
 Amplify.configure({
   Auth: {
@@ -122,7 +126,8 @@ Amplify.configure({
     WatchlistCreateComponent,
     WatchlistEditComponent,
     WatchlistNameSearchPipe,
-    FeedbackComponent
+    FeedbackComponent,
+    StockNameSearchPipe
   ],
   imports: [
     BrowserModule,
@@ -132,6 +137,7 @@ Amplify.configure({
     ConditionApiModule,
     WatchlistApiModule,
     ScreenerApiModule,
+    StockApiModule,
     HttpClientModule,
     MatCardModule,
     MatButtonModule,
@@ -176,6 +182,10 @@ Amplify.configure({
   {
     provide: SCREENER_API_BASE_PATH,
     useValue: environment.screenerApiBasePath
+  },
+  {
+    provide: STOCK_API_BASE_PATH,
+    useValue: environment.stockApiBasePath
   }, DatePipe],
   bootstrap: [AppComponent]
 })

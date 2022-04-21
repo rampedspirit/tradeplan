@@ -1,6 +1,7 @@
 <app-message *ngIf="fetchError" type="error" message="Failed to connect to our servers." [callback]="refresh"
     callbackText="Refresh">
 </app-message>
+
 <form *ngIf="editWatchlistForm" fxLayout="column" fxLayoutGap="10px" [formGroup]="editWatchlistForm" fxFlexFill>
     <div fxLayout="row" fxLayoutAlign="space-between center">
         <mat-form-field>
@@ -22,13 +23,21 @@
         </mat-error>
     </mat-form-field>
 
+    <div fxLayout="column">
+        <mat-form-field>
+            <mat-label>
+                <mat-icon>search</mat-icon> Search
+            </mat-label>
+            <input matInput #stockSearch>
+        </mat-form-field>
+    </div>
     <mat-error *ngIf="scripNames && scripNames.length == 0">Please select scrips.
     </mat-error>
     <mat-selection-list #scripNamesList dense [multiple]="true"
         (selectionChange)="onSelectionChange(scripNamesList.selectedOptions.selected)">
-        <mat-list-option *ngFor="let scripName of NIFTY_50_SCRIPS" [value]="scripName"
-            [selected]="scripNames.includes(scripName)">
-            {{scripName}}
+        <mat-list-option *ngFor="let stock of (stocks | stockNameSearch:stockSearch.value)" [value]="stock.symbol"
+            [selected]="scripNames.includes(stock.symbol)">
+            {{stock.name}}
         </mat-list-option>
     </mat-selection-list>
 </form>

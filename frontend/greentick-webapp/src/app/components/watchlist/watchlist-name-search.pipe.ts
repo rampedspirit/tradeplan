@@ -10,7 +10,7 @@ export class WatchlistNameSearchPipe implements PipeTransform {
     if (searchText == null || watchlists == null) {
       return watchlists;
     }
-    return watchlists.filter(filter => filter.name.toLowerCase().indexOf(searchText.toLowerCase()) !== -1);
+    return watchlists.filter(watchlist => watchlist.name.toLowerCase().indexOf(searchText.toLowerCase()) !== -1);
   }
 
 }
