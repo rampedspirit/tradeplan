@@ -10,7 +10,8 @@ export class StockNameSearchPipe implements PipeTransform {
     if (searchText == null || stocks == null) {
       return stocks;
     }
-    return stocks.filter(stock => stock.name.toLowerCase().indexOf(searchText.toLowerCase()) !== -1);
+    return stocks.filter(stock => stock.name.toLowerCase().indexOf(searchText.toLowerCase()) !== -1) ||
+      stocks.filter(stock => stock.symbol.toLowerCase().indexOf(searchText.toLowerCase()) !== -1);
   }
 
 }
