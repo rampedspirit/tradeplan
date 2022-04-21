@@ -65,6 +65,7 @@ export class EcsAppStack extends Stack {
         this.createScreenerService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
         this.createExpressionService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
         this.createWatchlistService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
+        this.createStockService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
     }
 
     /**
@@ -535,6 +536,73 @@ export class EcsAppStack extends Stack {
         });
 
         let service = new Ec2Service(this, stackName + "-watchlist-service", {
+            cluster: cluster,
+            desiredCount: 1,
+            taskDefinition: taskDefinition
+        });
+        service.attachToApplicationTargetGroup(targetGroup);
+    }
+
+    /**
+     * Creates the stock service
+     * @param stackName 
+     * @param imageTag
+     * @param vpc 
+     * @param logGroup 
+     * @param applicationLoadbalancer 
+     * @param cluster 
+     * @param dbCredentials 
+     * @param dbLoadBalancerUrl
+     */
+     private createStockService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
+        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string) {
+
+        //Load Balancer Config
+        let targetGroup = new ApplicationTargetGroup(this, stackName + "-stock-service-target-group", {
+            vpc: vpc,
+            port: 5005,
+            protocol: ApplicationProtocol.HTTP,
+            healthCheck: {
+                path: "/actuator/stock-health"
+            }
+        });
+
+        new ApplicationListenerRule(this, "stockservice-listener-rule", {
+            listener: applicationListener,
+            priority: 5,
+            conditions: [
+                ListenerCondition.pathPatterns(["/actuator/stock-health", "/v1/stock", "/v1/stock/*"])
+            ],
+            action: ListenerAction.forward([targetGroup])
+        });
+
+        //Service Config
+        let taskDefinition = new Ec2TaskDefinition(this, stackName + '-stock-service-taskdef');
+
+        taskDefinition.addContainer(stackName + "-stock-service-container", {
+            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-stock-service", "gtk-stock-service"), imageTag),
+            cpu: 50,
+            memoryLimitMiB: 256,
+            essential: true,
+            environment: {
+                "SERVER_PORT": "5005",
+                "DB_HOST": dbLoadBalancerUrl,
+                "DB_PORT": "5001",
+                "DB_NAME": "stockdb",
+                "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
+                "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
+                "ACTIVE_PROFILE": "dev"
+            },
+            portMappings: [{
+                containerPort: 5005
+            }],
+            logging: LogDriver.awsLogs({
+                logGroup: logGroup,
+                streamPrefix: logGroup.logGroupName
+            }),
+        });
+
+        let service = new Ec2Service(this, stackName + "-stock-service", {
             cluster: cluster,
             desiredCount: 1,
             taskDefinition: taskDefinition
