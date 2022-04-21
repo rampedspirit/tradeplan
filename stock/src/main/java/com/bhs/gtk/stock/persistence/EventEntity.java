@@ -7,12 +7,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.IdClass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 @Entity
-@IdClass(CandleId.class)
 public class EventEntity {
 
 	@Id
