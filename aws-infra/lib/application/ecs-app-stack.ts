@@ -569,7 +569,7 @@ export class EcsAppStack extends Stack {
 
         new ApplicationListenerRule(this, "stockservice-listener-rule", {
             listener: applicationListener,
-            priority: 5,
+            priority: 6,
             conditions: [
                 ListenerCondition.pathPatterns(["/actuator/stock-health", "/v1/stock", "/v1/stock/*"])
             ],
