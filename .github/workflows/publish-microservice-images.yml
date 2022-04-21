@@ -104,8 +104,8 @@ jobs:
         docker build watchlist/ -f watchlist/Dockerfile -t $ECR_REGISTRY/gtk-watchlist-service:$IMAGE_TAG
         docker push $ECR_REGISTRY/gtk-watchlist-service:$IMAGE_TAG
 
-    - name: Build watchlist-service
-      run: mvn -B package --file watchlist/pom.xml
+    - name: Build stock-service
+      run: mvn -B package --file stock/pom.xml
       
     - name: Push stock-service Image
       env:
