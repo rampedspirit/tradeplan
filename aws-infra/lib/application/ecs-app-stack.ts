@@ -5,7 +5,7 @@ import { Cluster, ContainerDependencyCondition, ContainerImage, Ec2Service, Ec2T
 import { ApplicationListener, ApplicationListenerRule, ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, ListenerAction, ListenerCondition, NetworkLoadBalancer, Protocol, TargetType } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
 import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
-import { DnsRecordType, NamespaceType } from "aws-cdk-lib/aws-servicediscovery";
+import { DnsRecordType, INamespace, NamespaceType } from "aws-cdk-lib/aws-servicediscovery";
 import { Construct } from "constructs";
 
 export interface EcsAppStackProps extends StackProps {
@@ -39,6 +39,9 @@ export class EcsAppStack extends Stack {
         //Cluster
         const cluster: Cluster = this.createCluster(props.stackName!, vpc);
 
+        //DNS Namespace
+        const dnsNamespace: INamespace = cluster.addDefaultCloudMapNamespace({ vpc, name: "internal.tradeplan.tech", type: NamespaceType.DNS_PRIVATE });
+
         //Application Load Balancer
         const applicationLoadbalancer = this.createApplicationLoadBalancer(props.stackName!, vpc);
 
@@ -49,7 +52,7 @@ export class EcsAppStack extends Stack {
         });
 
         //Kafka
-        this.createKafkaService(props.stackName!, vpc, logGroup, cluster);
+        this.createKafkaService(props.stackName!, vpc, logGroup, cluster, dnsNamespace);
 
         //Services
         const applicationListener = applicationLoadbalancer.addListener(props.stackName + "application-listener", {
@@ -60,11 +63,11 @@ export class EcsAppStack extends Stack {
                 messageBody: "Hello There! Looks like you have hit a wrong end point."
             })
         });
-        this.createFilterService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
-        this.createConditionService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
-        this.createScreenerService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
-        this.createExpressionService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
-        this.createWatchlistService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
+        this.createFilterService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, dnsNamespace);
+        this.createConditionService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, dnsNamespace);
+        this.createScreenerService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, dnsNamespace);
+        this.createExpressionService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, dnsNamespace);
+        this.createWatchlistService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, dnsNamespace);
         this.createStockService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
     }
 
@@ -126,7 +129,7 @@ export class EcsAppStack extends Stack {
      * @param logGroup 
      * @param cluster 
      */
-    private createKafkaService(stackName: string, vpc: IVpc, logGroup: LogGroup, cluster: Cluster) {
+    private createKafkaService(stackName: string, vpc: IVpc, logGroup: LogGroup, cluster: Cluster, dnsNamespace: INamespace) {
 
         let taskDefinition = new Ec2TaskDefinition(this, stackName + '-kafka-taskdef', {
             networkMode: NetworkMode.AWS_VPC
@@ -135,7 +138,7 @@ export class EcsAppStack extends Stack {
         const zookeeperContainerDefinition = taskDefinition.addContainer(stackName + "-zookeeper-container", {
             image: ContainerImage.fromRegistry("zookeeper:latest"),
             cpu: 50,
-            memoryLimitMiB: 500,
+            memoryLimitMiB: 512,
             essential: false,
             environment: {
                 "ZOOKEEPER_CLIENT_PORT": "2181"
@@ -179,9 +182,6 @@ export class EcsAppStack extends Stack {
             condition: ContainerDependencyCondition.START
         });
 
-        let namespace = "gtk.com";
-        const dnsNamespace = cluster.addDefaultCloudMapNamespace({ vpc, name: namespace, type: NamespaceType.DNS_PRIVATE });
-
         const securityGroup = new SecurityGroup(this, stackName + "-ALB-SecurityGroup", {
             securityGroupName: stackName + "-KafkaService-SecurityGroup",
             vpc: vpc
@@ -213,9 +213,11 @@ export class EcsAppStack extends Stack {
      * @param cluster 
      * @param dbCredentials 
      * @param dbLoadBalancerUrl
+     * @param dnsNamespace
      */
     private createFilterService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
-        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string) {
+        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string,
+        dnsNamespace: INamespace) {
 
         //Load Balancer Config
         let targetGroup = new ApplicationTargetGroup(this, stackName + "-filter-service-target-group", {
@@ -251,7 +253,7 @@ export class EcsAppStack extends Stack {
                 "DB_NAME": "appdb",
                 "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
                 "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
-                "KAFKA_BOOTSTRAP_ADDRESS": "kafka.gtk.com:19092",
+                "KAFKA_BOOTSTRAP_ADDRESS": "kafka." + dnsNamespace.namespaceName + ":19092",
                 "ACTIVE_PROFILE": "dev"
             },
             portMappings: [{
@@ -281,9 +283,11 @@ export class EcsAppStack extends Stack {
      * @param cluster 
      * @param dbCredentials 
      * @param dbLoadBalancerUrl
+     * @param dnsNamespace
      */
     private createConditionService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
-        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string) {
+        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string,
+        dnsNamespace: INamespace) {
 
         //Load Balancer Config
         let targetGroup = new ApplicationTargetGroup(this, stackName + "-condition-service-target-group", {
@@ -319,7 +323,7 @@ export class EcsAppStack extends Stack {
                 "DB_NAME": "appdb",
                 "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
                 "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
-                "KAFKA_BOOTSTRAP_ADDRESS": "kafka.gtk.com:19092",
+                "KAFKA_BOOTSTRAP_ADDRESS": "kafka." + dnsNamespace.namespaceName + ":19092",
                 "ACTIVE_PROFILE": "dev"
             },
             portMappings: [{
@@ -349,9 +353,11 @@ export class EcsAppStack extends Stack {
      * @param cluster 
      * @param dbCredentials 
      * @param databaseUrl
+     * @param dnsNamespace
      */
-    private createScreenerService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup, applicationListener: ApplicationListener,
-        cluster: Cluster, dbCredentials: ISecret, databaseUrl: string) {
+    private createScreenerService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
+        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, databaseUrl: string,
+        dnsNamespace: INamespace) {
 
         //Load Balancer Config
         let targetGroup = new ApplicationTargetGroup(this, stackName + "-screener-service-target-group", {
@@ -378,7 +384,7 @@ export class EcsAppStack extends Stack {
         taskDefinition.addContainer(stackName + "-screener-service-container", {
             image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-screener-service", "gtk-screener-service"), imageTag),
             cpu: 50,
-            memoryLimitMiB: 512,
+            memoryLimitMiB: 256,
             essential: true,
             environment: {
                 "SERVER_PORT": "5002",
@@ -387,7 +393,7 @@ export class EcsAppStack extends Stack {
                 "DB_NAME": "appdb",
                 "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
                 "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
-                "KAFKA_BOOTSTRAP_ADDRESS": "kafka.gtk.com:19092",
+                "KAFKA_BOOTSTRAP_ADDRESS": "kafka." + dnsNamespace.namespaceName + ":19092",
                 "ACTIVE_PROFILE": "dev"
             },
             portMappings: [{
@@ -417,9 +423,11 @@ export class EcsAppStack extends Stack {
      * @param cluster 
      * @param dbCredentials 
      * @param databaseUrl
+     * @param dnsNamespace
      */
-    private createExpressionService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup, applicationListener: ApplicationListener,
-        cluster: Cluster, dbCredentials: ISecret, databaseUrl: string) {
+    private createExpressionService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
+        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, databaseUrl: string,
+        dnsNamespace: INamespace) {
 
         //Load Balancer Config
         let targetGroup = new ApplicationTargetGroup(this, stackName + "-expression-service-target-group", {
@@ -446,7 +454,7 @@ export class EcsAppStack extends Stack {
         taskDefinition.addContainer(stackName + "-expression-service-container", {
             image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-expression-service", "gtk-expression-service"), imageTag),
             cpu: 50,
-            memoryLimitMiB: 512,
+            memoryLimitMiB: 256,
             essential: true,
             environment: {
                 "SERVER_PORT": "5003",
@@ -455,7 +463,7 @@ export class EcsAppStack extends Stack {
                 "DB_NAME": "appdb",
                 "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
                 "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
-                "KAFKA_BOOTSTRAP_ADDRESS": "kafka.gtk.com:19092",
+                "KAFKA_BOOTSTRAP_ADDRESS": "kafka." + dnsNamespace.namespaceName + ":19092",
                 "ACTIVE_PROFILE": "dev"
             },
             portMappings: [{
@@ -485,9 +493,11 @@ export class EcsAppStack extends Stack {
      * @param cluster 
      * @param dbCredentials 
      * @param dbLoadBalancerUrl
+     * @param dnsNamespace
      */
-     private createWatchlistService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
-        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string) {
+    private createWatchlistService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
+        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string,
+        dnsNamespace: INamespace) {
 
         //Load Balancer Config
         let targetGroup = new ApplicationTargetGroup(this, stackName + "-watchlist-service-target-group", {
@@ -523,7 +533,7 @@ export class EcsAppStack extends Stack {
                 "DB_NAME": "appdb",
                 "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
                 "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
-                "KAFKA_BOOTSTRAP_ADDRESS": "kafka.gtk.com:19092",
+                "KAFKA_BOOTSTRAP_ADDRESS": "kafka." + dnsNamespace.namespaceName + ":19092",
                 "ACTIVE_PROFILE": "dev"
             },
             portMappings: [{
@@ -554,7 +564,7 @@ export class EcsAppStack extends Stack {
      * @param dbCredentials 
      * @param dbLoadBalancerUrl
      */
-     private createStockService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
+    private createStockService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
         applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string) {
 
         //Load Balancer Config
