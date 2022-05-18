@@ -114,3 +114,14 @@ jobs:
       run: |
         docker build stock/ -f stock/Dockerfile -t $ECR_REGISTRY/gtk-stock-service:$IMAGE_TAG
         docker push $ECR_REGISTRY/gtk-stock-service:$IMAGE_TAG
+        
+    - name: Build mockfeed-service
+      run: mvn -B package --file mockfeed/pom.xml
+      
+    - name: Push mockfeed-service Image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.event.inputs.ImageVersion }}
+      run: |
+        docker build mockfeed/ -f mockfeed/Dockerfile -t $ECR_REGISTRY/gtk-mockfeed-service:$IMAGE_TAG
+        docker push $ECR_REGISTRY/gtk-mockfeed-service:$IMAGE_TAG
