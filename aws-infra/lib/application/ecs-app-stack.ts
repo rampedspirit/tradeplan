@@ -69,6 +69,7 @@ export class EcsAppStack extends Stack {
         this.createExpressionService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, dnsNamespace);
         this.createWatchlistService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, dnsNamespace);
         this.createStockService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
+        this.createMockfeedService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
     }
 
     /**
@@ -613,6 +614,73 @@ export class EcsAppStack extends Stack {
         });
 
         let service = new Ec2Service(this, stackName + "-stock-service", {
+            cluster: cluster,
+            desiredCount: 1,
+            taskDefinition: taskDefinition
+        });
+        service.attachToApplicationTargetGroup(targetGroup);
+    }
+
+    /**
+     * Creates the mockfeed service
+     * @param stackName 
+     * @param imageTag
+     * @param vpc 
+     * @param logGroup 
+     * @param applicationLoadbalancer 
+     * @param cluster 
+     * @param dbCredentials 
+     * @param dbLoadBalancerUrl
+     */
+    private createMockfeedService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
+        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string) {
+
+        //Load Balancer Config
+        let targetGroup = new ApplicationTargetGroup(this, stackName + "-mockfeed-service-target-group", {
+            vpc: vpc,
+            port: 5006,
+            protocol: ApplicationProtocol.HTTP,
+            healthCheck: {
+                path: "/actuator/mockfeed-health"
+            }
+        });
+
+        new ApplicationListenerRule(this, "mockfeedservice-listener-rule", {
+            listener: applicationListener,
+            priority: 7,
+            conditions: [
+                ListenerCondition.pathPatterns(["/actuator/mockfeed-health", "/v1/mockfeed", "/v1/mockfeed/*", "/getAllSymbols", "/token", "/getbars"])
+            ],
+            action: ListenerAction.forward([targetGroup])
+        });
+
+        //Service Config
+        let taskDefinition = new Ec2TaskDefinition(this, stackName + '-mockfeed-service-taskdef');
+
+        taskDefinition.addContainer(stackName + "-mockfeed-service-container", {
+            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-mockfeed-service", "gtk-mockfeed-service"), imageTag),
+            cpu: 50,
+            memoryLimitMiB: 256,
+            essential: true,
+            environment: {
+                "SERVER_PORT": "5006",
+                "DB_HOST": dbLoadBalancerUrl,
+                "DB_PORT": "5000",
+                "DB_NAME": "appdb",
+                "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
+                "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
+                "ACTIVE_PROFILE": "dev"
+            },
+            portMappings: [{
+                containerPort: 5006
+            }],
+            logging: LogDriver.awsLogs({
+                logGroup: logGroup,
+                streamPrefix: logGroup.logGroupName
+            }),
+        });
+
+        let service = new Ec2Service(this, stackName + "-mockfeed-service", {
             cluster: cluster,
             desiredCount: 1,
             taskDefinition: taskDefinition
