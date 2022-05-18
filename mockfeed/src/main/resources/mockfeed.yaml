@@ -1,0 +1,360 @@
+openapi: 3.0.0
+info:
+  description: These are mock feed APIs
+  version: 1.0.0
+  title: Stock
+servers:
+  - url: 'http://localhost:5006/'
+  - url: 'https://localhost:5006/'
+paths:
+  /createUser:
+    post:
+      tags:
+        - admin
+      operationId: createUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '200':
+          description: Request sucessfully processed.
+  /updateAllSymbols:
+    get:
+      tags:
+        - admin
+      operationId: updateAllSymbols
+      parameters:
+        - in: query
+          name: exchange
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: url
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Request sucessfully processed.
+  /getAllSymbols:
+    get:
+      tags:
+        - mockfeed
+      summary: get all symbols
+      operationId: getAllSymbols
+      parameters:
+        - in: query
+          name: segment
+          required: true
+          schema:
+            type: string
+            enum: ["eq","fo","fut","mcx","all"]
+        - in: query
+          name: user
+          required: true
+          schema:
+           type: string
+        - in: query
+          name: password
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: csv
+          required: true
+          schema:
+            type: boolean
+        - in: query
+          name: allexpiry
+          required: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Request sucessfully processed.
+          content:
+            text/plain:
+              schema:
+                type: string
+                format: binary
+  /token:
+    post:
+      tags:
+        - mockfeed
+      summary: get authentication token
+      operationId: getToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+      responses:
+        '200':
+          description: Request sucessfully processed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400':
+          description: Request not sucessfully processed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenError'
+  /getbars:
+    get:
+      tags:
+        - mockfeed
+      summary: get all symbols
+      operationId: getBars
+      parameters:
+        - in: header
+          name: bearer
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: symbol
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: from
+          required: true
+          schema:
+           type: string
+        - in: query
+          name: to
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: response
+          required: true
+          schema:
+            type: string
+            enum: ["csv"]
+        - in: query
+          name: interval
+          required: true
+          schema:
+            type: string
+            enum: ["1min", "2min", "3min", "5min", "10min", "15min", "30min", "60min"]
+      responses:
+        '200':
+          description: Request sucessfully processed.
+          content:
+            text/plain:
+              schema:
+                type: string
+                format: binary
+components:
+  schemas:
+    CreateUserRequest:
+      required:
+        - name
+        - password
+      type: object
+      properties:
+        name:
+          type: string
+        password:
+          type: string
+    TokenRequest:
+      required:
+        - username
+        - password
+        - grant_type
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        grant_type:
+          type: string
+          enum: ["bearer"]
+    TokenResponse:
+      required:
+        - access_token
+        - token_type
+        - expires_in
+        - userName
+        - expires
+        - issued
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          enum: ["bearer"]
+        expires_in:
+          type: number
+        userName:
+          type: string
+        expires:
+          type: string
+          format: date-time
+        issued:
+          type: string
+          format: date-time
+    TokenError:
+      type: object
+      properties:
+        error:
+          type: string
+        error_description:
+          type: string
+    AuthResponse:
+      required:
+        - success
+        - message
+        - segments
+        - maxsymbols
+        - subscription
+        - validity
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        segments:
+          type: array
+          items:
+            type: string
+        maxsymbols:
+          type: integer
+        subscription:
+          type: string
+          enum: ["tick", "1min", "tick+1min", "tick+5min", "tick+1min+5min"]
+        validity:
+          type: string
+          format: date-time
+    Heartbeat:
+      required:
+        - success
+        - message
+        - timestamp
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+          enum: ["HeartBeat"]
+        timestamp:
+          type: string
+          format: date-time
+    MethodRequest:
+      required:
+        - method
+        - symbols
+      type: object
+      properties:
+        method:
+          type: string
+          enum: ["addsymbol","removesymbol","logout"]
+        symbols:
+          type: array
+          items:
+            type: string
+    SubscribeError:
+      required:
+        - success
+        - message
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+    UnSubscribeResponse:
+      required:
+        - success
+        - message
+        - symbolsremoved
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        symbolsremoved:
+          type: integer
+    UnSubscribeError:
+      required:
+        - success
+        - message
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+    Touchline:
+      required:
+        - success
+        - message
+        - symbolsadded
+        - symbollist
+        - totalsymbolsubscribed
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        symbolsadded:
+          type: integer
+        symbollist:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+        totalsymbolsubscribed:
+          type: integer
+    LogoutResponse:
+      required:
+        - success
+      type: object
+      properties:
+        success:
+          type: boolean
+    Bar:
+      required:
+        - time
+        - open
+        - high
+        - low
+        - close
+        - volume
+        - oi
+      type: object
+      properties:
+        time:
+         type: string
+         format: date-time
+        open:
+         type: number
+         format: float          
+        high:
+         type: number
+         format: float          
+        low:
+         type: number
+         format: float
+        close:
+         type: number
+         format: float
+        volume:
+         type: number
+         format: float
+        oi:
+         type: number
+         format: float
