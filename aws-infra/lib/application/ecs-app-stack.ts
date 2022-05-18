@@ -649,7 +649,7 @@ export class EcsAppStack extends Stack {
             listener: applicationListener,
             priority: 7,
             conditions: [
-                ListenerCondition.pathPatterns(["/actuator/mockfeed-health", "/v1/mockfeed", "/v1/mockfeed/*", "/getAllSymbols", "/token", "/getbars"])
+                ListenerCondition.pathPatterns(["/actuator/mockfeed-health", "/v1/mockfeed/*", "/getAllSymbols", "/token", "/getbars"])
             ],
             action: ListenerAction.forward([targetGroup])
         });
