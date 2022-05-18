@@ -14,6 +14,9 @@ public class EntityReader {
 	@Autowired
 	private WatchlistRespository watchlistRespository;
 
+	@Autowired
+	private SymbolRespository symbolRespository;
+	
 	public WatchlistEntity getWatchlistEntity(UUID id) {
 		Optional<WatchlistEntity> entityContainer = watchlistRespository.findById(id);
 		if (entityContainer.isPresent()) {
@@ -29,5 +32,14 @@ public class EntityReader {
 			watchlists.add(ft);
 		}
 		return watchlists;
+	}
+
+	public List<SymbolEntity> getAllSymbolEntites() {
+		Iterable<SymbolEntity> iterable = symbolRespository.findAll();
+		List<SymbolEntity> stocks = new ArrayList<>();
+		for (SymbolEntity ft : iterable) {
+			stocks.add(ft);
+		}
+		return stocks;
 	}
 }

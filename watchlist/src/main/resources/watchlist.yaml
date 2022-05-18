@@ -158,6 +158,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /v1/watchlist/symbol:
+    get:
+      tags:
+        - symbol
+      summary: get all symbols
+      description: get symbol list
+      operationId: getAllSymbols
+      responses:
+        '200':
+          description: >-
+            Request sucessfully processed.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SymbolResponse'
+        '400':
+          description: Request is not understood.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/watchlist/symbol/update:
+    get:
+      tags:
+        - symbol
+      summary: update all symbols
+      description: update symbol list
+      operationId: updateAllSymbols
+      parameters:
+        - in: query
+          name: exchange
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: url
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: >-
+            Request sucessfully processed.
+        '400':
+          description: Request is not understood.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'                    
 components:
   schemas:
     WatchlistCreateRequest:
@@ -215,6 +266,30 @@ components:
         value:
           type: string
           description: The new value of the json attribute to be patched.
+    SymbolResponse:
+      required:
+        - symbol
+        - exchange
+        - name
+        - dol
+      type: object
+      properties:
+        symbol:
+          type: string
+          description: symbol of stock
+        exchange:
+          type: string
+          description: exchage that stock belongs to
+        name:
+          type: string
+          description: name of stock
+        series:
+          type: string
+          description: series of stock
+        dol:
+          type: string
+          description: date of listing
+          format: "date"          
     Error:
       type: object
       properties:
