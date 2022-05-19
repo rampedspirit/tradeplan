@@ -1,6 +1,7 @@
 package com.bhs.gtk.mockfeed.websocket;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,7 +57,7 @@ public class WebsocketHandler extends TextWebSocketHandler {
 		} else {
 			authResponse.setSuccess(true);
 			authResponse.setMessage("MockData Real Time Data Service");
-			authResponse.segments(List.of("nseeq", "nsefo", "mcx", "cds"));
+			authResponse.segments(Arrays.asList("nseeq", "nsefo", "mcx", "cds"));
 			authResponse.setMaxsymbols(stockService.getAllSymbolsCount());
 			authResponse.setSubscription(SubscriptionEnum._1MIN);
 

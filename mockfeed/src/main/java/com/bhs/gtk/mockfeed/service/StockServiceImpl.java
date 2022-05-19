@@ -35,7 +35,8 @@ public class StockServiceImpl implements StockService {
 	private static final String DATE_OF_LISTING = " DATE OF LISTING";
 
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MMM-yy");
-	private DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy'T'HH:mm");
+	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy'T'HH:mm");
+	private static final List<DayOfWeek> EXCLUDED_DAYS_OF_WEEK = List.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
 
 	@Autowired
 	private EntityReader entityReader;
@@ -137,10 +138,9 @@ public class StockServiceImpl implements StockService {
 
 	private List<OffsetDateTime> getMarketMinutesBetween(OffsetDateTime from, OffsetDateTime to) {
 		List<OffsetDateTime> minutes = new ArrayList<>();
-		List<DayOfWeek> excludedDaysOfWeek = List.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
 		OffsetDateTime time = from;
 		while (ChronoUnit.MINUTES.between(time, to) != 0) {
-			if (!excludedDaysOfWeek.contains(time.getDayOfWeek()) && (9 <= time.getHour() && time.getHour() <= 16)) {
+			if (!EXCLUDED_DAYS_OF_WEEK.contains(time.getDayOfWeek()) && (9 <= time.getHour() && time.getHour() <= 16)) {
 				minutes.add(time);
 			}
 			time = time.plusMinutes(1);
