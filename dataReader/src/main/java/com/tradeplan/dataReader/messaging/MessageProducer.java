@@ -18,7 +18,7 @@ public class MessageProducer {
 		try {
 			switch (type) {
 			case DATA_READ_RESPONSE:
-				topicName = TopicNames.OUTPUT_EXECUTION_RESPONSE;
+				topicName = TopicNames.OUTPUT_READ_RESPONSE;
 				break;
 			default:
 				throw new IllegalArgumentException(type+" is not supported message type in Execution service");
