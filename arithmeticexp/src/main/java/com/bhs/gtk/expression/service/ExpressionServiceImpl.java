@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,31 +119,31 @@ public class ExpressionServiceImpl implements ExpressionService {
 		//TODO logic to be completed...
 		String parseTree = expressionEntity.getParseTree();
 		Expression expression = converter.convertToExpression(parseTree);
-		return evaluateExpression(expression);
+		return evaluateExpression(expression,scripName,marketTime);
 	}
 
-	private double evaluateExpression(Expression expression) {
+	private double evaluateExpression(Expression expression,String scripName, Date marketTime) {
 		double result = Double.NEGATIVE_INFINITY;
 		if(expression instanceof ExpressionGroup) {
-			result = evaluateExpressionGroup((ExpressionGroup)expression);
+			result = evaluateExpressionGroup((ExpressionGroup)expression, scripName, marketTime);
 		} else if(expression instanceof FunctionChain) {
-			result = evaluateFunctionChain((FunctionChain)expression);
+			result = evaluateFunctionChain((FunctionChain)expression, scripName, marketTime);
 		}else if(expression instanceof NumericValue) {
 			result = evaluateNumericExpression((NumericValue)expression);
 		}
 		return result;
 	}
 
-	private double evaluateFunctionChain(FunctionChain expression) {
+	private double evaluateFunctionChain(FunctionChain expression,String scripName, Date marketTime) {
 		//TODO: write logic to execute functaionChain
 		return 600.5;
 	}
 
-	private double evaluateExpressionGroup(ExpressionGroup expression) {
+	private double evaluateExpressionGroup(ExpressionGroup expression,String scripName, Date marketTime) {
 		Double result = null;
 		List<Double> intermediateResult = new ArrayList<>();
 		for( Expression exp : expression.getExpressions()) {
-			double expResult = evaluateExpression(exp);
+			double expResult = evaluateExpression(exp, scripName, marketTime);
 			intermediateResult.add(expResult);
 			if(StringUtils.isNotBlank(exp.getOperation())) {
 				result = calculateResult(exp.getOperation(), intermediateResult);
