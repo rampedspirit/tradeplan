@@ -18,6 +18,9 @@ export class CognitoStack extends Stack {
                 emailBody: 'Hi {username}, \n Thanks for signing up with TradePlan ! Please use verification code {####}',
                 emailStyle: VerificationEmailStyle.CODE
             },
+            autoVerify: {
+                email: true
+            },
             standardAttributes: {
                 email: {
                     required: true
