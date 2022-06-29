@@ -5,11 +5,20 @@ import { EcrStack } from '../lib/repository/ecr-stack';
 import { VpcStack } from '../lib/network/vpc-stack';
 import { EcsDbStack } from '../lib/database/ecs-db-stack';
 import { EcsAppStack } from '../lib/application/ecs-app-stack';
+import { CognitoStack } from '../lib/auth/cognito-stack';
 
 const app = new cdk.App();
 
 const stackPrefix = app.node.tryGetContext('stackPrefix');
 const imageTag = app.node.tryGetContext('imageTag');
+
+new CognitoStack(app, stackPrefix + "-COGNITO-Stack", {
+    stackName: stackPrefix + "-COGNITO-Stack",
+    env: {
+        account: process.env.CDK_DEFAULT_ACCOUNT,
+        region: process.env.CDK_DEFAULT_REGION
+    }
+});
 
 new EcrStack(app, stackPrefix + "-ECR-Stack", {
     stackName: stackPrefix + "-ECR-Stack"
