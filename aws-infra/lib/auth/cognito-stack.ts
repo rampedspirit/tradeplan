@@ -1,4 +1,4 @@
-import { Stack, StackProps } from "aws-cdk-lib";
+import { CfnOutput, Stack, StackProps } from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { AccountRecovery, StringAttribute, UserPool, UserPoolClient, VerificationEmailStyle } from "aws-cdk-lib/aws-cognito";
 
@@ -37,5 +37,18 @@ export class CognitoStack extends Stack {
                 userPassword: true
             }
         });
+
+        //Export userPoolId
+        new CfnOutput(this, "userPoolId", {
+            value: userPool.userPoolId,
+            exportName: props.stackName + "-userPoolId",
+        });
+
+        //Export userPoolWebClientId
+        new CfnOutput(this, "userPoolWebClientId", {
+            value: userPoolClient.userPoolClientId,
+            exportName: props.stackName + "-userPoolWebClientId",
+        });
+
     }
 }
