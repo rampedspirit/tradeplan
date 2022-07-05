@@ -7,5 +7,7 @@ export const environment = {
   conditionApiBasePath: "appUrl",
   screenerApiBasePath: "appUrl",
   watchlistApiBasePath: "appUrl",
-  stockApiBasePath: "appUrl"
+  stockApiBasePath: "appUrl",
+  userPoolId: 'userPoolId',
+  userPoolWebClientId: 'userPoolWebClientId'
 };

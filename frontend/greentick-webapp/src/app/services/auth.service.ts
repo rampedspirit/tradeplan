@@ -67,7 +67,8 @@ export class AuthService {
       username: email,
       password: password,
       attributes: {
-        name: name
+        name: name,
+        email: email
       }
     });
   }

@@ -35,9 +35,9 @@
     </mat-error>
     <mat-selection-list #scripNamesList dense [multiple]="true"
         (selectionChange)="onSelectionChange(scripNamesList.selectedOptions.selected)">
-        <mat-list-option *ngFor="let stock of (stocks | stockNameSearch:stockSearch.value)" [value]="stock.symbol"
-            [selected]="scripNames.includes(stock.symbol)">
-            {{stock.name}}
+        <mat-list-option *ngFor="let symbol of (symbols | stockNameSearch:stockSearch.value)" [value]="symbol.symbol"
+            [selected]="scripNames.includes(symbol.symbol)">
+            {{symbol.name}}
         </mat-list-option>
     </mat-selection-list>
 </form>

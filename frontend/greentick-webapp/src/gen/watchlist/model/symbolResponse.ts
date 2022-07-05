@@ -1,6 +1,6 @@
 /**
- * Stock
- * These are stock service APIs
+ * Watchlist
+ * These are Watchlist service APIs
  *
  * OpenAPI spec version: 1.0.0
  * 
@@ -10,7 +10,7 @@
  * Do not edit the class manually.
  */
 
-export interface StockResponse { 
+export interface SymbolResponse { 
     /**
      * symbol of stock
      */

@@ -58,9 +58,6 @@ import { BASE_PATH as WATCHLIST_API_BASE_PATH } from 'src/gen/watchlist';
 import { ApiModule as ScreenerApiModule } from 'src/gen/screener';
 import { BASE_PATH as SCREENER_API_BASE_PATH } from 'src/gen/screener';
 
-import { ApiModule as StockApiModule } from 'src/gen/stock';
-import { BASE_PATH as STOCK_API_BASE_PATH } from 'src/gen/stock';
-
 import { ConditionListComponent } from './components/condition/condition-list/condition-list.component';
 import { ConditionCreateComponent } from './components/condition/condition-create/condition-create.component';
 import { ConditionEditComponent } from './components/condition/condition-edit/condition-edit.component';
@@ -83,13 +80,14 @@ import { WatchlistEditComponent } from './components/watchlist/watchlist-edit/wa
 import { WatchlistNameSearchPipe } from './components/watchlist/watchlist-name-search.pipe';
 import { FeedbackComponent } from './components/feedback/feedback.component';
 import { StockNameSearchPipe } from './components/watchlist/stock-name-search.pipe';
+import { WsComponent } from './components/ws/ws.component';
 
 Amplify.configure({
   Auth: {
     mandatorySignIn: true,
     region: 'ap-south-1',
-    userPoolId: 'ap-south-1_XbmXK37O2',
-    userPoolWebClientId: '2h4d41bhrr467dtg341j90q652',
+    userPoolId: environment.userPoolId,
+    userPoolWebClientId: environment.userPoolWebClientId,
     authenticationFlowType: 'USER_PASSWORD_AUTH'
   }
 });
@@ -127,7 +125,8 @@ Amplify.configure({
     WatchlistEditComponent,
     WatchlistNameSearchPipe,
     FeedbackComponent,
-    StockNameSearchPipe
+    StockNameSearchPipe,
+    WsComponent
   ],
   imports: [
     BrowserModule,
@@ -137,7 +136,6 @@ Amplify.configure({
     ConditionApiModule,
     WatchlistApiModule,
     ScreenerApiModule,
-    StockApiModule,
     HttpClientModule,
     MatCardModule,
     MatButtonModule,
@@ -182,10 +180,6 @@ Amplify.configure({
   {
     provide: SCREENER_API_BASE_PATH,
     useValue: environment.screenerApiBasePath
-  },
-  {
-    provide: STOCK_API_BASE_PATH,
-    useValue: environment.stockApiBasePath
   }, DatePipe],
   bootstrap: [AppComponent]
 })

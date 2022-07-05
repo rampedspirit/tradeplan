@@ -1,6 +1,6 @@
 /**
- * Stock
- * These are stock service APIs
+ * Watchlist
+ * These are Watchlist service APIs
  *
  * OpenAPI spec version: 1.0.0
  * 
@@ -17,16 +17,16 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 
 import { Observable }                                        from 'rxjs';
 
-import { StockResponse } from '../model/stockResponse';
+import { SymbolResponse } from '../model/symbolResponse';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 
 
 @Injectable()
-export class StockService {
+export class SymbolService {
 
-    protected basePath = 'http://localhost:5005/';
+    protected basePath = 'http://localhost:5004/';
     public defaultHeaders = new HttpHeaders();
     public configuration = new Configuration();
 
@@ -56,15 +56,15 @@ export class StockService {
 
 
     /**
-     * get all stocks
-     * get stock list
+     * get all symbols
+     * get symbol list
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getAllStocks(observe?: 'body', reportProgress?: boolean): Observable<Array<StockResponse>>;
-    public getAllStocks(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<StockResponse>>>;
-    public getAllStocks(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<StockResponse>>>;
-    public getAllStocks(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public getAllSymbols(observe?: 'body', reportProgress?: boolean): Observable<Array<SymbolResponse>>;
+    public getAllSymbols(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<SymbolResponse>>>;
+    public getAllSymbols(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<SymbolResponse>>>;
+    public getAllSymbols(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         let headers = this.defaultHeaders;
 
@@ -81,7 +81,7 @@ export class StockService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<Array<StockResponse>>('get',`${this.basePath}/v1/stock`,
+        return this.httpClient.request<Array<SymbolResponse>>('get',`${this.basePath}/v1/watchlist/symbol`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -92,24 +92,24 @@ export class StockService {
     }
 
     /**
-     * update all stocks
-     * update stock list
+     * update all symbols
+     * update symbol list
      * @param exchange 
      * @param url 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public updateAllStocks(exchange: string, url: string, observe?: 'body', reportProgress?: boolean): Observable<any>;
-    public updateAllStocks(exchange: string, url: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
-    public updateAllStocks(exchange: string, url: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
-    public updateAllStocks(exchange: string, url: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public updateAllSymbols(exchange: string, url: string, observe?: 'body', reportProgress?: boolean): Observable<any>;
+    public updateAllSymbols(exchange: string, url: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
+    public updateAllSymbols(exchange: string, url: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
+    public updateAllSymbols(exchange: string, url: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (exchange === null || exchange === undefined) {
-            throw new Error('Required parameter exchange was null or undefined when calling updateAllStocks.');
+            throw new Error('Required parameter exchange was null or undefined when calling updateAllSymbols.');
         }
 
         if (url === null || url === undefined) {
-            throw new Error('Required parameter url was null or undefined when calling updateAllStocks.');
+            throw new Error('Required parameter url was null or undefined when calling updateAllSymbols.');
         }
 
         let queryParameters = new HttpParams({encoder: new CustomHttpUrlEncodingCodec()});
@@ -135,7 +135,7 @@ export class StockService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<any>('get',`${this.basePath}/v1/stock/update`,
+        return this.httpClient.request<any>('get',`${this.basePath}/v1/watchlist/symbol/update`,
             {
                 params: queryParameters,
                 withCredentials: this.configuration.withCredentials,

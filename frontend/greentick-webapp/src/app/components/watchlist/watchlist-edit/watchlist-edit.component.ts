@@ -1,13 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { MatListOption, MatSelectionListChange } from '@angular/material/list';
-import { MatSelect } from '@angular/material/select';
+import { MatListOption } from '@angular/material/list';
 import { NgxSpinnerService } from 'ngx-spinner';
-import { EditorService } from 'src/app/services/editor.service';
 import { Tab } from 'src/app/services/tab-area.service';
-import { StockResponse, StockService } from 'src/gen/stock';
-import { WatchlistService } from 'src/gen/watchlist';
+import { SymbolResponse, SymbolService, WatchlistService } from 'src/gen/watchlist';
 import { ConfirmationComponent } from '../../common/confirmation/confirmation.component';
 import { MessageComponent } from '../../common/message/message.component';
 import { WatchlistNotificationService } from '../watchlist-notification.service';
@@ -22,7 +19,7 @@ export class WatchlistEditComponent implements OnInit {
   fetchError: boolean;
   editWatchlistForm: FormGroup;
 
-  stocks: StockResponse[];
+  symbols: SymbolResponse[];
   scripNames: string[];
 
   @Input()
@@ -36,9 +33,8 @@ export class WatchlistEditComponent implements OnInit {
     return this.editWatchlistForm.get('description') as FormControl;
   }
 
-  constructor(private stockService: StockService, private watchlistService: WatchlistService,
-    private watchlistNotificationService: WatchlistNotificationService, private dialog: MatDialog,
-    private spinner: NgxSpinnerService) {
+  constructor(private watchlistService: WatchlistService, private watchlistNotificationService: WatchlistNotificationService,
+    private symbolService: SymbolService, private dialog: MatDialog, private spinner: NgxSpinnerService) {
   }
 
   ngOnInit(): void {
@@ -68,8 +64,8 @@ export class WatchlistEditComponent implements OnInit {
   refresh2 = () => {
     this.fetchError = false;
     this.spinner.show();
-    this.stockService.getAllStocks().subscribe(allStocks => {
-      this.stocks = allStocks;
+    this.symbolService.getAllSymbols().subscribe(allSymbols => {
+      this.symbols = allSymbols;
       this.spinner.hide();
     }, error => {
       this.fetchError = true;

@@ -8,7 +8,9 @@ export const environment = {
   conditionApiBasePath: "http://localhost:5001/",
   screenerApiBasePath: "http://localhost:5002/",
   watchlistApiBasePath: "http://localhost:5004/",
-  stockApiBasePath: "http://localhost:5005/"
+  stockApiBasePath: "http://localhost:5005/",
+  userPoolId: 'ap-south-1_EslccvLDM',
+  userPoolWebClientId: '2cqbm3tiktsvetkg81s5l6fukg'
 };
 
 /*

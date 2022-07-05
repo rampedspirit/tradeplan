@@ -52,7 +52,7 @@ export class LoginComponent implements OnInit {
       this.authService.login(email, password)
         .then(user => {
           this.reset();
-          this.router.navigate(['/home']);
+          this.router.navigate(['/main']);
           console.log("Login Successfull");
         })
         .catch(error => {

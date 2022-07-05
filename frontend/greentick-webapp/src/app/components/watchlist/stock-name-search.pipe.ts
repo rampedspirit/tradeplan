@@ -1,12 +1,12 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { StockResponse } from 'src/gen/stock';
+import { SymbolResponse } from 'src/gen/watchlist';
 
 @Pipe({
   name: 'stockNameSearch'
 })
 export class StockNameSearchPipe implements PipeTransform {
 
-  transform(stocks: StockResponse[], searchText: string): StockResponse[] {
+  transform(stocks: SymbolResponse[], searchText: string): SymbolResponse[] {
     if (searchText == null || stocks == null) {
       return stocks;
     }

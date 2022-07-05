@@ -1,0 +1,46 @@
+<div fxLayout="column" fxLayoutGap="10px" fxLayoutAlign="center">
+
+    <div fxLayout="row" fxLayoutGap="10px">
+        <h2>Connection</h2>
+        <div fxLayout="row" fxLayoutGap="10px">
+            <button mat-flat-button color="primary" (click)="doLogin()">Log In</button>
+            <button mat-flat-button color="primary" (click)="doLogout()">Log Out</button>
+            <button mat-flat-button color="primary" (click)="doDisconnect()">Disconnect</button>
+        </div>
+    </div>
+
+    <form fxLayout="row" fxLayoutGap="10px" [formGroup]="connectForm">
+        <mat-form-field>
+            <mat-label>Name</mat-label>
+            <input matInput [formControl]="nameControl">
+            <mat-error *ngIf="nameControl && nameControl.invalid">Please enter valid name.</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Password</mat-label>
+            <input type="password" matInput [formControl]="passwordControl">
+            <mat-error *ngIf="passwordControl && passwordControl.invalid">Please enter valid password.
+            </mat-error>
+        </mat-form-field>
+    </form>
+
+    <div fxLayout="row" fxLayoutGap="10px">
+        <h2>Send</h2>
+        <mat-select [(ngModel)]="selectedMethod" (selectionChange)="onMethodSelectionChange()">
+            <mat-option *ngFor="let method of allMethods" [value]="method">
+                {{method.method}}
+            </mat-option>
+        </mat-select>
+        <div fxLayout="row" fxLayoutGap="10px">
+            <button mat-flat-button color="primary" (click)="doSend()">Send</button>
+        </div>
+    </div>
+    <textarea rows="10" [(ngModel)]="payload"></textarea>
+
+
+
+    <h2>Response</h2>
+    <textarea rows="10">{{response}}</textarea>
+</div>
+<mat-error *ngIf="error">{{error}}</mat-error>
+
+<ngx-spinner type="ball-spin-clockwise"></ngx-spinner>

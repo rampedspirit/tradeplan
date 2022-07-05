@@ -3,6 +3,7 @@ import { Configuration } from './configuration';
 import { HttpClient } from '@angular/common/http';
 
 
+import { SymbolService } from './api/symbol.service';
 import { WatchlistService } from './api/watchlist.service';
 
 @NgModule({
@@ -10,6 +11,7 @@ import { WatchlistService } from './api/watchlist.service';
   declarations: [],
   exports:      [],
   providers: [
+    SymbolService,
     WatchlistService ]
 })
 export class ApiModule {
