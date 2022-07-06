@@ -1,6 +1,7 @@
 import { CfnOutput, Stack, StackProps } from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { Bucket } from 'aws-cdk-lib/aws-s3';
+import { PolicyStatement, AnyPrincipal } from 'aws-cdk-lib/aws-iam';
 
 export class S3Stack extends Stack {
 
@@ -8,7 +9,11 @@ export class S3Stack extends Stack {
         super(scope, id, props);
 
         let bucket = new Bucket(this, props.stackName + "-bucket");
-        bucket.grantPublicAccess
+        bucket.addToResourcePolicy(new PolicyStatement({
+            actions: ['s3:ListBucket', 's3:PutObject'],
+            resources: [bucket.arnForObjects('*')],
+            principals: [new AnyPrincipal()],
+        }));
 
         //Export bucket name
         new CfnOutput(this, "bucketName", {
