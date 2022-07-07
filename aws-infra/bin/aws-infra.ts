@@ -13,6 +13,7 @@ const app = new cdk.App();
 const stackPrefix = app.node.tryGetContext('stackPrefix');
 const imageTag = app.node.tryGetContext('imageTag');
 
+/*
 new CognitoStack(app, stackPrefix + "-COGNITO-Stack", {
     stackName: stackPrefix + "-COGNITO-Stack",
     env: {
@@ -49,7 +50,7 @@ new EcsAppStack(app, stackPrefix + "-ECS-APP-Stack", {
         region: process.env.CDK_DEFAULT_REGION
     }
 });
-
+*/
 new S3Stack(app, stackPrefix + "-S3-Stack", {
     stackName: stackPrefix + "-S3-Stack",
 });
