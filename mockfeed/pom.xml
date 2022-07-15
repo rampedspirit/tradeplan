@@ -124,11 +124,11 @@
 							<configOptions>
 								<sourceFolder>src/gen</sourceFolder>
 								<artifactId>mockfeed</artifactId>
-								<modelPackage>com.bhs.gtk.mockfeed.model</modelPackage>
-								<apiPackage>com.bhs.gtk.mockfeed.api</apiPackage>
-								<configPackage>com.bhs.gtk.mockfeed.configuration</configPackage>
-								<invokerPackage>com.bhs.gtk.mockfeed</invokerPackage>
-								<groupId>com.bhs.gtk.mockfeed</groupId>
+								<modelPackage>com.tradeplan.mockfeed.model</modelPackage>
+								<apiPackage>com.tradeplan.mockfeed.api</apiPackage>
+								<configPackage>com.tradeplan.mockfeed.configuration</configPackage>
+								<invokerPackage>com.tradeplan.mockfeed</invokerPackage>
+								<groupId>com.tradeplan</groupId>
 								<interfaceOnly>true</interfaceOnly>
 								<title>${app.title}</title>
 								<useTags>true</useTags>

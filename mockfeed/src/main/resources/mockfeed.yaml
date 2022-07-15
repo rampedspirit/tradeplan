@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   description: These are mock feed APIs
   version: 1.0.0
-  title: Stock
+  title: Mockfeed
 servers:
   - url: 'http://localhost:5006/'
   - url: 'https://localhost:5006/'

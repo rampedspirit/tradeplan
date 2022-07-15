@@ -1,0 +1,33 @@
+openapi: 3.0.0
+info:
+  description: These are data writer APIs
+  version: 1.0.0
+  title: Stock
+servers:
+  - url: 'http://localhost:5005/'
+  - url: 'https://localhost:5005/'
+paths:
+  /v1/datawriter/updateAllSymbols:
+    get:
+      tags:
+        - admin
+      operationId: updateAllSymbols
+      responses:
+        '200':
+          description: Request sucessfully processed.
+  /v1/datawriter/start:
+    get:
+      tags:
+        - admin
+      operationId: start
+      responses:
+        '200':
+          description: Request sucessfully processed.
+  /v1/datawriter/stop:
+    get:
+      tags:
+        - admin
+      operationId: stop
+      responses:
+        '200':
+          description: Request sucessfully processed.                    

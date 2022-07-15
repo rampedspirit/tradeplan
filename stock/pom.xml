@@ -7,11 +7,11 @@
 		<version>2.5.4</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.bhscloudtech.greentick</groupId>
-	<artifactId>stock</artifactId>
+	<groupId>com.tradeplan</groupId>
+	<artifactId>datawriter</artifactId>
 	<version>0.0.1</version>
-	<name>stock</name>
-	<description>stock service</description>
+	<name>Data Writer</name>
+	<description>Inserts stock candle data</description>
 	<properties>
 		<java.version>1.8</java.version>
 	</properties>
@@ -85,6 +85,14 @@
 			<artifactId>commons-csv</artifactId>
 			<version>1.8</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -99,7 +107,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- Automatic code generation for yaml -->
 			<plugin>
 				<groupId>io.swagger.codegen.v3</groupId>
 				<artifactId>swagger-codegen-maven-plugin</artifactId>
@@ -111,17 +118,17 @@
 							<goal>generate</goal>
 						</goals>
 						<configuration>
-							<inputSpec>${project.basedir}/src/main/resources/stock.yaml</inputSpec>
+							<inputSpec>${project.basedir}/src/main/resources/datawriter.yaml</inputSpec>
 							<language>spring</language>
 							<output>${project.basedir}</output>
 							<configOptions>
 								<sourceFolder>src/gen</sourceFolder>
-								<artifactId>watchlist</artifactId>
-								<modelPackage>com.bhs.gtk.watchlist.model</modelPackage>
-								<apiPackage>com.bhs.gtk.watchlist.api</apiPackage>
-								<configPackage>com.bhs.gtk.watchlist.configuration</configPackage>
-								<invokerPackage>com.bhs.gtk.watchlist</invokerPackage>
-								<groupId>com.bhs.gtk.watchlist</groupId>
+								<artifactId>datawriter</artifactId>
+								<modelPackage>com.tradeplan.datawriter.model</modelPackage>
+								<apiPackage>com.tradeplan.datawriter.api</apiPackage>
+								<configPackage>com.tradeplan.datawriter.configuration</configPackage>
+								<invokerPackage>com.tradeplan.datawriter</invokerPackage>
+								<groupId>com.tradeplan</groupId>
 								<interfaceOnly>true</interfaceOnly>
 								<title>${app.title}</title>
 								<useTags>true</useTags>
