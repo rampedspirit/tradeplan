@@ -28,7 +28,7 @@ jobs:
       #patch cognito user pool id
       - name: Fetch cognito cloudformation stack info for user pool id
         id: cognitoStackInfoForUserPoolId
-        run: echo ::set-output name=USER_POOL_ID::$(aws cloudformation --region ap-south-1 describe-stacks --stack-name ${{ github.event.inputs.StackNamePrefix }}-COGNITO-Stack --query "Stacks[0].Outputs[?OutputKey=='userPoolId'].OutputValue  | [0]")
+        run: echo ::set-output name=USER_POOL_ID::$(aws cloudformation --region ap-south-1 describe-stacks --stack-name ${{ github.event.inputs.StackNamePrefix }}-COGNITO-Stack --query "Stacks[0].Outputs[?OutputKey=='userPoolId'].OutputValue  | [0]" --output text)
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -43,7 +43,7 @@ jobs:
       #patch cognito webclient id
       - name: Fetch cognito cloudformation stack info for webclient id
         id: cognitoStackInfoForWebClientId
-        run: echo ::set-output name=WEBCLIENT_ID::$(aws cloudformation --region ap-south-1 describe-stacks --stack-name ${{ github.event.inputs.StackNamePrefix }}-COGNITO-Stack --query "Stacks[0].Outputs[?OutputKey=='userPoolWebClientId'].OutputValue | [0]")
+        run: echo ::set-output name=WEBCLIENT_ID::$(aws cloudformation --region ap-south-1 describe-stacks --stack-name ${{ github.event.inputs.StackNamePrefix }}-COGNITO-Stack --query "Stacks[0].Outputs[?OutputKey=='userPoolWebClientId'].OutputValue | [0]" --output text)
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
