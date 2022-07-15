@@ -24,15 +24,15 @@ jobs:
       # As you can see below we are using matrix.node-version => it means it will execute for all possible combinations
       # provided matrix keys array(in our case only one kye => node-version)
       - uses: actions/checkout@v2
-      
+
       #patch cognito user pool id
       - name: Fetch cognito cloudformation stack info for user pool id
         id: cognitoStackInfoForUserPoolId
-        run: echo ::set-output name=USER_POOL_ID::$(aws cloudformation --region ap-south-1 describe-stacks --stack-name ${{ github.event.inputs.StackNamePrefix }}-COGNITO-Stack --query Stacks[0].Outputs[?OutputKey=='userPoolId'].OutputValue --output text)
+        run: echo ::set-output name=USER_POOL_ID::$(aws cloudformation --region ap-south-1 describe-stacks --stack-name ${{ github.event.inputs.StackNamePrefix }}-COGNITO-Stack --query "Stacks[0].Outputs[?OutputKey=='userPoolId'].OutputValue  | [0]")
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: 'ap-south-1'
+          AWS_DEFAULT_REGION: "ap-south-1"
       - name: Replace user pool id
         uses: jacobtomlinson/gha-find-replace@v2
         with:
@@ -43,16 +43,16 @@ jobs:
       #patch cognito webclient id
       - name: Fetch cognito cloudformation stack info for webclient id
         id: cognitoStackInfoForWebClientId
-        run: echo ::set-output name=WEBCLIENT_ID::$(aws cloudformation --region ap-south-1 describe-stacks --stack-name ${{ github.event.inputs.StackNamePrefix }}-COGNITO-Stack --query Stacks[0].Outputs[?OutputKey=='userPoolWebClientId'].OutputValue --output text)
+        run: echo ::set-output name=WEBCLIENT_ID::$(aws cloudformation --region ap-south-1 describe-stacks --stack-name ${{ github.event.inputs.StackNamePrefix }}-COGNITO-Stack --query "Stacks[0].Outputs[?OutputKey=='userPoolWebClientId'].OutputValue | [0]")
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: 'ap-south-1'
+          AWS_DEFAULT_REGION: "ap-south-1"
       - name: Replace webclient id
         uses: jacobtomlinson/gha-find-replace@v2
         with:
           find: "userPoolWebClientIdValue"
-          replace: "${{ steps.cognitoStackInfoForWebClientId.outputs.WEBCLIENT_ID }}"
+          replace: ${{ steps.cognitoStackInfoForWebClientId.outputs.WEBCLIENT_ID }}
           include: "**environment.prod.ts"
 
       # patch app Url with the actual value
@@ -62,7 +62,7 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: 'ap-south-1'
+          AWS_DEFAULT_REGION: "ap-south-1"
       - name: Fix raw app url
         id: fixUrl
         run: |
@@ -74,19 +74,19 @@ jobs:
         with:
           find: "appUrl"
           replace: http://${{ steps.fixUrl.outputs.APP_URL }}
-          include: "**environment.prod.ts"      
-          
+          include: "**environment.prod.ts"
+
       - name: Use Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16'
-          cache: 'npm'
+          node-version: "16"
+          cache: "npm"
           cache-dependency-path: frontend/greentick-webapp
 
       # Install the node modules
       - name: NPM Install
         run: npm install
-        working-directory: frontend/greentick-webapp        
+        working-directory: frontend/greentick-webapp
 
       # Create production build
       - name: Production Build
@@ -102,7 +102,7 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: 'ap-south-1'
+          AWS_DEFAULT_REGION: "ap-south-1"
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:
