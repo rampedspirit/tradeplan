@@ -1,4 +1,4 @@
-name: Deploy S3 Services
+name: Deploy Static Site Services
 
 on:
   workflow_dispatch:
@@ -13,11 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      - name: Deploy S3
+      - name: Deploy Static Site Resources
         uses: youyo/aws-cdk-github-actions@v2
         with:
           cdk_subcommand: 'deploy'
-          cdk_stack: ${{ github.event.inputs.StackNamePrefix }}-S3-Stack
+          cdk_stack: ${{ github.event.inputs.StackNamePrefix }}-StaticSite-Stack
           cdk_args: '--context stackPrefix=${{ github.event.inputs.StackNamePrefix }}'
           working_dir: 'aws-infra'
         env:

@@ -6,7 +6,7 @@ import { VpcStack } from '../lib/network/vpc-stack';
 import { EcsDbStack } from '../lib/database/ecs-db-stack';
 import { EcsAppStack } from '../lib/application/ecs-app-stack';
 import { CognitoStack } from '../lib/auth/cognito-stack';
-import { StaticSiteStack } from '../lib/s3/s3-stack';
+import { StaticSiteStack } from '../lib/staticsite/staticstite-stack';
 
 const app = new cdk.App();
 
@@ -50,6 +50,6 @@ new EcsAppStack(app, stackPrefix + "-ECS-APP-Stack", {
     }
 });
 
-new StaticSiteStack(app, stackPrefix + "-S3-Stack", {
+new StaticSiteStack(app, stackPrefix + "-StaticSite-Stack", {
     stackName: stackPrefix + "-StaticSite-Stack",
 });
