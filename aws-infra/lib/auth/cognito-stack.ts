@@ -7,7 +7,7 @@ export class CognitoStack extends Stack {
     constructor(scope: Construct, id: string, props: StackProps) {
         super(scope, id, props);
 
-        let userPool: UserPool = new UserPool(this, 'tradeplan-userpool', {
+        let userPool: UserPool = new UserPool(this, props.stackName + '-userpool', {
             selfSignUpEnabled: true,
             passwordPolicy: {
                 minLength: 8,
