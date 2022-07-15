@@ -28,7 +28,7 @@ export class StaticSiteStack extends Stack {
         // Cloud Front Distribution
         let distribution: Distribution = new Distribution(this, props.stackName + "-distribution", {
             defaultBehavior: {
-                origin: new S3Origin(Bucket.fromBucketArn(this, props.stackName + "-bucket", bucket.bucketArn))
+                origin: new S3Origin(Bucket.fromBucketArn(this, props.stackName + "-bucket-cloudfront", bucket.bucketArn))
             },
         });
 
