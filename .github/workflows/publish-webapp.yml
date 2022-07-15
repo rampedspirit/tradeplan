@@ -98,7 +98,7 @@ jobs:
       # For security purpose I am using secrets configured in project repo setting.
       - name: Fetch s3 bucket name
         id: s3BucketInfo
-        run: echo ::set-output name=S3_BUCKET_NAME::$(aws cloudformation --region ap-south-1 describe-stacks --stack-name ${{ github.event.inputs.StackNamePrefix }}-S3-Stack --query Stacks[0].Outputs[0].OutputValue)
+        run: echo ::set-output name=S3_BUCKET_NAME::$(aws cloudformation --region ap-south-1 describe-stacks --stack-name ${{ github.event.inputs.StackNamePrefix }}-StaticSite-Stack --query Stacks[0].Outputs[0].OutputValue)
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
