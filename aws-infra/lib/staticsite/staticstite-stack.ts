@@ -30,6 +30,7 @@ export class StaticSiteStack extends Stack {
             defaultBehavior: {
                 origin: new S3Origin(Bucket.fromBucketArn(this, props.stackName + "-bucket-cloudfront", bucket.bucketArn))
             },
+            defaultRootObject: "index.html"
         });
 
         //Export bucket name
