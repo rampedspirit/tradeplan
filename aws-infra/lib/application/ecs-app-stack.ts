@@ -68,7 +68,7 @@ export class EcsAppStack extends Stack {
         this.createScreenerService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, dnsNamespace);
         this.createExpressionService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, dnsNamespace);
         this.createWatchlistService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, dnsNamespace);
-        this.createStockService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
+        this.createDataWriterService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
         this.createMockfeedService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
     }
 
@@ -555,7 +555,7 @@ export class EcsAppStack extends Stack {
     }
 
     /**
-     * Creates the stock service
+     * Creates the data writer service
      * @param stackName 
      * @param imageTag
      * @param vpc 
@@ -565,33 +565,33 @@ export class EcsAppStack extends Stack {
      * @param dbCredentials 
      * @param dbLoadBalancerUrl
      */
-    private createStockService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
+    private createDataWriterService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
         applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string) {
 
         //Load Balancer Config
-        let targetGroup = new ApplicationTargetGroup(this, stackName + "-stock-service-target-group", {
+        let targetGroup = new ApplicationTargetGroup(this, stackName + "-datawriter-service-target-group", {
             vpc: vpc,
             port: 5005,
             protocol: ApplicationProtocol.HTTP,
             healthCheck: {
-                path: "/actuator/stock-health"
+                path: "/actuator/datawriter-health"
             }
         });
 
-        new ApplicationListenerRule(this, "stockservice-listener-rule", {
+        new ApplicationListenerRule(this, "datawriterservice-listener-rule", {
             listener: applicationListener,
             priority: 6,
             conditions: [
-                ListenerCondition.pathPatterns(["/actuator/stock-health", "/v1/stock", "/v1/stock/*"])
+                ListenerCondition.pathPatterns(["/actuator/datawriter-health", "/v1/datawriter", "/v1/datawriter/*"])
             ],
             action: ListenerAction.forward([targetGroup])
         });
 
         //Service Config
-        let taskDefinition = new Ec2TaskDefinition(this, stackName + '-stock-service-taskdef');
+        let taskDefinition = new Ec2TaskDefinition(this, stackName + '-datawriter-service-taskdef');
 
-        taskDefinition.addContainer(stackName + "-stock-service-container", {
-            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-stock-service", "gtk-stock-service"), imageTag),
+        taskDefinition.addContainer(stackName + "-datawriter-service-container", {
+            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-datawriter-service", "gtk-datawriter-service"), imageTag),
             cpu: 50,
             memoryLimitMiB: 256,
             essential: true,
@@ -613,7 +613,7 @@ export class EcsAppStack extends Stack {
             }),
         });
 
-        let service = new Ec2Service(this, stackName + "-stock-service", {
+        let service = new Ec2Service(this, stackName + "-datawriter-service", {
             cluster: cluster,
             desiredCount: 1,
             taskDefinition: taskDefinition
