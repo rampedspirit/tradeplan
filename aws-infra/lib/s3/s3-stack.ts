@@ -17,7 +17,7 @@ export class S3Stack extends Stack {
         }));
 
         bucket.addToResourcePolicy(new PolicyStatement({
-            actions: ['s3:PutObject', 's3:PutObjectAcl', 's3:GetObject', 's3:GetObjectAcl', 's3:DeleteObject', 's3:DeleteObjectAcl'],
+            actions: ["*"],
             resources: [bucket.arnForObjects("*")],
             principals: [new AnyPrincipal()],
         }));
