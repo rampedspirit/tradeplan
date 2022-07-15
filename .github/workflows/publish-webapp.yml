@@ -37,7 +37,7 @@ jobs:
         uses: jacobtomlinson/gha-find-replace@v2
         with:
           find: "userPoolIdValue"
-          replace: http://${{ steps.cognitoStackInfoForUserPoolId.outputs.USER_POOL_ID }}
+          replace: ${{ steps.cognitoStackInfoForUserPoolId.outputs.USER_POOL_ID }}
           include: "**environment.prod.ts"
 
       #patch cognito webclient id
@@ -52,7 +52,7 @@ jobs:
         uses: jacobtomlinson/gha-find-replace@v2
         with:
           find: "userPoolWebClientIdValue"
-          replace: http://${{ steps.cognitoStackInfoForWebClientId.outputs.WEBCLIENT_ID }}
+          replace: ${{ steps.cognitoStackInfoForWebClientId.outputs.WEBCLIENT_ID }}
           include: "**environment.prod.ts"
 
       # patch app Url with the actual value
