@@ -9,7 +9,7 @@ export class S3Stack extends Stack {
         super(scope, id, props);
 
         let bucket = new Bucket(this, props.stackName + "-bucket");
-        
+
         bucket.addToResourcePolicy(new PolicyStatement({
             actions: ['s3:ListBucket'],
             resources: [bucket.bucketArn],
@@ -17,7 +17,7 @@ export class S3Stack extends Stack {
         }));
 
         bucket.addToResourcePolicy(new PolicyStatement({
-            actions: ['s3:PutObject', 's3:DeleteObject'],
+            actions: ['s3:PutObject', 's3:PutObjectAcl', 's3:GetObject', 's3:GetObjectAcl', 's3:DeleteObject', 's3:DeleteObjectAcl'],
             resources: [bucket.arnForObjects("*")],
             principals: [new AnyPrincipal()],
         }));
