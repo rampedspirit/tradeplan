@@ -9,8 +9,8 @@ export const environment = {
   screenerApiBasePath: "http://localhost:5002/",
   watchlistApiBasePath: "http://localhost:5004/",
   stockApiBasePath: "http://localhost:5005/",
-  userPoolId: 'ap-south-1_EslccvLDM',
-  userPoolWebClientId: '2cqbm3tiktsvetkg81s5l6fukg'
+  userPoolId: 'ap-south-1_MYDa7J7Q5',
+  userPoolWebClientId: '7ng1sr1etassuv06enjpkolcvc'
 };
 
 /*
