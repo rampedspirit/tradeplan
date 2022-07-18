@@ -12,6 +12,7 @@ const app = new cdk.App();
 
 const stackPrefix = app.node.tryGetContext('stackPrefix');
 const imageTag = app.node.tryGetContext('imageTag');
+const stockDataSourceUrl = app.node.tryGetContext('stockDataSourceUrl');
 
 new CognitoStack(app, stackPrefix + "-COGNITO-Stack", {
     stackName: stackPrefix + "-COGNITO-Stack",
@@ -44,6 +45,7 @@ new EcsAppStack(app, stackPrefix + "-ECS-APP-Stack", {
     vpcName: stackPrefix + "-VPC-Stack",
     imageTag: imageTag,
     dbLoadBalancerDnsExportName: stackPrefix + "-ECS-DB-Stack-nlb-dns",
+    stockDataSourceUrl: stockDataSourceUrl,
     env: {
         account: process.env.CDK_DEFAULT_ACCOUNT,
         region: process.env.CDK_DEFAULT_REGION

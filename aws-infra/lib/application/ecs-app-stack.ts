@@ -12,6 +12,7 @@ export interface EcsAppStackProps extends StackProps {
     vpcName: string
     imageTag: string
     dbLoadBalancerDnsExportName: string
+    stockDataSourceUrl: string
 }
 export class EcsAppStack extends Stack {
 
@@ -28,7 +29,8 @@ export class EcsAppStack extends Stack {
         const dbLoadBalancerUrl = Fn.importValue(props.dbLoadBalancerDnsExportName);
 
         // Secrets
-        const dbCredentials = Secret.fromSecretCompleteArn(this, 'DbCredentials', 'arn:aws:secretsmanager:ap-south-1:838293343811:secret:prod/db/credentials-vquhXO');
+        const dbCredentials = Secret.fromSecretCompleteArn(this, 'DbCredentials', 'arn:aws:secretsmanager:ap-south-1:743188977552:secret:tpn/prod/db/credentials-1bx5BI');
+        const stockDatasourceCredentials = Secret.fromSecretCompleteArn(this, 'StockDatasourceCredentials', 'arn:aws:secretsmanager:ap-south-1:743188977552:secret:tpn/prod/stock/datasource/credentials-0qvMTy');
 
         //Log Group
         const logGroup = new LogGroup(this, props.stackName + "-app-loggroup", {
@@ -68,8 +70,13 @@ export class EcsAppStack extends Stack {
         this.createScreenerService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, dnsNamespace);
         this.createExpressionService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, dnsNamespace);
         this.createWatchlistService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, dnsNamespace);
-        this.createDataWriterService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
-        this.createMockfeedService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
+
+        let stockDataSourceUrl = props.stockDataSourceUrl;
+        if (stockDataSourceUrl.length == 0) {
+            this.createMockfeedService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, dnsNamespace);
+            stockDataSourceUrl = "mockfeed." + dnsNamespace.namespaceName + ":5005";
+        }
+        this.createDataWriterService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, stockDatasourceCredentials, stockDataSourceUrl);
     }
 
     /**
@@ -555,6 +562,82 @@ export class EcsAppStack extends Stack {
     }
 
     /**
+    * Creates the mockfeed service
+    * @param stackName 
+    * @param imageTag
+    * @param vpc 
+    * @param logGroup 
+    * @param applicationLoadbalancer 
+    * @param cluster 
+    * @param dbCredentials 
+    * @param dbLoadBalancerUrl
+    * @param dnsNamespace
+    */
+    private createMockfeedService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
+        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string,
+        dnsNamespace: INamespace) {
+
+        //Load Balancer Config
+        let targetGroup = new ApplicationTargetGroup(this, stackName + "-mockfeed-service-target-group", {
+            vpc: vpc,
+            port: 5005,
+            protocol: ApplicationProtocol.HTTP,
+            healthCheck: {
+                path: "/actuator/mockfeed-health"
+            }
+        });
+
+        new ApplicationListenerRule(this, "mockfeedservice-listener-rule", {
+            listener: applicationListener,
+            priority: 6,
+            conditions: [
+                ListenerCondition.pathPatterns(["/actuator/mockfeed-health", "/v1/mockfeed/*", "/getAllSymbols", "/token", "/getbars"])
+            ],
+            action: ListenerAction.forward([targetGroup])
+        });
+
+        //Service Config
+        let taskDefinition = new Ec2TaskDefinition(this, stackName + '-mockfeed-service-taskdef');
+
+        const mockfeedContainerDefinition = taskDefinition.addContainer(stackName + "-mockfeed-service-container", {
+            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-mockfeed-service", "gtk-mockfeed-service"), imageTag),
+            cpu: 50,
+            memoryLimitMiB: 256,
+            essential: true,
+            environment: {
+                "SERVER_PORT": "5005",
+                "DB_HOST": dbLoadBalancerUrl,
+                "DB_PORT": "5000",
+                "DB_NAME": "appdb",
+                "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
+                "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
+                "ACTIVE_PROFILE": "dev"
+            },
+            portMappings: [{
+                containerPort: 5005
+            }],
+            logging: LogDriver.awsLogs({
+                logGroup: logGroup,
+                streamPrefix: logGroup.logGroupName
+            }),
+        });
+
+        let service = new Ec2Service(this, stackName + "-mockfeed-service", {
+            cluster: cluster,
+            desiredCount: 1,
+            taskDefinition: taskDefinition,
+            cloudMapOptions: {
+                name: "mockfeed",
+                cloudMapNamespace: dnsNamespace,
+                dnsRecordType: DnsRecordType.A,
+                container: mockfeedContainerDefinition,
+                containerPort: 5005
+            }
+        });
+        service.attachToApplicationTargetGroup(targetGroup);
+    }
+
+    /**
      * Creates the data writer service
      * @param stackName 
      * @param imageTag
@@ -564,14 +647,17 @@ export class EcsAppStack extends Stack {
      * @param cluster 
      * @param dbCredentials 
      * @param dbLoadBalancerUrl
+     * @param stockDatasourceCredentials
+     * @param stockDataSourceUrl
      */
     private createDataWriterService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
-        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string) {
+        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string,
+        stockDatasourceCredentials: ISecret, stockDataSourceUrl: string) {
 
         //Load Balancer Config
         let targetGroup = new ApplicationTargetGroup(this, stackName + "-datawriter-service-target-group", {
             vpc: vpc,
-            port: 5005,
+            port: 5006,
             protocol: ApplicationProtocol.HTTP,
             healthCheck: {
                 path: "/actuator/datawriter-health"
@@ -580,7 +666,7 @@ export class EcsAppStack extends Stack {
 
         new ApplicationListenerRule(this, "datawriterservice-listener-rule", {
             listener: applicationListener,
-            priority: 6,
+            priority: 7,
             conditions: [
                 ListenerCondition.pathPatterns(["/actuator/datawriter-health", "/v1/datawriter", "/v1/datawriter/*"])
             ],
@@ -596,79 +682,15 @@ export class EcsAppStack extends Stack {
             memoryLimitMiB: 256,
             essential: true,
             environment: {
-                "SERVER_PORT": "5005",
+                "SERVER_PORT": "5006",
                 "DB_HOST": dbLoadBalancerUrl,
                 "DB_PORT": "5001",
                 "DB_NAME": "stockdb",
                 "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
                 "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
-                "ACTIVE_PROFILE": "dev"
-            },
-            portMappings: [{
-                containerPort: 5005
-            }],
-            logging: LogDriver.awsLogs({
-                logGroup: logGroup,
-                streamPrefix: logGroup.logGroupName
-            }),
-        });
-
-        let service = new Ec2Service(this, stackName + "-datawriter-service", {
-            cluster: cluster,
-            desiredCount: 1,
-            taskDefinition: taskDefinition
-        });
-        service.attachToApplicationTargetGroup(targetGroup);
-    }
-
-    /**
-     * Creates the mockfeed service
-     * @param stackName 
-     * @param imageTag
-     * @param vpc 
-     * @param logGroup 
-     * @param applicationLoadbalancer 
-     * @param cluster 
-     * @param dbCredentials 
-     * @param dbLoadBalancerUrl
-     */
-    private createMockfeedService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
-        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string) {
-
-        //Load Balancer Config
-        let targetGroup = new ApplicationTargetGroup(this, stackName + "-mockfeed-service-target-group", {
-            vpc: vpc,
-            port: 5006,
-            protocol: ApplicationProtocol.HTTP,
-            healthCheck: {
-                path: "/actuator/mockfeed-health"
-            }
-        });
-
-        new ApplicationListenerRule(this, "mockfeedservice-listener-rule", {
-            listener: applicationListener,
-            priority: 7,
-            conditions: [
-                ListenerCondition.pathPatterns(["/actuator/mockfeed-health", "/v1/mockfeed/*", "/getAllSymbols", "/token", "/getbars"])
-            ],
-            action: ListenerAction.forward([targetGroup])
-        });
-
-        //Service Config
-        let taskDefinition = new Ec2TaskDefinition(this, stackName + '-mockfeed-service-taskdef');
-
-        taskDefinition.addContainer(stackName + "-mockfeed-service-container", {
-            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "gtk-mockfeed-service", "gtk-mockfeed-service"), imageTag),
-            cpu: 50,
-            memoryLimitMiB: 256,
-            essential: true,
-            environment: {
-                "SERVER_PORT": "5006",
-                "DB_HOST": dbLoadBalancerUrl,
-                "DB_PORT": "5000",
-                "DB_NAME": "appdb",
-                "DB_USER_NAME": dbCredentials.secretValueFromJson("UserName").toString(),
-                "DB_PASSWORD": dbCredentials.secretValueFromJson("Password").toString(),
+                "STOCK_DATASOURCE_URL": stockDataSourceUrl,
+                "STOCK_DATASOURCE_USERNAME": stockDatasourceCredentials.secretValueFromJson("UserName").toString(),
+                "STOCK_DATASOURCE_PASSWORD": stockDatasourceCredentials.secretValueFromJson("Password").toString(),
                 "ACTIVE_PROFILE": "dev"
             },
             portMappings: [{
@@ -680,7 +702,7 @@ export class EcsAppStack extends Stack {
             }),
         });
 
-        let service = new Ec2Service(this, stackName + "-mockfeed-service", {
+        let service = new Ec2Service(this, stackName + "-datawriter-service", {
             cluster: cluster,
             desiredCount: 1,
             taskDefinition: taskDefinition
