@@ -41,7 +41,7 @@ export class EcsAppStack extends Stack {
         //Cluster
         const cluster: Cluster = this.createCluster(props.stackName!, vpc);
 
-        //DNS Namespace
+        //Kafka DNS Namespace
         const dnsNamespace: INamespace = cluster.addDefaultCloudMapNamespace({ vpc, name: "internal.tradeplan.tech", type: NamespaceType.DNS_PRIVATE });
 
         //Application Load Balancer
@@ -71,12 +71,12 @@ export class EcsAppStack extends Stack {
         this.createExpressionService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, dnsNamespace);
         this.createWatchlistService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, dnsNamespace);
 
-        let stockDataSourceUrl = props.stockDataSourceUrl;
-        if (stockDataSourceUrl.length == 0) {
-            this.createMockfeedService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, dnsNamespace);
-            stockDataSourceUrl = "mockfeed." + dnsNamespace.namespaceName + ":5005";
+        if (props.stockDataSourceUrl) {
+            this.createDataWriterService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, stockDatasourceCredentials, props.stockDataSourceUrl);
+        } else {
+            this.createMockfeedService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl);
+            this.createDataWriterService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, stockDatasourceCredentials, applicationLoadbalancer.loadBalancerDnsName + ":5005");
         }
-        this.createDataWriterService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, stockDatasourceCredentials, stockDataSourceUrl);
     }
 
     /**
@@ -571,11 +571,9 @@ export class EcsAppStack extends Stack {
     * @param cluster 
     * @param dbCredentials 
     * @param dbLoadBalancerUrl
-    * @param dnsNamespace
     */
     private createMockfeedService(stackName: string, imageTag: string, vpc: IVpc, logGroup: LogGroup,
-        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string,
-        dnsNamespace: INamespace) {
+        applicationListener: ApplicationListener, cluster: Cluster, dbCredentials: ISecret, dbLoadBalancerUrl: string) {
 
         //Load Balancer Config
         let targetGroup = new ApplicationTargetGroup(this, stackName + "-mockfeed-service-target-group", {
@@ -595,6 +593,7 @@ export class EcsAppStack extends Stack {
             ],
             action: ListenerAction.forward([targetGroup])
         });
+
 
         //Service Config
         let taskDefinition = new Ec2TaskDefinition(this, stackName + '-mockfeed-service-taskdef');
@@ -625,14 +624,7 @@ export class EcsAppStack extends Stack {
         let service = new Ec2Service(this, stackName + "-mockfeed-service", {
             cluster: cluster,
             desiredCount: 1,
-            taskDefinition: taskDefinition,
-            cloudMapOptions: {
-                name: "mockfeed",
-                cloudMapNamespace: dnsNamespace,
-                dnsRecordType: DnsRecordType.A,
-                container: mockfeedContainerDefinition,
-                containerPort: 5005
-            }
+            taskDefinition: taskDefinition
         });
         service.attachToApplicationTargetGroup(targetGroup);
     }
