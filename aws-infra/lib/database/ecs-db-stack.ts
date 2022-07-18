@@ -25,7 +25,7 @@ export class EcsDbStack extends Stack {
         });
 
         // Secrets
-        const dbCredentials = Secret.fromSecretCompleteArn(this, 'DbCredentials', 'arn:aws:secretsmanager:ap-south-1:838293343811:secret:prod/db/credentials-vquhXO');
+        const dbCredentials = Secret.fromSecretCompleteArn(this, 'DbCredentials', 'arn:aws:secretsmanager:ap-south-1:743188977552:secret:tpn/prod/db/credentials-1bx5BI');
 
         //Log Group
         const logGroup = new LogGroup(this, props.stackName + "-db-loggroup", {
