@@ -72,7 +72,7 @@ export class EcsAppStack extends Stack {
         this.createWatchlistService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, dnsNamespace);
 
         let stockDataSourceUrl = props.stockDataSourceUrl;
-        if (!stockDataSourceUrl) {
+        if (stockDataSourceUrl.length == 0) {
             this.createMockfeedService(props.stackName!, props.imageTag, vpc, logGroup, applicationListener, cluster, dbCredentials, dbLoadBalancerUrl, dnsNamespace);
             stockDataSourceUrl = "mockfeed." + dnsNamespace.namespaceName + ":5005";
         }
